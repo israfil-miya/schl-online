@@ -5,8 +5,6 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession, SessionProvider } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
-import dbConnect from "../db/dbConnect";
-dbConnect()
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -24,7 +22,11 @@ function MyApp({ Component, pageProps }) {
 
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/x-icon" href="/images/NEW-SCH-logo-text-grey.png"></link>
+        <link
+          rel="icon"
+          type="image/x-icon"
+          href="/images/NEW-SCH-logo-text-grey.png"
+        ></link>
         <title>SCHL PORTAL</title>
       </Head>
 

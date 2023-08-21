@@ -1,5 +1,6 @@
 import Order from "../../db/Orders";
-
+import dbConnect from "../../db/dbConnect";
+dbConnect();
 function calculateTimeDifference(deliveryDate, deliveryTime) {
   const is12HourFormat = /am|pm/i.test(deliveryTime);
   const [time, meridiem] = deliveryTime.split(/\s+/);
@@ -57,7 +58,7 @@ async function handleGetAllOrder(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -72,14 +73,14 @@ async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
       {},
-      { delivery_date: 1, delivery_bd_time: 1 }
+      { delivery_date: 1, delivery_bd_time: 1 },
     ).lean();
 
     const sortedOrders = orders
       .map((order) => ({
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -117,7 +118,9 @@ async function handleGetEntriesByYearAndMonth(req, res) {
   console.log("Received request with parameters:", year, month, client_code);
 
   try {
-    const startDate = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1));
+    const startDate = new Date(
+      Date.UTC(parseInt(year), parseInt(month) - 1, 1),
+    );
     const endDate = new Date(startDate);
     endDate.setUTCMonth(endDate.getUTCMonth() + 1);
 
@@ -128,8 +131,8 @@ async function handleGetEntriesByYearAndMonth(req, res) {
       client_code,
       date_today: {
         $gte: `${year}-${month}-01`,
-        $lt: `${year}-${month + 1}-01`
-      }
+        $lt: `${year}-${month + 1}-01`,
+      },
     });
 
     console.log("RESDATA: ", resData);
@@ -140,9 +143,8 @@ async function handleGetEntriesByYearAndMonth(req, res) {
   }
 }
 
-
 async function handleDeleteOrder(req, res) {
-  const data = req.headers
+  const data = req.headers;
   console.log("Received edit request with data:", data);
 
   try {
@@ -161,7 +163,6 @@ async function handleDeleteOrder(req, res) {
   }
 }
 
-
 async function handleGetTimePeriods(req, res) {
   let { client_code } = req.headers;
 
@@ -170,36 +171,36 @@ async function handleGetTimePeriods(req, res) {
   try {
     const matchedDocuments = await Order.aggregate([
       {
-        $match: { client_code }
+        $match: { client_code },
       },
       {
         $project: {
           _id: 0,
           year: { $substr: ["$date_today", 0, 4] },
-          month: { $substr: ["$date_today", 5, 2] }
-        }
+          month: { $substr: ["$date_today", 5, 2] },
+        },
       },
       {
         $group: {
-          _id: { year: "$year", month: "$month" }
-        }
+          _id: { year: "$year", month: "$month" },
+        },
       },
       {
         $match: {
           "_id.year": { $ne: "" }, // Filter out entries with empty year
-          "_id.month": { $ne: "" } // Filter out entries with empty month
-        }
+          "_id.month": { $ne: "" }, // Filter out entries with empty month
+        },
       },
       {
-        $sort: { "_id.year": -1, "_id.month": -1 } // Sort by year and month in descending order
+        $sort: { "_id.year": -1, "_id.month": -1 }, // Sort by year and month in descending order
       },
       {
         $project: {
           _id: 0,
           year: "$_id.year",
-          month: "$_id.month"
-        }
-      }
+          month: "$_id.month",
+        },
+      },
     ]);
 
     console.log("Matched Documents:", matchedDocuments);
@@ -209,8 +210,6 @@ async function handleGetTimePeriods(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 export default async function handle(req, res) {
   const { method } = req;

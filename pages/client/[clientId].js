@@ -9,10 +9,10 @@ export default function ClientRecords({ client, possibleTimePeriods }) {
   const [timePeriodState, setTimePeriodState] = useState(
     possibleTimePeriods.length > 0
       ? JSON.stringify({
-        year: possibleTimePeriods[0].year,
-        month: possibleTimePeriods[0].month,
-      })
-      : ""
+          year: possibleTimePeriods[0].year,
+          month: possibleTimePeriods[0].month,
+        })
+      : "",
   );
   const [orders, setOrdersList] = useState();
 
@@ -51,10 +51,13 @@ export default function ClientRecords({ client, possibleTimePeriods }) {
   }
 
   useEffect(() => {
-
     if (possibleTimePeriods.length) {
       const parsedTimePeriod = JSON.parse(timePeriodState);
-      GetAllOrders(parsedTimePeriod.year, parsedTimePeriod.month, client.client_code);
+      GetAllOrders(
+        parsedTimePeriod.year,
+        parsedTimePeriod.month,
+        client.client_code,
+      );
     }
   }, [timePeriodState]);
 
@@ -92,7 +95,6 @@ export default function ClientRecords({ client, possibleTimePeriods }) {
                   })
                 )}
               </select>
-
             </div>
           </div>
         </div>
@@ -174,12 +176,6 @@ export async function getServerSideProps(context) {
     };
   }
 
-
-
-
-
-
-
   const res1 = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/client`, {
     method: "GET",
     headers: {
@@ -191,7 +187,6 @@ export async function getServerSideProps(context) {
   const resData1 = await res1.json();
 
   if (!resData1.error) {
-
     const res2 = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/order`, {
       method: "GET",
       headers: {
@@ -207,7 +202,6 @@ export async function getServerSideProps(context) {
         props: { client: resData1, possibleTimePeriods: resData2 },
       };
     }
-
   } else {
     return {
       redirect: {

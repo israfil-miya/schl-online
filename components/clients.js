@@ -25,9 +25,9 @@ export default function Clients() {
           getallclients: true,
         },
       };
-      
+
       const clientsList = await fetchClientData(url, options);
-      
+
       if (!clientsList.error) {
         setClients(clientsList);
       } else {
@@ -41,7 +41,7 @@ export default function Clients() {
 
   async function addNewClient(e) {
     e.preventDefault();
-    
+
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
     const options = {
       method: "POST",
@@ -53,7 +53,7 @@ export default function Clients() {
 
     try {
       const result = await fetchClientData(url, options);
-      
+
       if (!result.error) {
         toast.success("Added new client");
         await getAllClients();
@@ -81,7 +81,7 @@ export default function Clients() {
 
     try {
       const resData = await fetchClientData(url, options);
-      
+
       if (!resData.error) {
         toast.success("Deleted the client data", {
           duration: 3500,
@@ -109,7 +109,7 @@ export default function Clients() {
 
     try {
       const result = await fetchClientData(url, options);
-      
+
       if (!result.error) {
         toast.success("Edited the client data", {
           duration: 3500,
@@ -122,8 +122,6 @@ export default function Clients() {
       console.error("Error editing client:", error);
       toast.error("Error editing client");
     }
-
-    
   }
 
   useEffect(() => {
@@ -191,7 +189,7 @@ export default function Clients() {
                     Delete
                   </button>
                   <Link
-                  href={`/client/${client._id}`}
+                    href={`/client/${client._id}`}
                     type="button"
                     className="btn me-2 btn-sm btn-outline-primary"
                   >

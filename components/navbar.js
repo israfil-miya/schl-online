@@ -11,7 +11,10 @@ export default function Navbar({ navFor }) {
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center" href="https://studioclickhouse.com/">
+        <Link
+          className="navbar-brand d-flex align-items-center"
+          href="https://studioclickhouse.com/"
+        >
           <Image
             src="/images/NEW-SCH-logo-text-grey.png"
             alt="Logo"

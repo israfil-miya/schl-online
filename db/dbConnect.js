@@ -4,7 +4,7 @@ const dbConnect = () => {
   try {
     if (mongoose.connections[0].readyState) {
       // console.log('Already connected.')
-      return true
+      return true;
     }
 
     mongoose.set("strictQuery", false);
@@ -15,9 +15,7 @@ const dbConnect = () => {
       dbName: "SCHL_PORTAL",
     });
     // console.log("Connected to Mongo Successfully!");
-  } catch (error) {
-  }
+  } catch (error) {}
 };
-
 
 export default dbConnect;

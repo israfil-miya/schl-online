@@ -49,13 +49,14 @@ const GetAllOrdersTime = async () => {
 
 const getCurrentTimes = (orders) => {
   const timesNow = orders.map((order) =>
-    order.timeDifference <= 0 ? "Over" : calculateCountdown(order.timeDifference)
+    order.timeDifference <= 0
+      ? "Over"
+      : calculateCountdown(order.timeDifference),
   );
   return timesNow;
 };
 
 export async function getServerSideProps(context) {
-  /*
   const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
     method: "GET",
     headers: {
@@ -65,8 +66,6 @@ export async function getServerSideProps(context) {
   });
   const orders = await res.json();
   return { props: { orders } };
-  */
-  return { props: {  } };
 }
 
 export default function Home({ orders }) {
@@ -153,9 +152,7 @@ export default function Home({ orders }) {
                   <span className="fw-medium">Time:</span>{" "}
                   {order.delivery_bd_time}
                 </td>
-                <td className="text-break">
-                  {countdowns[index]}
-                </td>
+                <td className="text-break">{countdowns[index]}</td>
                 <td className="text-break">{order.task}</td>
                 <td className="text-break">{order.et}</td>
                 <td className="text-break">{order.production}</td>

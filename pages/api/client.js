@@ -1,5 +1,6 @@
 import Client from "../../db/Clients";
-
+import dbConnect from "../../db/dbConnect";
+dbConnect();
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,
@@ -17,7 +18,7 @@ async function handleNewClient(req, res) {
       {
         new: true,
         upsert: true,
-      }
+      },
     );
 
     if (resData) {
@@ -73,7 +74,6 @@ async function handleDeleteClient(req, res) {
   }
 }
 
-
 async function handleGetClientInfo(req, res) {
   let data = req.headers;
 
@@ -85,8 +85,6 @@ async function handleGetClientInfo(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 export default async function handle(req, res) {
   const { method } = req;
