@@ -141,7 +141,25 @@ async function handleGetEntriesByYearAndMonth(req, res) {
 }
 
 
+async function handleDeleteOrder(req, res) {
+  const data = req.headers
+  console.log("Received edit request with data:", data);
 
+  try {
+    const resData = await Order.findByIdAndDelete(data.id, {
+      new: true,
+    });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No order found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 
 
 async function handleGetTimePeriods(req, res) {
@@ -191,7 +209,6 @@ async function handleGetTimePeriods(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
 
 
 

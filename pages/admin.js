@@ -1,9 +1,12 @@
 import Navbar from "../components/navbar";
 import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
-import Users from "../components/users";
-import Tasks from "../components/tasks";
-import Clients from "../components/clients";
+import dynamic from "next/dynamic";
+const DynamicUsers = dynamic(() => import("../components/users"));
+const DynamicTasks = dynamic(() => import("../components/tasks"));
+const DynamicClients = dynamic(() => import("../components/clients"));
+
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
@@ -67,9 +70,9 @@ export default function Admin() {
           </Link>
         </li>
       </ul>
-      {component == "users" && <Users />}
-      {component == "tasks" && <Tasks />}
-      {component == "clients" && <Clients />}
+      {component == "users" && <DynamicUsers />}
+      {component == "tasks" && <DynamicTasks />}
+      {component == "clients" && <DynamicClients />}
 
       <style jsx>
         {`
