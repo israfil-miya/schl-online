@@ -55,6 +55,7 @@ const getCurrentTimes = (orders) => {
 };
 
 export async function getServerSideProps(context) {
+  /*
   const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
     method: "GET",
     headers: {
@@ -64,6 +65,8 @@ export async function getServerSideProps(context) {
   });
   const orders = await res.json();
   return { props: { orders } };
+  */
+  return { props: {  } };
 }
 
 export default function Home({ orders }) {
