@@ -2,9 +2,10 @@ import Navbar from "../components/navbar";
 import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-const DynamicUsers =  import("../components/users")
-const DynamicTasks = import("../components/tasks")
-const DynamicClients = import("../components/clients")
+
+import Clients from "../components/clients"
+import Tasks from "../components/tasks"
+import Users from "../components/users"
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -69,9 +70,9 @@ export default function Admin() {
           </Link>
         </li>
       </ul>
-      {component == "users" && <DynamicUsers />}
-      {component == "tasks" && <DynamicTasks />}
-      {component == "clients" && <DynamicClients />}
+      {component == "users" && <Users />}
+      {component == "tasks" && <Tasks />}
+      {component == "clients" && <Clients />}
 
       <style jsx>
         {`
