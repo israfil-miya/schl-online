@@ -2,9 +2,9 @@ import Navbar from "../components/navbar";
 import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-const DynamicUsers = dynamic(() => import("../components/users"));
-const DynamicTasks = dynamic(() => import("../components/tasks"));
-const DynamicClients = dynamic(() => import("../components/clients"));
+const DynamicUsers =  import("../components/users")
+const DynamicTasks = import("../components/tasks")
+const DynamicClients = import("../components/clients")
 
 import Link from "next/link";
 import { useRouter } from "next/router";
