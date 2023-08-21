@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 
-import Clients from "../components/clients"
-import Tasks from "../components/tasks"
-import Users from "../components/users"
+import Clients from "../components/clients";
+import Tasks from "../components/tasks";
+import Users from "../components/users";
 
 import Link from "next/link";
 import { useRouter } from "next/router";

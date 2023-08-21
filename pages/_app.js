@@ -1,10 +1,16 @@
 import "../styles/globals.css";
+import dynamic from "next/dynamic";
 import Head from "next/head";
 import Script from "next/script";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession, SessionProvider } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
+
+// Dynamically import NextNProgress only on the client side
+const DynamicNextNProgress = dynamic(() => import("nextjs-progressbar"), {
+  ssr: false,
+});
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -31,6 +37,18 @@ function MyApp({ Component, pageProps }) {
       </Head>
 
       <Toaster position="top-right" reverseOrder={true} />
+
+      {/* Render NextNProgress only on the client side */}
+      {typeof window !== "undefined" && (
+        <DynamicNextNProgress
+          color="#4169e1"
+          startPosition={0.3}
+          stopDelayMs={200}
+          height={1.5}
+          showOnShallow={true}
+          options={{ easing: "ease", speed: 500, showSpinner: false }}
+        />
+      )}
 
       <SessionProvider session={pageProps.session}>
         {!Component.noAuth ? (

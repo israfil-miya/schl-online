@@ -2,11 +2,10 @@ import { getSession, useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/router";
 export default function Navbar({ navFor }) {
   const { data: session } = useSession();
   const signOutHandle = () => {
-    signOut();
+    signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/login` });
   };
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
@@ -76,17 +75,18 @@ export default function Navbar({ navFor }) {
                 </em>
               </Link>
               <ul className="dropdown-menu list-unstyled">
-                <span className="d-flex fw-medium p-1 justify-content-center">
-                  You are {session.user.role == "admin" ? "an Admin" : "a User"}
-                </span>
-
-                <Link
-                  href=""
-                  onClick={signOutHandle}
-                  className="btn d-flex m-2 justify-content-center btn-sm btn-outline-danger"
-                >
-                  Logout
-                </Link>
+                <div className="text-center">
+                  <span className="fw-medium p-1">
+                    You are{" "}
+                    {session.user.role == "admin" ? "an Admin" : "a User"}
+                  </span>
+                  <button
+                    onClick={signOutHandle}
+                    className="btn mt-3 px-5 btn-sm btn-outline-danger"
+                  >
+                    Logout
+                  </button>
+                </div>
               </ul>
             </div>
           </div>
