@@ -72,6 +72,10 @@ export default function Home({ orders }) {
   const router = useRouter();
   let { error, success } = router.query;
 
+  const [fromTime, setFromTime] = useState()
+  const [toTime, setToTime] = useState()
+  const [foldetFilter, setFolderFilter] = useState()
+
   const [countdowns, setCountdowns] = useState(getCurrentTimes(orders));
 
   useEffect(() => {
@@ -108,7 +112,24 @@ export default function Home({ orders }) {
   return (
     <>
       <Navbar navFor="tasks" />
-      <h5 className="d-flex justify-content-center py-3">ALL TASKS LIST</h5>
+
+
+      <div className="">
+        <div className="bg-success p-3 my-5 d-flex justify-content-center" >
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <strong>Date: </strong>
+            <input type="date" className="form-control mx-2 custom-input" value={fromTime} onChange={e => setFromTime(e.target.value)} />
+            <span> To </span>
+            <input type="date" className="form-control ms-2 custom-input" value={toTime} onChange={e => setToTime(e.target.value)} />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center' }} className="mx-5">
+            <strong>Folder: </strong><input type="text" placeholder="Folder" className="form-control ms-2 custom-input" value={foldetFilter} onChange={e => setFolderFilter(e.target.value)} />
+          </div>
+          <button className="btn btn-outline-primary">Filter</button>
+        </div>
+      </div>
+
 
       <table
         style={{ overflow: "hidden" }}
@@ -128,8 +149,8 @@ export default function Home({ orders }) {
             <th>E.T.</th>
             <th>Production</th>
             <th>QC1</th>
-            <th>Assign</th>
             <th>Comments</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -157,12 +178,20 @@ export default function Home({ orders }) {
                 <td className="text-break">{order.et}</td>
                 <td className="text-break">{order.production}</td>
                 <td className="text-break">{order.qc1}</td>
-                <td className="text-break">{order.assign}</td>
                 <td className="text-break">{order.comment}</td>
+                <td className="text-break">{order.status}</td>
               </tr>
             ))}
         </tbody>
       </table>
+      <style jsx>
+        {`
+  .custom-input {
+    font-size: 16px;
+    width: 20ex;
+  }
+  `}
+      </style>
     </>
   );
 }

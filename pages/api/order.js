@@ -69,6 +69,7 @@ async function handleGetAllOrder(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(

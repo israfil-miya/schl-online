@@ -14,9 +14,9 @@ export default function Tasks() {
   const [delivery_bd_time, setDeliveryBdTime] = useState("");
   const [task, setTask] = useState("");
   const [et, setEt] = useState(false);
-  const [production, setProduction] = useState(false);
+  const [production, setProduction] = useState("");
   const [qc1, setQc1] = useState(false);
-  const [assign, setAssign] = useState("");
+  const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
 
   const [manageData, setManageData] = useState({
@@ -30,10 +30,10 @@ export default function Tasks() {
     delivery_bd_time: "",
     task: "",
     et: false,
-    production: false,
+    production: "",
     qc1: false,
-    assign: "",
     comment: "",
+    status: ""
   });
 
   async function fetchOrderData(url, options) {
@@ -83,8 +83,8 @@ export default function Tasks() {
         et,
         production,
         qc1,
-        assign,
         comment,
+        status
       }),
       headers: {
         "Content-Type": "application/json",
@@ -112,8 +112,8 @@ export default function Tasks() {
     setEt(false);
     setProduction(false);
     setQc1(false);
-    setAssign("");
     setComment("");
+    setStatus("");
   };
 
   async function deleteOrder(deleteOrderData) {
@@ -303,7 +303,7 @@ export default function Tasks() {
               <input
                 value={production}
                 onChange={(e) => setProduction(e.target.value)}
-                type="number"
+                type="string"
                 className="form-control"
                 id="production"
                 placeholder="Production"
@@ -323,30 +323,30 @@ export default function Tasks() {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="assign" className="form-label">
-                Assign
+              <label htmlFor="comments" className="form-label">
+                Comment
               </label>
               <input
-                value={assign}
-                onChange={(e) => setAssign(e.target.value)}
-                type="text"
-                className="form-control"
-                id="assign"
-                placeholder="Assign"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="comments" className="form-label">
-                Comments
-              </label>
-              <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="form-control"
                 id="comments"
                 rows="3"
                 placeholder="Comments"
-              ></textarea>
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="status" className="form-label">
+                Status
+              </label>
+              <input
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                type="text"
+                className="form-control"
+                id="status"
+                placeholder="Status"
+              />
             </div>
             <button type="submit" className="btn btn-sm btn-outline-primary">
               Submit
@@ -363,8 +363,8 @@ export default function Tasks() {
                 <th>Client Code</th>
                 <th>Client Name</th>
                 <th>Folder</th>
-                <th>Assign</th>
                 <th>Comment</th>
+                <th>Status</th>
                 <th>Manage</th>
               </tr>
             </thead>
@@ -384,8 +384,8 @@ export default function Tasks() {
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.client_name}</td>
                       <td className="text-break">{order.folder}</td>
-                      <td className="text-break">{order.assign}</td>
                       <td className="text-break">{order.comment}</td>
+                      <td className="text-break">{order.status}</td>
                       <td>
                         <button
                           onClick={() =>
@@ -402,8 +402,8 @@ export default function Tasks() {
                               et: order.et,
                               production: order.production,
                               qc1: order.qc1,
-                              assign: order.assign,
                               comment: order.comment,
+                              status: order.status,
                             })
                           }
                           data-bs-toggle="modal"
@@ -618,7 +618,7 @@ export default function Tasks() {
                         production: e.target.value,
                       }))
                     }
-                    type="number"
+                    type="string"
                     className="form-control"
                     id="production"
                     placeholder="Production"
@@ -643,28 +643,10 @@ export default function Tasks() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="assign" className="form-label">
-                    Assign
-                  </label>
-                  <input
-                    value={manageData.assign}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        assign: e.target.value,
-                      }))
-                    }
-                    type="text"
-                    className="form-control"
-                    id="assign"
-                    placeholder="Assign"
-                  />
-                </div>
-                <div className="mb-3">
                   <label htmlFor="comments" className="form-label">
                     Comment
                   </label>
-                  <textarea
+                  <input
                     value={manageData.comment}
                     onChange={(e) =>
                       setManageData((prevData) => ({
@@ -673,11 +655,30 @@ export default function Tasks() {
                       }))
                     }
                     className="form-control"
-                    id="comments"
+                    id="comment"
                     rows="3"
-                    placeholder="Comments"
-                  ></textarea>
+                    placeholder="Comment"
+                  />
                 </div>
+                <div className="mb-3">
+                  <label htmlFor="status" className="form-label">
+                    Status
+                  </label>
+                  <input
+                    value={manageData.status}
+                    onChange={(e) =>
+                      setManageData((prevData) => ({
+                        ...prevData,
+                        status: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                    id="status"
+                    placeholder="Status"
+                  />
+                </div>
+
               </div>
               <div className="modal-footer p-1">
                 <button

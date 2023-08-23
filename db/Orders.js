@@ -81,15 +81,15 @@ const OrderSchema = new mongoose.Schema({
     type: Number,
   },
   production: {
-    type: Number,
+    type: String,
   },
   qc1: {
     type: Number,
   },
-  assign: {
+  comment: {
     type: String,
   },
-  comment: {
+  status: {
     type: String,
   },
 });
