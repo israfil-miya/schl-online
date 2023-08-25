@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 
-function browse({ orders: ordersArr }) {
+export default function Browse({ orders: ordersArr }) {
   const [orders, setOrders] = useState(ordersArr);
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
@@ -177,4 +177,3 @@ export async function getServerSideProps(context) {
   const orders = await res.json();
   return { props: { orders } };
 }
-export default browse;
