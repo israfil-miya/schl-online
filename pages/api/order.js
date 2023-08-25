@@ -58,7 +58,7 @@ async function handleGetAllOrder(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time,
+          order.delivery_bd_time
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -70,18 +70,43 @@ async function handleGetAllOrder(req, res) {
   }
 }
 
+async function handleGetOrdersByTimeAndFolder(req, res) {
+  try {
+    const { fromtime, totime, folder } = req.headers;
+
+    console.log("Received request with parameters:", fromtime, totime);
+
+    let query = { };
+    if (folder) query.folder = folder
+    if (fromtime!='undefined' || totime!='undefined') {
+      query.date_today = { }
+      if (fromtime!='undefined') query.date_today.$gte = fromtime
+      if (totime!='undefined') query.date_today.$lte = totime
+    }
+
+    console.log(query)
+
+    const orders = await Order.find(query);
+
+    res.status(200).json(orders);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
       {},
-      { delivery_date: 1, delivery_bd_time: 1 },
+      { delivery_date: 1, delivery_bd_time: 1 }
     ).lean();
 
     const sortedOrders = orders
       .map((order) => ({
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time,
+          order.delivery_bd_time
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -120,7 +145,7 @@ async function handleGetEntriesByYearAndMonth(req, res) {
 
   try {
     const startDate = new Date(
-      Date.UTC(parseInt(year), parseInt(month) - 1, 1),
+      Date.UTC(parseInt(year), parseInt(month) - 1, 1)
     );
     const endDate = new Date(startDate);
     endDate.setUTCMonth(endDate.getUTCMonth() + 1);
@@ -225,6 +250,8 @@ export default async function handle(req, res) {
         await handleDeleteOrder(req, res);
       } else if (req.headers.getentriesbyyearandmonth) {
         await handleGetEntriesByYearAndMonth(req, res);
+      } else if (req.headers.getordersbytimeandfolder) {
+        await handleGetOrdersByTimeAndFolder(req, res);
       } else if (req.headers.gettimeperiods) {
         await handleGetTimePeriods(req, res);
       } else {

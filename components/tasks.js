@@ -110,7 +110,7 @@ export default function Tasks() {
     setDeliveryBdTime("");
     setTask("");
     setEt(false);
-    setProduction(false);
+    setProduction("");
     setQc1(false);
     setComment("");
     setStatus("");
