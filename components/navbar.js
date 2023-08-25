@@ -45,6 +45,15 @@ export default function Navbar({ navFor }) {
               </Link>
             </li>
 
+            <li className="nav-item">
+              <Link
+                className={navFor == "browse" ? "nav-link active" : "nav-link"}
+                href="/browse"
+              >
+                Browse
+              </Link>
+            </li>
+
             {session.user.role == "admin" ? (
               <li className="nav-item">
                 <Link

@@ -33,9 +33,8 @@ function sendError(res, statusCode, message) {
 }
 
 async function handleNewOrder(req, res) {
-  const data = req.body;
-
   try {
+    const data = req.body;
     const resData = await Order.create(data);
 
     if (resData) {
@@ -49,9 +48,9 @@ async function handleNewOrder(req, res) {
   }
 }
 
-async function handleGetAllOrder(req, res) {
+async function handleGetOrdersUnfinished(req, res) {
   try {
-    const orders = await Order.find().lean();
+    const orders = await Order.find({ status: { $ne: "FINISHED" } }).lean();
 
     const sortedOrders = orders
       .map((order) => ({
@@ -70,25 +69,47 @@ async function handleGetAllOrder(req, res) {
   }
 }
 
-async function handleGetOrdersByTimeAndFolder(req, res) {
+async function handleGetAllOrder(req, res) {
   try {
-    const { fromtime, totime, folder } = req.headers;
-
-    console.log("Received request with parameters:", fromtime, totime);
-
-    let query = { };
-    if (folder) query.folder = folder
-    if (fromtime!='undefined' || totime!='undefined') {
-      query.date_today = { }
-      if (fromtime!='undefined') query.date_today.$gte = fromtime
-      if (totime!='undefined') query.date_today.$lte = totime
-    }
-
-    console.log(query)
-
-    const orders = await Order.find(query);
+    const orders = await Order.find().lean();
 
     res.status(200).json(orders);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleGetOrdersByFilter(req, res) {
+  try {
+    const { fromtime, totime, folder, client, task } = req.headers;
+
+    console.log(
+      "Received request with parameters:",
+      fromtime,
+      totime,
+      folder,
+      client,
+      task
+    );
+
+    let query = {};
+    if (folder) query.folder = folder;
+    if (client) query.client_code = client;
+    if (task) query.task = task;
+    if (fromtime || totime) {
+      query.date_today = {};
+      if (fromtime) query.date_today.$gte = fromtime;
+      if (totime) query.date_today.$lte = totime;
+    }
+
+    if (Object.keys(query).length === 0 && query.constructor === Object)
+      sendError(res, 400, "No filter applied");
+    else {
+      const orders = await Order.find(query).lean();
+
+      res.status(200).json(orders);
+    }
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
@@ -98,7 +119,7 @@ async function handleGetOrdersByTimeAndFolder(req, res) {
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
-      {},
+      { status: { $ne: "FINISHED" } },
       { delivery_date: 1, delivery_bd_time: 1 }
     ).lean();
 
@@ -119,10 +140,9 @@ async function handleGetOnlyTime(req, res) {
 }
 
 async function handleEditOrder(req, res) {
-  const data = req.body;
-  console.log("Received edit request with data:", data);
-
   try {
+    const data = req.body;
+    console.log("Received edit request with data:", data);
     const resData = await Order.findByIdAndUpdate(data._id, data, {
       new: true,
     });
@@ -138,42 +158,11 @@ async function handleEditOrder(req, res) {
   }
 }
 
-async function handleGetEntriesByYearAndMonth(req, res) {
-  let { year, month, client_code } = req.headers;
-
-  console.log("Received request with parameters:", year, month, client_code);
-
-  try {
-    const startDate = new Date(
-      Date.UTC(parseInt(year), parseInt(month) - 1, 1)
-    );
-    const endDate = new Date(startDate);
-    endDate.setUTCMonth(endDate.getUTCMonth() + 1);
-
-    console.log("Start Date:", startDate);
-    console.log("End Date:", endDate);
-
-    const resData = await Order.find({
-      client_code,
-      date_today: {
-        $gte: `${year}-${month}-01`,
-        $lt: `${year}-${month + 1}-01`,
-      },
-    });
-
-    console.log("RESDATA: ", resData);
-    res.status(200).json(resData);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
 async function handleDeleteOrder(req, res) {
-  const data = req.headers;
-  console.log("Received edit request with data:", data);
-
   try {
+    const data = req.headers;
+    console.log("Received edit request with data:", data);
+
     const resData = await Order.findByIdAndDelete(data.id, {
       new: true,
     });
@@ -190,11 +179,10 @@ async function handleDeleteOrder(req, res) {
 }
 
 async function handleGetTimePeriods(req, res) {
-  let { client_code } = req.headers;
-
-  console.log("Received request with client code:", client_code);
-
   try {
+    let { client_code } = req.headers;
+    console.log("Received request with client code:", client_code);
+
     const matchedDocuments = await Order.aggregate([
       {
         $match: { client_code },
@@ -248,10 +236,10 @@ export default async function handle(req, res) {
         await handleGetOnlyTime(req, res);
       } else if (req.headers.deleteorder) {
         await handleDeleteOrder(req, res);
-      } else if (req.headers.getentriesbyyearandmonth) {
-        await handleGetEntriesByYearAndMonth(req, res);
-      } else if (req.headers.getordersbytimeandfolder) {
-        await handleGetOrdersByTimeAndFolder(req, res);
+      } else if (req.headers.getordersbyfilter) {
+        await handleGetOrdersByFilter(req, res);
+      } else if (req.headers.getordersunfinished) {
+        await handleGetOrdersUnfinished(req, res);
       } else if (req.headers.gettimeperiods) {
         await handleGetTimePeriods(req, res);
       } else {
