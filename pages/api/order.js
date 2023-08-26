@@ -178,6 +178,26 @@ async function handleDeleteOrder(req, res) {
   }
 }
 
+async function handleFinishOrder(req, res) {
+  try {
+    const data = req.headers;
+    console.log("Received edit request with data:", data);
+
+    const resData = await Order.findByIdAndUpdate(data.id, {status: "FINISHED"}, {
+      new: true,
+    });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No order found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -193,6 +213,8 @@ export default async function handle(req, res) {
         await handleGetOrdersByFilter(req, res);
       } else if (req.headers.getordersunfinished) {
         await handleGetOrdersUnfinished(req, res);
+      } else if (req.headers.finishorder) {
+        await handleFinishOrder(req, res);
       } else if (req.headers.gettimeperiods) {
         await handleGetTimePeriods(req, res);
       } else {

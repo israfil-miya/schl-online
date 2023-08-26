@@ -7,7 +7,12 @@ export default function Clients() {
   const router = useRouter();
   const [clients, setClients] = useState([]);
   const [clientCode, setClientCode] = useState("");
-  const [manageData, setManageData] = useState({ _id: "", client_code: "" });
+  const [clientName, setClientName] = useState("");
+  const [manageData, setManageData] = useState({
+    _id: "",
+    client_code: "",
+    client_name: "",
+  });
 
   async function fetchClientData(url, options) {
     const res = await fetch(url, options);
@@ -45,7 +50,10 @@ export default function Clients() {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
     const options = {
       method: "POST",
-      body: JSON.stringify({ client_code: clientCode }),
+      body: JSON.stringify({
+        client_code: clientCode,
+        client_name: clientName,
+      }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -66,6 +74,7 @@ export default function Clients() {
     }
 
     setClientCode("");
+    setClientName("");
   }
 
   async function deleteClient(deleteClientData) {
@@ -134,16 +143,27 @@ export default function Clients() {
         <h5 className="py-3">Add New Client</h5>
         <form onSubmit={addNewClient} id="inputForm">
           <div className="mb-3">
-            <label htmlFor="date" className="form-label">
+            <label htmlFor="clientCode" className="form-label">
               Client Code
             </label>
             <input
-              required
               value={clientCode}
               onChange={(e) => setClientCode(e.target.value)}
               type="text"
               className="form-control"
               id="clientCode"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Client Code
+            </label>
+            <input
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
             />
           </div>
           <button type="submit" className="btn btn-sm btn-outline-primary">
@@ -158,6 +178,7 @@ export default function Clients() {
             <tr>
               <th>#</th>
               <th>Client Code</th>
+              <th>Client Name</th>
               <th>Manage</th>
             </tr>
           </thead>
@@ -166,12 +187,14 @@ export default function Clients() {
               <tr key={client._id}>
                 <td>{index + 1}</td>
                 <td>{client.client_code}</td>
+                <td>{client.client_name}</td>
                 <td>
                   <button
                     onClick={() =>
                       setManageData({
                         _id: client._id,
                         client_code: client.client_code,
+                        client_name: client.client_name,
                       })
                     }
                     data-bs-toggle="modal"
@@ -219,12 +242,27 @@ export default function Clients() {
                   Client Code
                 </label>
                 <input
-                  required
                   value={manageData.client_code}
                   onChange={(e) =>
                     setManageData((prevData) => ({
                       ...prevData,
                       client_code: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Client Name
+                </label>
+                <input
+                  value={manageData.client_name}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      client_name: e.target.value,
                     }))
                   }
                   type="text"

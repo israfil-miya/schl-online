@@ -33,7 +33,7 @@ export default function Tasks() {
     production: "",
     qc1: false,
     comment: "",
-    status: ""
+    status: "",
   });
 
   async function fetchOrderData(url, options) {
@@ -84,7 +84,7 @@ export default function Tasks() {
         production,
         qc1,
         comment,
-        status
+        status,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -114,6 +114,34 @@ export default function Tasks() {
     setQc1(false);
     setComment("");
     setStatus("");
+  };
+
+  const FinishOrder = async (finishOrderData) => {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        finishorder: true,
+        id: finishOrderData._id,
+      },
+    };
+
+    try {
+      const resData = await fetchOrderData(url, options);
+
+      if (!resData.error) {
+        toast.success("Changed the status to FINISHED", {
+          duration: 3500,
+        });
+        await GetAllOrders();
+      } else {
+        toast.error("Unable to change status");
+      }
+    } catch (error) {
+      console.error("Error changing status:", error);
+      toast.error("Error changing status");
+    }
   };
 
   async function deleteOrder(deleteOrderData) {
@@ -420,6 +448,13 @@ export default function Tasks() {
                         >
                           Delete
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => FinishOrder(order)}
+                          className="btn me-2 btn-sm btn-outline-success"
+                        >
+                          Finish
+                        </button>
                       </td>
                     </tr>
                   );
@@ -678,7 +713,6 @@ export default function Tasks() {
                     placeholder="Status"
                   />
                 </div>
-
               </div>
               <div className="modal-footer p-1">
                 <button
