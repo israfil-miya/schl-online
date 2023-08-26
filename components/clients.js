@@ -188,13 +188,6 @@ export default function Clients() {
                   >
                     Delete
                   </button>
-                  <Link
-                    href={`/client/${client._id}`}
-                    type="button"
-                    className="btn me-2 btn-sm btn-outline-primary"
-                  >
-                    View all tasks
-                  </Link>
                 </td>
               </tr>
             ))}

@@ -178,53 +178,6 @@ async function handleDeleteOrder(req, res) {
   }
 }
 
-async function handleGetTimePeriods(req, res) {
-  try {
-    let { client_code } = req.headers;
-    console.log("Received request with client code:", client_code);
-
-    const matchedDocuments = await Order.aggregate([
-      {
-        $match: { client_code },
-      },
-      {
-        $project: {
-          _id: 0,
-          year: { $substr: ["$date_today", 0, 4] },
-          month: { $substr: ["$date_today", 5, 2] },
-        },
-      },
-      {
-        $group: {
-          _id: { year: "$year", month: "$month" },
-        },
-      },
-      {
-        $match: {
-          "_id.year": { $ne: "" }, // Filter out entries with empty year
-          "_id.month": { $ne: "" }, // Filter out entries with empty month
-        },
-      },
-      {
-        $sort: { "_id.year": -1, "_id.month": -1 }, // Sort by year and month in descending order
-      },
-      {
-        $project: {
-          _id: 0,
-          year: "$_id.year",
-          month: "$_id.month",
-        },
-      },
-    ]);
-
-    console.log("Matched Documents:", matchedDocuments);
-    res.status(200).json(matchedDocuments);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
 export default async function handle(req, res) {
   const { method } = req;
 

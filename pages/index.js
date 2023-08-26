@@ -24,7 +24,7 @@ function calculateCountdown(timeDifferenceMs) {
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export default function Home({ orders}) {
+export default function Home({ orders }) {
   const router = useRouter();
   let { error, success } = router.query;
 
@@ -39,7 +39,6 @@ export default function Home({ orders}) {
       },
     });
     const orders = await res.json();
-    console.log("these are orders; ", orders)
     return orders;
   };
 
@@ -48,14 +47,12 @@ export default function Home({ orders}) {
       toast.error(error, {
         toastId: "error",
       });
-      error = undefined;
       router.replace("/");
     }
     if (success) {
       toast.success(success, {
         toastId: "success",
       });
-      success = undefined;
       router.replace("/");
     }
 
@@ -103,37 +100,70 @@ export default function Home({ orders}) {
           </thead>
           <tbody>
             {orders &&
-              orders.map((order, index) => (
-                <tr key={order._id}>
-                  <td>{index + 1}</td>
-                  <td className="text-break">
-                    <span className="fw-medium">Date:</span> {order.date_today}
-                    <br />
-                    <span className="fw-medium">Time:</span> {order.time_now}
-                  </td>
-                  <td className="text-break">{order.client_code}</td>
-                  <td className="text-break">{order.folder}</td>
-                  <td className="text-break">{order.quantity}</td>
-                  <td className="text-break">{order.download_date}</td>
-                  <td className="text-break">
-                    <span className="fw-medium">Date:</span>{" "}
-                    {order.delivery_date}
-                    <br />
-                    <span className="fw-medium">Time:</span>{" "}
-                    {order.delivery_bd_time}
-                  </td>
-                  <td className="text-break">{countdowns[index]}</td>
-                  <td className="text-break">{order.task}</td>
-                  <td className="text-break">{order.et}</td>
-                  <td className="text-break">{order.production}</td>
-                  <td className="text-break">{order.qc1}</td>
-                  <td className="text-break">{order.comment}</td>
-                  <td className="text-break">{order.status}</td>
-                </tr>
-              ))}
+              orders.map((order, index) => {
+                let priorityColor = "";
+                const countdownTime = countdowns[index];
+                const [hours, minutes, seconds] = countdownTime.split(":");
+                const totalSeconds =
+                  parseInt(hours) * 3600 +
+                  parseInt(minutes) * 60 +
+                  parseInt(seconds);
+
+                if (totalSeconds > 0) {
+                  if (totalSeconds <= 600) {
+                    priorityColor = "table-danger";
+                  } else if (totalSeconds <= 1800) {
+                    priorityColor = "table-warning";
+                  }
+                }
+                if (countdownTime == "Over") priorityColor = "table-secondary";
+
+                return (
+                  <tr
+                    key={order._id}
+                    className={priorityColor ? priorityColor : ""}
+                  >
+                    <td>{index + 1}</td>
+                    <td className="text-break">
+                      <span className="fw-medium">Date:</span>{" "}
+                      {order.date_today}
+                      <br />
+                      <span className="fw-medium">Time:</span> {order.time_now}
+                    </td>
+                    <td className="text-break">{order.client_code}</td>
+                    <td className="text-break">{order.folder}</td>
+                    <td className="text-break">{order.quantity}</td>
+                    <td className="text-break">{order.download_date}</td>
+                    <td className="text-break">
+                      <span className="fw-medium">Date:</span>{" "}
+                      {order.delivery_date}
+                      <br />
+                      <span className="fw-medium">Time:</span>{" "}
+                      {order.delivery_bd_time}
+                    </td>
+                    <td className="text-break">{countdowns[index]}</td>
+                    <td className="text-break">{order.task}</td>
+                    <td className="text-break">{order.et}</td>
+                    <td className="text-break">{order.production}</td>
+                    <td className="text-break">{order.qc1}</td>
+                    <td className="text-break">{order.comment}</td>
+                    <td className="text-break">{order.status}</td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
+      <style jsx>
+        {`
+          .table-danger {
+            background-color: red !important;
+          }
+          .table-warning {
+            background-color: yellow !important;
+          }
+        `}
+      </style>
     </>
   );
 }

@@ -11,7 +11,7 @@ const dbConnect = () => {
     mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      // maxPoolSize: 10,
+      maxPoolSize: 10,
       dbName: "SCHL_PORTAL",
     });
     // console.log("Connected to Mongo Successfully!");
