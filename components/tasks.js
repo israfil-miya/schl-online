@@ -12,12 +12,25 @@ export default function Tasks() {
   const [download_date, setDownloadDate] = useState("");
   const [delivery_date, setDeliveryDate] = useState("");
   const [delivery_bd_time, setDeliveryBdTime] = useState("");
-  const [task, setTask] = useState("");
   const [et, setEt] = useState(false);
   const [production, setProduction] = useState("");
   const [qc1, setQc1] = useState(false);
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
+
+  const [optionsCode, setOptionsCode] = useState([]);
+  const [optionsName, setOptionsName] = useState([]);
+
+  const optionsTask = ["Retouch", "Multipath", "Cutout", "Video"];
+  const [selectedTasks, setSelectedTasks] = useState([]);
+
+  const handleTaskCheckboxChange = (task) => {
+    if (selectedTasks.includes(task)) {
+      setSelectedTasks(selectedTasks.filter((t) => t !== task));
+    } else {
+      setSelectedTasks([...selectedTasks, task]);
+    }
+  };
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -66,8 +79,43 @@ export default function Tasks() {
     }
   }
 
+  async function GetAllClients() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallclients: true,
+        },
+      };
+
+      const clientsList = await fetchOrderData(url, options);
+
+      if (!clientsList.error) {
+        const clientCodes = clientsList
+          .filter((client) => client.client_code != "")
+          .map((client) => client.client_code);
+        const clientNames = clientsList
+          .filter((client) => client.client_name != "")
+          .map((client) => client.client_name);
+
+        setOptionsCode(clientCodes);
+        setOptionsName(clientNames);
+      } else {
+        console.log(clientsList.message);
+        toast.error("Unable to retrieve clients list");
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      toast.error("Error retrieving clients");
+    }
+  }
+
   const AddNewOrder = async (e) => {
     e.preventDefault();
+
+    console.log(selectedTasks);
 
     const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
       method: "POST",
@@ -79,7 +127,7 @@ export default function Tasks() {
         download_date,
         delivery_date,
         delivery_bd_time,
-        task,
+        task: selectedTasks.join("+"),
         et,
         production,
         qc1,
@@ -108,7 +156,7 @@ export default function Tasks() {
     setDownloadDate("");
     setDeliveryDate("");
     setDeliveryBdTime("");
-    setTask("");
+    setSelectedTasks([]);
     setEt(false);
     setProduction("");
     setQc1(false);
@@ -201,6 +249,7 @@ export default function Tasks() {
   }
 
   useEffect(() => {
+    GetAllClients();
     GetAllOrders();
   }, []);
 
@@ -210,32 +259,82 @@ export default function Tasks() {
         <div className="add-order">
           <h5 className="py-3">Add New Tasks</h5>
           <form onSubmit={AddNewOrder} id="inputForm">
-            <div className="mb-3">
-              <label htmlFor="clientCode" className="form-label">
-                Client Code
-              </label>
+            <label htmlFor="clientCode" className="form-label">
+              Client Code
+            </label>
+            <div id="clientCode" className="input-group mb-3">
+              <div className="input-group-prepend">
+                <button
+                  className="btn btn-light dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-target="#formDropdown1"
+                  aria-expanded="false"
+                >
+                  Select an option
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="formDropdown1">
+                  {optionsCode.map((option, index) => (
+                    <li key={index}>
+                      <a
+                        href="#"
+                        className="dropdown-item"
+                        onClick={() => setClientCode(option)}
+                      >
+                        {option}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <input
+                type="text"
+                className="form-control"
+                placeholder="Client Code"
                 value={client_code}
                 onChange={(e) => setClientCode(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientCode"
-                placeholder="Client Code"
               />
             </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Client Name
-              </label>
+
+            <label htmlFor="clientName" className="form-label">
+              Client Name
+            </label>
+            <div id="clientName" className="input-group mb-3">
+              <div className="input-group-prepend">
+                <button
+                  className="btn btn-light dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-target="#formDropdown2"
+                  aria-expanded="false"
+                >
+                  Select an option
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="formDropdown2">
+                  {optionsName.map((option, index) => (
+                    <li key={index}>
+                      <a
+                        href="#"
+                        className="dropdown-item"
+                        onClick={() => setClientName(option)}
+                      >
+                        {option}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
               <input
+                type="text"
+                className="form-control"
+                placeholder="Client Name"
                 value={client_name}
                 onChange={(e) => setClientName(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-                placeholder="Client Name"
               />
             </div>
+
             <div className="mb-3">
               <label htmlFor="folder" className="form-label">
                 Folder
@@ -298,19 +397,55 @@ export default function Tasks() {
                 id="deliveryBDTime"
               />
             </div>
-            <div className="mb-3">
-              <label htmlFor="task" className="form-label">
-                Task
-              </label>
+
+            <label htmlFor="task" className="form-label">
+              Task
+            </label>
+            <div id="task" className="input-group mb-3">
+              <div className="input-group-prepend">
+                <button
+                  className="btn btn-light dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-target="#formDropdown3"
+                  aria-expanded="false"
+                >
+                  Select tasks
+                </button>
+                <ul
+                  className="dropdown-menu list-unstyled"
+                  aria-labelledby="formDropdown3"
+                >
+                  {optionsTask.map((task, index) => (
+                    <div key={index} className="m-2 form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        value={task}
+                        id={`checkbox${index}`}
+                        checked={selectedTasks.includes(task)}
+                        onChange={() => handleTaskCheckboxChange(task)}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`checkbox${index}`}
+                      >
+                        {task}
+                      </label>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+
               <input
-                value={task}
-                onChange={(e) => setTask(e.target.value)}
                 type="text"
                 className="form-control"
-                id="task"
-                placeholder="Task"
+                placeholder="Client Name"
+                value={selectedTasks.join("+")}
+                onChange={(e) => setSelectedTasks(e.target.value.split("+"))}
               />
             </div>
+
             <div className="mb-3">
               <label htmlFor="et" className="form-label">
                 E.T.
@@ -387,10 +522,10 @@ export default function Tasks() {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Added Time</th>
                 <th>Client Code</th>
                 <th>Client Name</th>
                 <th>Folder</th>
+                <th>Task</th>
                 <th>Comment</th>
                 <th>Status</th>
                 <th>Manage</th>
@@ -402,16 +537,10 @@ export default function Tasks() {
                   return (
                     <tr key={order._id}>
                       <td>{index + 1}</td>
-                      <td className="text-break">
-                        <span className="fw-medium">Date:</span>{" "}
-                        {order.date_today}
-                        <br />
-                        <span className="fw-medium">Time:</span>{" "}
-                        {order.time_now}
-                      </td>
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.client_name}</td>
                       <td className="text-break">{order.folder}</td>
+                      <td className="text-break">{order.task}</td>
                       <td className="text-break">{order.comment}</td>
                       <td className="text-break">{order.status}</td>
                       <td>
