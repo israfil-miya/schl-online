@@ -62,6 +62,21 @@ async function handleEditClient(req, res) {
   }
 }
 
+
+async function handleGetClientNameByCode(req, res) {
+  try {
+    let data = req.headers;
+    const resData = await Client.findOne({client_code: data.client_code});
+    if(!resData) sendError(res, 500, "No client found with the code");
+    else res.status(200).json(resData);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+
+
 async function handleDeleteClient(req, res) {
   let data = req.headers;
 
@@ -95,6 +110,8 @@ export default async function handle(req, res) {
         await handleGetAllClient(req, res);
       } else if (req.headers.deleteclient) {
         await handleDeleteClient(req, res);
+      } else if (req.headers.getclientnamebycode) {
+        await handleGetClientNameByCode(req, res);
       } else if (req.headers.getclientinfo) {
         await handleGetClientInfo(req, res);
       } else {

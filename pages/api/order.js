@@ -50,7 +50,29 @@ async function handleNewOrder(req, res) {
 
 async function handleGetOrdersUnfinished(req, res) {
   try {
-    const orders = await Order.find({ status: { $ne: "FINISHED" } }).lean();
+    const orders = await Order.find({ status: { $ne: "FINISHED", $ne: "CORRECTION" } }).lean();
+
+    const sortedOrders = orders
+      .map((order) => ({
+        ...order,
+        timeDifference: calculateTimeDifference(
+          order.delivery_date,
+          order.delivery_bd_time
+        ),
+      }))
+      .sort((a, b) => a.timeDifference - b.timeDifference);
+
+    res.status(200).json(sortedOrders);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+
+async function handleGetOrdersRedo(req, res) {
+  try {
+    const orders = await Order.find({ status: { $eq: "CORRECTION", $ne: "FINISHED" } }).lean();
 
     const sortedOrders = orders
       .map((order) => ({
@@ -119,7 +141,7 @@ async function handleGetOrdersByFilter(req, res) {
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
-      { status: { $ne: "FINISHED" } },
+      { status: { $ne: "FINISHED", $ne: "CORRECTION" } },
       { delivery_date: 1, delivery_bd_time: 1 }
     ).lean();
 
@@ -198,6 +220,26 @@ async function handleFinishOrder(req, res) {
   }
 }
 
+async function handleRedoOrder(req, res) {
+  try {
+    const data = req.headers;
+    console.log("Received edit request with data:", data);
+
+    const resData = await Order.findByIdAndUpdate(data.id, {status: "CORRECTION"}, {
+      new: true,
+    });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No order found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -213,8 +255,12 @@ export default async function handle(req, res) {
         await handleGetOrdersByFilter(req, res);
       } else if (req.headers.getordersunfinished) {
         await handleGetOrdersUnfinished(req, res);
+      } else if (req.headers.getordersredo) {
+        await handleGetOrdersRedo(req, res);
       } else if (req.headers.finishorder) {
         await handleFinishOrder(req, res);
+      } else if (req.headers.redoorder) {
+        await handleRedoOrder(req, res);
       } else if (req.headers.gettimeperiods) {
         await handleGetTimePeriods(req, res);
       } else {

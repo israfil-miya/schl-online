@@ -15,13 +15,14 @@ export default function Tasks() {
   const [et, setEt] = useState(false);
   const [production, setProduction] = useState("");
   const [qc1, setQc1] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Running");
   const [comment, setComment] = useState("");
 
   const [optionsCode, setOptionsCode] = useState([]);
   const [optionsName, setOptionsName] = useState([]);
 
   const optionsTask = ["Retouch", "Multipath", "Cutout", "Video"];
+  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running"];
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   const handleTaskCheckboxChange = (task) => {
@@ -31,6 +32,45 @@ export default function Tasks() {
       setSelectedTasks([...selectedTasks, task]);
     }
   };
+
+
+  const handleStatusRadioChange = (radio_status) => {
+    if (status == radio_status) {
+      console.log(radio_status)
+      return
+    } else {
+      setStatus(radio_status);
+    }
+  };
+
+
+  const handleClientNameFocus = async () => {
+    if (!client_code) return
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getclientnamebycode: true,
+          client_code
+        },
+      };
+
+      const clientData = await fetchOrderData(url, options);
+
+      if (!clientData.error) {
+        console.log(clientData)
+        if (!clientData.client_name) return
+        else setClientName(clientData.client_name)
+      }
+      if(!clientData || clientData.error) return
+    } catch (error) {
+      console.error("Error fetching client:", error);
+    }
+
+  }
+
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -192,6 +232,35 @@ export default function Tasks() {
     }
   };
 
+
+  const RedoOrder = async (redoOrderData) => {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        redoorder: true,
+        id: redoOrderData._id,
+      },
+    };
+
+    try {
+      const resData = await fetchOrderData(url, options);
+
+      if (!resData.error) {
+        toast.success("Changed the status to CORRECTION", {
+          duration: 3500,
+        });
+        await GetAllOrders();
+      } else {
+        toast.error("Unable to change status");
+      }
+    } catch (error) {
+      console.error("Error changing status:", error);
+      toast.error("Error changing status");
+    }
+  };
+
   async function deleteOrder(deleteOrderData) {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
@@ -273,7 +342,7 @@ export default function Tasks() {
                 >
                   Select an option
                 </button>
-                <ul className="dropdown-menu" aria-labelledby="formDropdown1">
+                <ul className="dropdown-menu dropdown-scroll" aria-labelledby="formDropdown1">
                   {optionsCode.map((option, index) => (
                     <li key={index}>
                       <a
@@ -328,6 +397,7 @@ export default function Tasks() {
 
               <input
                 type="text"
+                onFocus={handleClientNameFocus}
                 className="form-control"
                 placeholder="Client Name"
                 value={client_name}
@@ -413,7 +483,7 @@ export default function Tasks() {
                   Select tasks
                 </button>
                 <ul
-                  className="dropdown-menu list-unstyled"
+                  className="dropdown-menu dropdown-scroll list-unstyled"
                   aria-labelledby="formDropdown3"
                 >
                   {optionsTask.map((task, index) => (
@@ -498,19 +568,58 @@ export default function Tasks() {
                 placeholder="Comments"
               />
             </div>
-            <div className="mb-3">
-              <label htmlFor="status" className="form-label">
-                Status
-              </label>
+
+
+
+
+            <label htmlFor="status" className="form-label">
+              Status
+            </label>
+            <div id="status" className="input-group mb-3">
+              <div className="input-group-prepend">
+                <button
+                  className="btn btn-light dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-target="#formDropdown4"
+                  aria-expanded="false"
+                >
+                  Select status
+                </button>
+                <ul
+                  className="dropdown-menu dropdown-scroll list-unstyled"
+                  aria-labelledby="formDropdown4"
+                >
+                  {optionsStatus.map((radio_status, index) => (
+                    <div key={index} className="m-2 form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        value={radio_status}
+                        id={`radio${index}`}
+                        checked={status == radio_status}
+                        onChange={() => handleStatusRadioChange(radio_status)}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`radio${index}`}
+                      >
+                        {radio_status}
+                      </label>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+
               <input
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
                 type="text"
                 className="form-control"
-                id="status"
-                placeholder="Status"
+                placeholder="Client Name"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
               />
             </div>
+
             <button type="submit" className="btn btn-sm btn-outline-primary">
               Submit
             </button>
@@ -578,13 +687,19 @@ export default function Tasks() {
                           Delete
                         </button>
 
-                        {order.status!="FINISHED" ? <button
+                        {order.status == "FINISHED" ? <button
+                          type="button"
+                          onClick={() => RedoOrder(order)}
+                          className="btn me-2 btn-sm btn-outline-success"
+                        >
+                          Redo
+                        </button> : <button
                           type="button"
                           onClick={() => FinishOrder(order)}
                           className="btn me-2 btn-sm btn-outline-success"
                         >
                           Finish
-                        </button> : <></>}
+                        </button>}
 
                       </td>
                     </tr>
@@ -865,6 +980,14 @@ export default function Tasks() {
           </div>
         </div>
       </div>
+      <style jsx>
+        {`
+        .dropdown-menu {
+          max-height: 200px;
+          overflow-y: auto;
+        }
+        `}
+      </style>
     </>
   );
 }

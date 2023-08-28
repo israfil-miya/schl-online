@@ -156,7 +156,7 @@ export default function Clients() {
           </div>
           <div className="mb-3">
             <label htmlFor="clientName" className="form-label">
-              Client Code
+              Client Name
             </label>
             <input
               value={clientName}
