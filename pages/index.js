@@ -77,7 +77,7 @@ export default function Home({ orders, ordersRedo }) {
       <div className="mb-5">
 
       <div className="my-2">
-          <h5 className="text-center py-4">CORRECTION TASKS LIST</h5>
+          <h5 className="text-center py-4">Test & Correction</h5>
           <table
             style={{ overflow: "hidden" }}
             className="table table-bordered py-3 table-hover"
@@ -140,7 +140,7 @@ export default function Home({ orders, ordersRedo }) {
 
 
         <div className="my-2">
-          <h5 className="text-center py-4">UNFINISHED TASKS LIST</h5>
+          <h5 className="text-center py-4">Running Task List</h5>
           <table
             style={{ overflow: "hidden" }}
             className="table table-bordered py-3 table-hover"
