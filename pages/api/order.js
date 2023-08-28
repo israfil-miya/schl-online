@@ -51,7 +51,7 @@ async function handleNewOrder(req, res) {
 async function handleGetOrdersUnfinished(req, res) {
   try {
     const orders = await Order.find({
-      status: { $nin: ["FINISHED", "CORRECTION"] }
+      status: { $nin: ["FINISHED", "CORRECTION", "TEST"] }
     }).lean();
 
     const sortedOrders = orders
@@ -73,7 +73,9 @@ async function handleGetOrdersUnfinished(req, res) {
 
 async function handleGetOrdersRedo(req, res) {
   try {
-    const orders = await Order.find({ status: { $eq: "CORRECTION", $ne: "FINISHED" } }).lean();
+    const orders = await Order.find({
+      status: { $in: ["CORRECTION", "TEST"], $ne: "FINISHED" }
+    }).lean();
 
     const sortedOrders = orders
       .map((order) => ({
@@ -142,7 +144,7 @@ async function handleGetOrdersByFilter(req, res) {
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
-      { status: { $ne: "FINISHED", $ne: "CORRECTION" } },
+      { status: {  $nin: ["FINISHED", "CORRECTION", "TEST"] } },
       { delivery_date: 1, delivery_bd_time: 1 }
     ).lean();
 

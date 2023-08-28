@@ -22,7 +22,7 @@ export default function Tasks() {
   const [optionsName, setOptionsName] = useState([]);
 
   const optionsTask = ["Retouch", "Multipath", "Cutout", "Video"];
-  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running"];
+  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running", "TEST"];
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   const handleTaskCheckboxChange = (task) => {
@@ -683,6 +683,8 @@ export default function Tasks() {
                           type="button"
                           onClick={() => deleteOrder(order)}
                           className="btn me-2 btn-sm btn-outline-danger"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteModal"
                         >
                           Delete
                         </button>
@@ -979,6 +981,54 @@ export default function Tasks() {
             </div>
           </div>
         </div>
+
+
+{/*
+        <div
+          className="modal fade"
+          id="deleteModal"
+          tabIndex="-1"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                  Delete Order Confirmation
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Do you really want to delete this order?</p>
+              </div>
+              <div className="modal-footer p-1">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  No
+                </button>
+                <button
+                  onClick={deleteOrder}
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+                  */}
+
       </div>
       <style jsx>
         {`
