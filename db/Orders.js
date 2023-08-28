@@ -52,11 +52,8 @@ function timeNow() {
   };
 
   const now = new Date();
-  const localTime = now.toLocaleTimeString('en-US', options);
-  const utcTime = now.toISOString();
-
-  console.log('Local Time:', localTime);
-  console.log('UTC Time:', utcTime);
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const localTime = formatter.format(now);
 
   return localTime;
 }
