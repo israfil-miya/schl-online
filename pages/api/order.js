@@ -50,7 +50,9 @@ async function handleNewOrder(req, res) {
 
 async function handleGetOrdersUnfinished(req, res) {
   try {
-    const orders = await Order.find({ status: { $ne: "FINISHED", $ne: "CORRECTION" } }).lean();
+    const orders = await Order.find({
+      status: { $nin: ["FINISHED", "CORRECTION"] }
+    }).lean();
 
     const sortedOrders = orders
       .map((order) => ({
@@ -68,7 +70,6 @@ async function handleGetOrdersUnfinished(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
 
 async function handleGetOrdersRedo(req, res) {
   try {
