@@ -51,7 +51,7 @@ export default function Login() {
   return (
     <>
       <div className="main-wrapper container">
-        <div className="signin-form fw-bold py-1">
+        <div className="signin-form rounded border bg-light fw-bold py-1">
           <form onSubmit={signinSubmit}>
             <div className="text-center my-3">
               <p>LOGIN PANEL</p>
@@ -87,7 +87,7 @@ export default function Login() {
 
             <button
               type="submit"
-              className="btn btn-light fw-bold btn-block mb-4"
+              className="btn btn-outline-primary btn-block mb-4"
             >
               Login
             </button>
@@ -98,7 +98,7 @@ export default function Login() {
       <style jsx>
         {`
           .main-wrapper {
-            color: white;
+            
             overflow: hidden;
             min-height: 100vh;
             flex: 1;
@@ -109,10 +109,6 @@ export default function Login() {
           }
           .signin-form {
             padding: 50px;
-            background-color: rgb(66, 0, 140);
-          }
-          .form-label {
-            color: white;
           }
         `}
       </style>
