@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import Navbar from "../components/navbar";
 
 const getCurrentTimes = (orders) => {
+  console.log(orders);
   const timesNow = orders.map((order) =>
     order.timeDifference <= 0
       ? "Over"
@@ -60,23 +61,24 @@ export default function Home({ orders, ordersRedo }) {
       toast.error("Unable to retrieve tasks list");
     }
 
-    const countdownIntervalId = setInterval(async () => {
-      const updatedOrders = await GetAllOrdersTime();
-      const updatedCountdowns = getCurrentTimes(updatedOrders);
-      setCountdowns(updatedCountdowns);
-    }, process.env.NEXT_PUBLIC_UPDATE_DELAY);
+    if (orders.length) {
+      const countdownIntervalId = setInterval(async () => {
+        const updatedOrders = await GetAllOrdersTime();
+        const updatedCountdowns = getCurrentTimes(updatedOrders);
+        setCountdowns(updatedCountdowns);
+      }, process.env.NEXT_PUBLIC_UPDATE_DELAY);
 
-    return () => {
-      clearInterval(countdownIntervalId); // Clear countdown interval
-    };
+      return () => {
+        clearInterval(countdownIntervalId); // Clear countdown interval
+      };
+    }
   }, [error, success, router, orders]);
 
   return (
     <>
       <Navbar navFor="tasks" />
       <div className="mb-5">
-
-      <div className="my-2">
+        <div className="my-2">
           <h5 className="text-center py-4">Test & Correction</h5>
           <table
             style={{ overflow: "hidden" }}
@@ -102,17 +104,15 @@ export default function Home({ orders, ordersRedo }) {
             <tbody>
               {ordersRedo &&
                 ordersRedo.map((order, index) => {
-
                   return (
-                    <tr
-                      key={order._id}
-                    >
+                    <tr key={order._id}>
                       <td>{index + 1}</td>
                       <td className="text-break">
                         <span className="fw-medium">Date:</span>{" "}
                         {order.date_today}
                         <br />
-                        <span className="fw-medium">Time:</span> {order.time_now}
+                        <span className="fw-medium">Time:</span>{" "}
+                        {order.time_now}
                       </td>
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.folder}</td>
@@ -137,7 +137,6 @@ export default function Home({ orders, ordersRedo }) {
             </tbody>
           </table>
         </div>
-
 
         <div className="my-2">
           <h5 className="text-center py-4">Running Task List</h5>
@@ -193,7 +192,8 @@ export default function Home({ orders, ordersRedo }) {
                         <span className="fw-medium">Date:</span>{" "}
                         {order.date_today}
                         <br />
-                        <span className="fw-medium">Time:</span> {order.time_now}
+                        <span className="fw-medium">Time:</span>{" "}
+                        {order.time_now}
                       </td>
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.folder}</td>
@@ -219,9 +219,6 @@ export default function Home({ orders, ordersRedo }) {
             </tbody>
           </table>
         </div>
-
-
-
       </div>
       <style jsx>
         {`
@@ -254,6 +251,5 @@ export async function getServerSideProps(context) {
   });
   const orders = await res.json();
   const ordersRedo = await res2.json();
-  console.log(ordersRedo)
   return { props: { orders, ordersRedo } };
 }

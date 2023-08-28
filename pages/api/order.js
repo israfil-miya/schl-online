@@ -1,6 +1,7 @@
 import Order from "../../db/Orders";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
+
 function calculateTimeDifference(deliveryDate, deliveryTime) {
   const is12HourFormat = /am|pm/i.test(deliveryTime);
   const [time, meridiem] = deliveryTime.split(/\s+/);
@@ -25,6 +26,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
   return timeDifferenceMs;
 }
 
+
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,
@@ -48,11 +50,15 @@ async function handleNewOrder(req, res) {
   }
 }
 
-async function handleGetOrdersUnfinished(req, res) {
+async function handleGetOrdersUnFinished(req, res) {
   try {
     const orders = await Order.find({
-      status: { $nin: ["FINISHED", "CORRECTION", "TEST"] }
+      status: { $nin: ["Finished", "Correction", "Test"] }
     }).lean();
+
+
+    if(!orders) res.status(200).json([]);
+
 
     const sortedOrders = orders
       .map((order) => ({
@@ -64,17 +70,18 @@ async function handleGetOrdersUnfinished(req, res) {
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
 
+
     res.status(200).json(sortedOrders);
   } catch (e) {
     console.error(e);
-    sendError(res, 500, "An error occurred");
+    sendError(res, 500, ["An error occurred"]);
   }
 }
 
 async function handleGetOrdersRedo(req, res) {
   try {
     const orders = await Order.find({
-      status: { $in: ["CORRECTION", "TEST"], $ne: "FINISHED" }
+      status: { $in: ["Correction", "Test"], $ne: "Finished" }
     }).lean();
 
     const sortedOrders = orders
@@ -144,7 +151,7 @@ async function handleGetOrdersByFilter(req, res) {
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
-      { status: {  $nin: ["FINISHED", "CORRECTION", "TEST"] } },
+      { status: {  $nin: ["Finished", "Correction", "Test"] } },
       { delivery_date: 1, delivery_bd_time: 1 }
     ).lean();
 
@@ -208,7 +215,7 @@ async function handleFinishOrder(req, res) {
     const data = req.headers;
     console.log("Received edit request with data:", data);
 
-    const resData = await Order.findByIdAndUpdate(data.id, {status: "FINISHED"}, {
+    const resData = await Order.findByIdAndUpdate(data.id, {status: "Finished"}, {
       new: true,
     });
 
@@ -228,7 +235,7 @@ async function handleRedoOrder(req, res) {
     const data = req.headers;
     console.log("Received edit request with data:", data);
 
-    const resData = await Order.findByIdAndUpdate(data.id, {status: "CORRECTION"}, {
+    const resData = await Order.findByIdAndUpdate(data.id, {status: "Correction"}, {
       new: true,
     });
 
@@ -257,7 +264,7 @@ export default async function handle(req, res) {
       } else if (req.headers.getordersbyfilter) {
         await handleGetOrdersByFilter(req, res);
       } else if (req.headers.getordersunfinished) {
-        await handleGetOrdersUnfinished(req, res);
+        await handleGetOrdersUnFinished(req, res);
       } else if (req.headers.getordersredo) {
         await handleGetOrdersRedo(req, res);
       } else if (req.headers.finishorder) {

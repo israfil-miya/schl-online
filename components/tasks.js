@@ -22,7 +22,7 @@ export default function Tasks() {
   const [optionsName, setOptionsName] = useState([]);
 
   const optionsTask = ["Retouch", "Multipath", "Cutout", "Video"];
-  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running", "TEST"];
+  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running", "Test"];
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   const handleTaskCheckboxChange = (task) => {
@@ -261,14 +261,14 @@ export default function Tasks() {
     }
   };
 
-  async function deleteOrder(deleteOrderData) {
+  async function deleteOrder() {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         deleteorder: true,
-        id: deleteOrderData._id,
+        id: manageData._id,
       },
     };
 
@@ -681,7 +681,7 @@ export default function Tasks() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => deleteOrder(order)}
+                          onClick={() => setManageData({ _id: order._id})}
                           className="btn me-2 btn-sm btn-outline-danger"
                           data-bs-toggle="modal"
                           data-bs-target="#deleteModal"
@@ -983,7 +983,7 @@ export default function Tasks() {
         </div>
 
 
-{/*
+
         <div
           className="modal fade"
           id="deleteModal"
@@ -1018,6 +1018,7 @@ export default function Tasks() {
                   onClick={deleteOrder}
                   type="button"
                   className="btn btn-sm btn-outline-danger"
+                  data-bs-dismiss="modal"
                 >
                   Yes
                 </button>
@@ -1027,7 +1028,6 @@ export default function Tasks() {
         </div>
 
 
-                  */}
 
       </div>
       <style jsx>

@@ -23,33 +23,38 @@ function convertTo24HourFormat(time) {
 }
 
 function dateToday() {
-  const utcOffset = 6;
+  const options = {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  };
+
   const now = new Date();
-  const utcPlus6Date = new Date(now.getTime() + (utcOffset * 60 * 60 * 1000));
+  const localDate = now.toLocaleDateString('en-US', options);
+  const [month, day, year] = localDate.split('/');
 
-  const year = utcPlus6Date.getUTCFullYear();
-  const month = (utcPlus6Date.getUTCMonth() + 1).toString().padStart(2, "0");
-  const day = utcPlus6Date.getUTCDate().toString().padStart(2, "0");
+  const formattedDate = `${day}-${month}-${year}`;
 
-  const returnValue = `${year}-${month}-${day}`;
-
-  return returnValue;
+  return formattedDate;
 }
+
 
 console.log(dateToday());
 
 
 function timeNow() {
-  const utcOffset = 6;
+  const options = {
+    timeZone: 'Asia/Dhaka', // Replace with the appropriate timezone identifier
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+
   const now = new Date();
-  const utcPlus6Time = new Date(now.getTime() + (utcOffset * 60 * 60 * 1000));
+  const localTime = now.toLocaleTimeString('en-US', options);
 
-  const hour = utcPlus6Time.getUTCHours().toString().padStart(2, "0");
-  const minute = utcPlus6Time.getUTCMinutes().toString().padStart(2, "0");
-
-  const returnValue = `${hour}:${minute}`;
-
-  return returnValue;
+  return localTime;
 }
 
 console.log(timeNow());
