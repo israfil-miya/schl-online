@@ -17,14 +17,24 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
     }
   }
 
-  const deliveryDateTime = new Date(deliveryDate);
-  deliveryDateTime.setHours(adjustedHours, minutes, 0, 0);
+  const now = new Date();
+  const options = {
+    timeZone: 'Asia/Dhaka',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const utc6Time = new Date(formatter.format(now)).getTime() + (6 * 60 * 60 * 1000);
 
-  const currentTime = new Date();
-  const timeDifferenceMs = deliveryDateTime - currentTime;
+  const deliveryDateTime = new Date(deliveryDate);
+  deliveryDateTime.setUTCHours(adjustedHours, minutes, 0, 0);
+
+  const timeDifferenceMs = deliveryDateTime - utc6Time;
 
   return timeDifferenceMs;
 }
+
 
 
 function sendError(res, statusCode, message) {
