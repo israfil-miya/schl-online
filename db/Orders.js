@@ -23,25 +23,37 @@ function convertTo24HourFormat(time) {
 }
 
 function dateToday() {
-  let now = new Date();
-  let year = now.getFullYear();
-  let month = (now.getMonth() + 1).toString().padStart(2, "0");
-  let day = now.getDate().toString().padStart(2, "0");
+  const utcOffset = 6;
+  const now = new Date();
+  const utcPlus6Date = new Date(now.getTime() + (utcOffset * 60 * 60 * 1000));
+
+  const year = utcPlus6Date.getUTCFullYear();
+  const month = (utcPlus6Date.getUTCMonth() + 1).toString().padStart(2, "0");
+  const day = utcPlus6Date.getUTCDate().toString().padStart(2, "0");
 
   const returnValue = `${year}-${month}-${day}`;
 
   return returnValue;
 }
 
-function timeNodw() {
-  let now = new Date();
-  let hour = now.getHours().toString().padStart(2, "0");
-  let minute = now.getMinutes().toString().padStart(2, "0");
+console.log(dateToday());
+
+
+function timeNow() {
+  const utcOffset = 6;
+  const now = new Date();
+  const utcPlus6Time = new Date(now.getTime() + (utcOffset * 60 * 60 * 1000));
+
+  const hour = utcPlus6Time.getUTCHours().toString().padStart(2, "0");
+  const minute = utcPlus6Time.getUTCMinutes().toString().padStart(2, "0");
 
   const returnValue = `${hour}:${minute}`;
 
-  return convertTo24HourFormat(returnValue);
+  return returnValue;
 }
+
+console.log(timeNow());
+
 
 const OrderSchema = new mongoose.Schema({
   date_today: {
@@ -50,7 +62,7 @@ const OrderSchema = new mongoose.Schema({
   },
   time_now: {
     type: String,
-    default: timeNodw(),
+    default: timeNow(),
   },
   client_code: {
     type: String,
