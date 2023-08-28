@@ -45,7 +45,7 @@ console.log(dateToday());
 
 function timeNow() {
   const options = {
-    timeZone: 'Asia/Dhaka', // Replace with the appropriate timezone identifier
+    timeZone: 'Asia/Dhaka',
     hour12: false,
     hour: '2-digit',
     minute: '2-digit'
@@ -53,6 +53,10 @@ function timeNow() {
 
   const now = new Date();
   const localTime = now.toLocaleTimeString('en-US', options);
+  const utcTime = now.toISOString();
+
+  console.log('Local Time:', localTime);
+  console.log('UTC Time:', utcTime);
 
   return localTime;
 }
