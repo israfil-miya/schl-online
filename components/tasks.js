@@ -577,13 +577,15 @@ export default function Tasks() {
                         >
                           Delete
                         </button>
-                        <button
+
+                        {order.status!="FINISHED" ? <button
                           type="button"
                           onClick={() => FinishOrder(order)}
                           className="btn me-2 btn-sm btn-outline-success"
                         >
                           Finish
-                        </button>
+                        </button> : <></>}
+
                       </td>
                     </tr>
                   );
