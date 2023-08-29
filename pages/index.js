@@ -117,7 +117,6 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.quantity}</td>
                       <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-
                         {order.delivery_date}
                         <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
@@ -195,7 +194,6 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.quantity}</td>
                       <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-
                         {order.delivery_date}
                         <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
@@ -216,13 +214,14 @@ export default function Home({ orders, ordersRedo }) {
       </div>
       <style jsx>
         {`
-.table {
-  font-size: 2ex
-}
+          .table {
+            font-size: 15px
+          }
 
-th, td {
-  padding: 1px 6px
-}
+          th,
+          td {
+            padding: 3px 6px;
+          }
         `}
       </style>
     </>

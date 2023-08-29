@@ -146,6 +146,9 @@ async function handleGetOrdersByFilter(req, res) {
       if (totime) query.date_today.$lte = totime;
     }
 
+
+    console.log(query)
+
     if (Object.keys(query).length === 0 && query.constructor === Object)
       sendError(res, 400, "No filter applied");
     else {

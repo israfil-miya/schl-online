@@ -51,7 +51,7 @@ export default function Login() {
   return (
     <>
       <div className="main-wrapper container">
-        <div className="signin-form rounded border bg-light fw-bold py-1">
+        <div className="signin-form rounded shadow border bg-light fw-bold py-1">
           <form onSubmit={signinSubmit}>
             <div className="text-center my-3">
               <p className="fw-medium">LOGIN PANEL</p>
