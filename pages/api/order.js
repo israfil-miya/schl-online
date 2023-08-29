@@ -17,23 +17,22 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
     }
   }
 
-  const now = new Date();
-  const options = {
-    timeZone: 'Asia/Dhaka',
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const utc6Time = new Date(formatter.format(now)).getTime() + (6 * 60 * 60 * 1000);
+  function getCurrentAsiaDhakaTime() {
+    const now = new Date();
+    const asiaDhakaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+    return asiaDhakaTime;
+  }
+
+  const asiaDhakaTime = getCurrentAsiaDhakaTime();
 
   const deliveryDateTime = new Date(deliveryDate);
-  deliveryDateTime.setUTCHours(adjustedHours, minutes, 0, 0);
+  deliveryDateTime.setHours(adjustedHours, minutes, 0, 0);
 
-  const timeDifferenceMs = deliveryDateTime - utc6Time;
+  const timeDifferenceMs = deliveryDateTime - asiaDhakaTime;
 
   return timeDifferenceMs;
 }
+
 
 
 
