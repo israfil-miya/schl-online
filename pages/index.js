@@ -108,10 +108,8 @@ export default function Home({ orders, ordersRedo }) {
                     <tr key={order._id}>
                       <td>{index + 1}</td>
                       <td className="text-break">
-                        <span className="fw-medium">Date:</span>{" "}
                         {order.date_today}
-                        <br />
-                        <span className="fw-medium">Time:</span>{" "}
+                        <span className="text-body-secondary"> | </span>
                         {order.time_now}
                       </td>
                       <td className="text-break">{order.client_code}</td>
@@ -119,10 +117,9 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.quantity}</td>
                       <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-                        <span className="fw-medium">Date:</span>{" "}
+
                         {order.delivery_date}
-                        <br />
-                        <span className="fw-medium">Time:</span>{" "}
+                        <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
                       </td>
                       <td className="text-break">{order.task}</td>
@@ -189,10 +186,8 @@ export default function Home({ orders, ordersRedo }) {
                     >
                       <td>{index + 1}</td>
                       <td className="text-break">
-                        <span className="fw-medium">Date:</span>{" "}
                         {order.date_today}
-                        <br />
-                        <span className="fw-medium">Time:</span>{" "}
+                        <span className="text-body-secondary"> | </span>
                         {order.time_now}
                       </td>
                       <td className="text-break">{order.client_code}</td>
@@ -200,10 +195,9 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.quantity}</td>
                       <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-                        <span className="fw-medium">Date:</span>{" "}
+
                         {order.delivery_date}
-                        <br />
-                        <span className="fw-medium">Time:</span>{" "}
+                        <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
                       </td>
                       <td className="text-break">{countdowns[index]}</td>
@@ -222,12 +216,13 @@ export default function Home({ orders, ordersRedo }) {
       </div>
       <style jsx>
         {`
-          .table-danger {
-            background-color: red !important;
-          }
-          .table-warning {
-            background-color: yellow !important;
-          }
+.table {
+  font-size: 2ex
+}
+
+th, td {
+  padding: 1px 6px
+}
         `}
       </style>
     </>

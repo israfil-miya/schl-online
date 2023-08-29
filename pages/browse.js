@@ -140,18 +140,19 @@ export default function Browse({ orders: ordersArr }) {
               <tr key={order._id}>
                 <td>{index + 1}</td>
                 <td className="text-break">
-                  <span className="fw-medium">Date:</span> {order.date_today}
-                  <br />
-                  <span className="fw-medium">Time:</span> {order.time_now}
+                  {order.date_today}
+                  <span className="text-body-secondary"> | </span>
+                  {order.time_now}
                 </td>
                 <td className="text-break">{order.client_code}</td>
                 <td className="text-break">{order.folder}</td>
                 <td className="text-break">{order.quantity}</td>
                 <td className="text-break">{order.download_date}</td>
                 <td className="text-break">
-                  <span className="fw-medium">Date:</span> {order.delivery_date}
-                  <br />
-                  <span className="fw-medium">Time:</span> {order.delivery_bd_time}
+
+                  {order.delivery_date}
+                  <span className="text-body-secondary"> | </span>
+                  {order.delivery_bd_time}
                 </td>
                 <td className="text-break">{order.task}</td>
                 <td className="text-break">{order.et}</td>
@@ -163,6 +164,18 @@ export default function Browse({ orders: ordersArr }) {
             ))}
         </tbody>
       </table>
+
+      <style jsx>
+        {`
+.table {
+  font-size: 2ex
+}
+
+th, td {
+  padding: 1px 6px
+}
+        `}
+      </style>
     </>
   );
 }
