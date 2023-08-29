@@ -152,6 +152,12 @@ export default function Tasks() {
     }
   }
 
+
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    return `${day}-${month}-${year}`;
+  };
+
   const AddNewOrder = async (e) => {
     e.preventDefault();
 
@@ -164,8 +170,8 @@ export default function Tasks() {
         client_name,
         folder,
         quantity,
-        download_date,
-        delivery_date,
+        download_date: convertToDDMMYYYY(download_date),
+        delivery_date: convertToDDMMYYYY(delivery_date),
         delivery_bd_time,
         task: selectedTasks.join("+"),
         et,
@@ -290,6 +296,17 @@ export default function Tasks() {
   }
 
   async function editOrder() {
+
+
+
+    if (manageData.download_date) {
+      manageData.download_date = convertToDDMMYYYY(manageData.download_date);
+    }
+    if (manageData.delivery_date) {
+      manageData.delivery_date = convertToDDMMYYYY(manageData.delivery_date);
+    }
+
+
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "POST",

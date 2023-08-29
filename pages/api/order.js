@@ -2,6 +2,7 @@ import Order from "../../db/Orders";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 
+
 function calculateTimeDifference(deliveryDate, deliveryTime) {
   const is12HourFormat = /am|pm/i.test(deliveryTime);
   const [time, meridiem] = deliveryTime.split(/\s+/);
@@ -25,8 +26,9 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
 
   const asiaDhakaTime = getCurrentAsiaDhakaTime();
 
-  const deliveryDateTime = new Date(deliveryDate);
-  deliveryDateTime.setHours(adjustedHours, minutes, 0, 0);
+  // Convert deliveryDate to a valid JavaScript Date object
+  const [day, month, year] = deliveryDate.split("-").map(Number);
+  const deliveryDateTime = new Date(year, month - 1, day, adjustedHours, minutes, 0, 0);
 
   const timeDifferenceMs = deliveryDateTime - asiaDhakaTime;
 
