@@ -54,7 +54,7 @@ export default function Navbar({ navFor }) {
               </Link>
             </li>
 
-            {(session.user.role == "admin" || session.user.role == "super") ? (
+            {session.user.role == "admin" || session.user.role == "super" ? (
               <li className="nav-item">
                 <Link
                   className={navFor == "admin" ? "nav-link active" : "nav-link"}
@@ -67,14 +67,12 @@ export default function Navbar({ navFor }) {
               <></>
             )}
           </ul>
-          <div className="navbar-text me-5 pe-5">
-            <div className="nav-item dropdown list-unstyled">
+          <div className="navbar-text d-flex me-5 pe-5">
+            <div class="btn-group dropdown-center">
               <Link
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href=""
+                className={navFor == "account" ? "nav-link active" : "nav-link"}
+                href="/account"
                 role="button"
-                aria-expanded="false"
               >
                 <em>
                   Welcome {session.user?.name}{" "}
@@ -83,11 +81,19 @@ export default function Navbar({ navFor }) {
                   </span>
                 </em>
               </Link>
+              <Link
+                role="button"
+                href=""
+                class="dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </Link>
               <ul className="dropdown-menu list-unstyled">
                 <div className="text-center">
                   <span className="fw-medium p-1">
-                    Interacting as{" "}
-                    {session.user.role}
+                    Interacting as {session.user.role}
                   </span>
                   <button
                     onClick={signOutHandle}

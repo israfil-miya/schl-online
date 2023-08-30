@@ -20,8 +20,40 @@ export default function Tasks() {
   const [optionsCode, setOptionsCode] = useState([]);
   const [optionsName, setOptionsName] = useState([]);
 
-  const optionsTask = ["Retouch", "Multipath", "Cutout", "Video"];
-  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running", "Test"];
+  const optionsTask = [
+    "Banner",
+    "Background erase",
+    "Color correction",
+    "Illustrator work",
+    "Retouch",
+    "Shadow",
+    "Neck shot",
+    "SPM",
+    "CP",
+    "Neck",
+    "Retouch",
+    "Pattern change",
+    "Color change",
+    "Multipath",
+    "Clipping path",
+    "Liquify retouch",
+    "3D Neck shot",
+    "Trade retouch",
+    "Language change",
+    "Simple retouch",
+    "High-end retouch",
+    "Liquify",
+    "Shadow original",
+    "Symmetry liquify",
+  ];
+
+  const optionsStatus = [
+    "Uploaded",
+    "Client hold",
+    "Paused",
+    "Running",
+    "Test",
+  ];
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   const handleTaskCheckboxChange = (task) => {
@@ -32,19 +64,17 @@ export default function Tasks() {
     }
   };
 
-
   const handleStatusRadioChange = (radio_status) => {
     if (status == radio_status) {
-      console.log(radio_status)
-      return
+      console.log(radio_status);
+      return;
     } else {
       setStatus(radio_status);
     }
   };
 
-
   const handleClientNameFocus = async () => {
-    if (!client_code) return
+    if (!client_code) return;
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
       const options = {
@@ -52,23 +82,22 @@ export default function Tasks() {
         headers: {
           "Content-Type": "application/json",
           getclientnamebycode: true,
-          client_code
+          client_code,
         },
       };
 
       const clientData = await fetchApi(url, options);
 
       if (!clientData.error) {
-        console.log(clientData)
-        if (!clientData.client_name) return
-        else setClientName(clientData.client_name)
+        console.log(clientData);
+        if (!clientData.client_name) return;
+        else setClientName(clientData.client_name);
       }
-      if(!clientData || clientData.error) return
+      if (!clientData || clientData.error) return;
     } catch (error) {
       console.error("Error fetching client:", error);
     }
-
-  }
+  };
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
@@ -165,7 +194,6 @@ export default function Tasks() {
     setStatus("");
   };
 
-
   useEffect(() => {
     GetAllClients();
   }, []);
@@ -190,7 +218,10 @@ export default function Tasks() {
                 >
                   Select an option
                 </button>
-                <ul className="dropdown-menu dropdown-scroll" aria-labelledby="formDropdown1">
+                <ul
+                  className="dropdown-menu dropdown-scroll"
+                  aria-labelledby="formDropdown1"
+                >
                   {optionsCode.map((option, index) => (
                     <li key={index}>
                       <a
@@ -417,9 +448,6 @@ export default function Tasks() {
               />
             </div>
 
-
-
-
             <label htmlFor="status" className="form-label">
               Status
             </label>
@@ -476,10 +504,10 @@ export default function Tasks() {
       </div>
       <style jsx>
         {`
-        .dropdown-menu {
-          max-height: 200px;
-          overflow-y: auto;
-        }
+          .dropdown-menu {
+            max-height: 200px;
+            overflow-y: auto;
+          }
         `}
       </style>
     </>

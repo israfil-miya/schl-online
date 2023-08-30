@@ -311,15 +311,14 @@ export default function Browse() {
 
           <button
             onClick={filteredData}
-            className="btn ms-5 btn-outline-primary"
+            className="btn ms-4 btn-sm btn-outline-primary"
           >
-            Filter
+            Search
           </button>
         </div>
       </div>
 
-      <div class="row; mt-5">
-        <div class="col-md-8">
+
           <table
             style={{ overflow: "hidden" }}
             className="table table-bordered py-3 table-hover"
@@ -462,8 +461,6 @@ export default function Browse() {
                 ))}
             </tbody>
           </table>
-        </div>
-      </div>
 
       <div
         className="modal fade"

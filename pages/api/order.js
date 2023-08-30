@@ -154,6 +154,8 @@ async function handleGetOrdersByFilter(req, res) {
     else {
       const orders = await Order.find(query).lean();
 
+      console.log(orders)
+
       res.status(200).json(orders);
     }
   } catch (e) {
