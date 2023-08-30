@@ -54,7 +54,7 @@ export default function Navbar({ navFor }) {
               </Link>
             </li>
 
-            {(session.user.role != "user" || session.user.role != "manager") ? (
+            {(session.user.role == "admin" || session.user.role == "super") ? (
               <li className="nav-item">
                 <Link
                   className={navFor == "admin" ? "nav-link active" : "nav-link"}

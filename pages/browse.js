@@ -329,6 +329,7 @@ export default function Browse() {
                 <th>#</th>
                 <th>Added Time</th>
                 <th>Client Code</th>
+                {(session.user.role == "admin" || session.user.role == "super") ? <th>Client Name</th> : <></>}
                 <th>Folder</th>
                 <th>Quantity</th>
                 <th>Download Date</th>
@@ -339,7 +340,7 @@ export default function Browse() {
                 <th>QC1</th>
                 <th>Comment</th>
                 <th>Status</th>
-                {session.user.role == "admin" ? <th>Manage</th> : <></>}
+                {(session.user.role != "user") ? <th>Manage</th> : <></>}
               </tr>
             </thead>
             <tbody>
@@ -353,6 +354,7 @@ export default function Browse() {
                       {order.time_now}
                     </td>
                     <td className="text-break">{order.client_code}</td>
+                    <td className="text-break">{order.client_name}</td>
                     <td className="text-break">{order.folder}</td>
                     <td className="text-break">{order.quantity}</td>
                     <td className="text-break">{order.download_date}</td>
@@ -367,7 +369,7 @@ export default function Browse() {
                     <td className="text-break">{order.qc1}</td>
                     <td className="text-break">{order.comment}</td>
                     <td className="text-break">{order.status}</td>
-                    {session.user.role == "admin" ? (
+                    {(session.user.role == "admin" || session.user.role == "super") ? (
                       // Default state
 
                       <td
@@ -413,11 +415,10 @@ export default function Browse() {
                               ? () => RedoOrder(order)
                               : () => FinishOrder(order)
                           }
-                          className={`btn btn-sm ${
-                            order.status === "Finished"
-                              ? "btn-outline-warning"
-                              : "btn-outline-success"
-                          }`}
+                          className={`btn btn-sm ${order.status === "Finished"
+                            ? "btn-outline-warning"
+                            : "btn-outline-success"
+                            }`}
                         >
                           {order.status === "Finished" ? "Redo" : "Finish"}
                         </button>
@@ -425,6 +426,38 @@ export default function Browse() {
                     ) : (
                       <></>
                     )}
+
+
+
+                    {(session.user.role == "manager") ? (
+                      // Default state
+
+                      <td
+                        className="align-middle"
+                        style={{ textAlign: "center" }}
+                      >
+                        <button
+                          onClick={() =>
+                            setManageData({
+                              _id: order._id,
+                              production: order.production,
+                              qc1: order.qc1,
+                              comment: order.comment,
+                            })
+                          }
+                          className="btn btn-sm btn-outline-primary me-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editModal0"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    ) : (
+                      <></>
+                    )}
+
+
+
                   </tr>
                 ))}
             </tbody>
@@ -747,8 +780,110 @@ export default function Browse() {
         </div>
       </div>
 
+
+
+
+      <div
+        className="modal fade"
+        id="editModal0"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Edit task
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="production" className="form-label">
+                  Production
+                </label>
+                <input
+                  value={manageData.production}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      production: e.target.value,
+                    }))
+                  }
+                  type="string"
+                  className="form-control"
+                  id="production"
+                  placeholder="Production"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="qc1" className="form-label">
+                  QC1
+                </label>
+                <input
+                  value={manageData.qc1}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      qc1: e.target.value,
+                    }))
+                  }
+                  type="number"
+                  className="form-control"
+                  id="qc1"
+                  placeholder="QC1"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="comments" className="form-label">
+                  Comment
+                </label>
+                <input
+                  value={manageData.comment}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      comment: e.target.value,
+                    }))
+                  }
+                  className="form-control"
+                  id="comment"
+                  rows="3"
+                  placeholder="Comment"
+                />
+              </div>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                onClick={editOrder}
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
       <style jsx>
-      {`
+        {`
           .table {
             font-size: 15px
           }
