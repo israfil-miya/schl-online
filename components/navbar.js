@@ -54,7 +54,7 @@ export default function Navbar({ navFor }) {
               </Link>
             </li>
 
-            {session.user.role == "admin" ? (
+            {(session.user.role != "user" || session.user.role != "manager") ? (
               <li className="nav-item">
                 <Link
                   className={navFor == "admin" ? "nav-link active" : "nav-link"}
@@ -77,7 +77,7 @@ export default function Navbar({ navFor }) {
                 aria-expanded="false"
               >
                 <em>
-                  {session.user?.name}{" "}
+                  Welcome {session.user?.name}{" "}
                   <span className="text-body-secondary">
                     ({session.user?.role})
                   </span>
@@ -86,8 +86,8 @@ export default function Navbar({ navFor }) {
               <ul className="dropdown-menu list-unstyled">
                 <div className="text-center">
                   <span className="fw-medium p-1">
-                    You are{" "}
-                    {session.user.role == "admin" ? "an Admin" : "a User"}
+                    Interacting as{" "}
+                    {session.user.role}
                   </span>
                   <button
                     onClick={signOutHandle}

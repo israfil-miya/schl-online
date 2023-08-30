@@ -10,6 +10,12 @@ export default function Users() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
+  const [editUserData, setEditUserData] = useState({
+    _id: "",
+    name: "",
+    password: "",
+    role: "",
+  })
   const [manageData, setManageData] = useState({
     _id: "",
     name: "",
@@ -50,6 +56,17 @@ export default function Users() {
   const AddNewUser = async (e) => {
     e.preventDefault();
 
+
+
+
+    if (session.user.role == "admin" && (role == "super" || role == "admin")) {
+
+      toast.error("You don't have the permission")
+      return;
+    }
+
+
+
     const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
       method: "POST",
       body: JSON.stringify({ name, password, role }),
@@ -75,12 +92,17 @@ export default function Users() {
   };
 
   async function deleteUser(deleteUserData) {
-    if (deleteUserData._id == session.user._id) {
-      toast("You can't just delete yourself", {
-        icon: "😂",
-      });
+
+
+
+    if ((session.user.role == "admin" && (deleteUserData.role == "super" || deleteUserData.role == "admin")) ||
+      (session.user._id == deleteUserData._id )) {
+
+      toast.error("You don't have the permission")
       return;
     }
+
+
 
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/user`;
     const options = {
@@ -110,10 +132,13 @@ export default function Users() {
   }
 
   async function editUser() {
-    if (session.user.role == "admin" && session.user.role != manageData.role) {
-      toast("You can't just promote/demote yourself", {
-        icon: "😂",
-      });
+
+
+
+    if ((session.user.role == "admin" && (manageData.role == "super" || manageData.role == "admin" || editUserData.role == "super" || editUserData.role == "admin")) ||
+      (session.user._id == editUserData._id && session.user.role != manageData.role)) {
+
+      toast.error("You don't have the permission")
       return;
     }
 
@@ -192,6 +217,8 @@ export default function Users() {
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
+                <option value="super">Super</option>
+                <option value="manager">Manager</option>
               </select>
             </div>
 
@@ -223,14 +250,20 @@ export default function Users() {
                       <td>{user.role}</td>
                       <td>
                         <button
-                          onClick={() =>
+                          onClick={() => {
                             setManageData({
                               _id: user._id,
                               name: user.name,
                               password: user.password,
                               role: user.role,
                             })
-                          }
+                            setEditUserData({
+                              _id: user._id,
+                              name: user.name,
+                              password: user.password,
+                              role: user.role,
+                            })
+                          }}
                           data-bs-toggle="modal"
                           data-bs-target="#editModal"
                           type="button"
@@ -325,6 +358,8 @@ export default function Users() {
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
+                    <option value="super">Super</option>
+                    <option value="manager">Manager</option>
                   </select>
                 </div>
               </div>

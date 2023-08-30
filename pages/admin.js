@@ -89,10 +89,10 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
 
   // code for redirect if not logged in
-  if (!session || session?.user?.role != "admin") {
+  if (!session || session.user.role == "user" || session.user.role == "manager") {
     return {
       redirect: {
-        destination: "/?error=You need Admin role to access the page",
+        destination: "/?error=You need Admin/Super role to access the page",
         permanent: true,
       },
     };
