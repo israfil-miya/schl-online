@@ -55,12 +55,96 @@ export default function Browse() {
 
 
   return (
-  <>
-<Navbar navFor="dashboard" />
+    <>
+      <Navbar navFor="dashboard" />
+
+      <div className="container my-5">
+        <div className="waiting-list">
+          <h5 className="py-3">Waiting for approval</h5>
 
 
+          <table
+            style={{ overflow: "hidden" }}
+            className="table table-bordered py-3 table-hover"
+          >
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Request Type</th>
+                <th>Resust Status</th>
+                <th>Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Delete</td>
+                <td>Not approved</td>
+                <td>
+                  <button>
+                    View
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Delete</td>
+                <td>Not approved</td>
+                <td>
+                  <button>
+                    View
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Delete</td>
+                <td>Approved</td>
+                <td>
+                  <button>
+                    View
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Delete</td>
+                <td>Not approved</td>
+                <td>
+                  <button>
+                    View
+                  </button>
+                </td>
+              </tr>
 
+              <tr>
+                <td>5</td>
+                <td>Delete</td>
+                <td>Approved</td>
+                <td>
+                  <button>
+                    View
+                  </button>
+                </td>
 
+              </tr>
 
-  </>)
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px
+          }
+
+          th,
+          td {
+            padding: 3px 6px;
+          }
+        `}
+      </style>
+    </>)
 }
