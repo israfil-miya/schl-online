@@ -66,6 +66,18 @@ export default function Navbar({ navFor }) {
             ) : (
               <></>
             )}
+            {session.user.role == "super" ? (
+              <li className="nav-item">
+                <Link
+                  className={navFor == "dashboard" ? "nav-link active" : "nav-link"}
+                  href="/dashboard"
+                >
+                  Dashboard
+                </Link>
+              </li>
+            ) : (
+              <></>
+            )}
           </ul>
           <div className="navbar-text d-flex me-5 pe-5">
             <div class="btn-group dropdown-center">

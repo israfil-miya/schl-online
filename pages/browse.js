@@ -319,148 +319,150 @@ export default function Browse() {
       </div>
 
 
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
-          >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Added Time</th>
-                <th>Client Code</th>
-                {(session.user.role == "admin" || session.user.role == "super") ? <th>Client Name</th> : <></>}
-                <th>Folder</th>
-                <th>Quantity</th>
-                <th>Download Date</th>
-                <th>Delivery Time</th>
-                <th>Task</th>
-                <th>E.T.</th>
-                <th>Production</th>
-                <th>QC1</th>
-                <th>Comment</th>
-                <th>Status</th>
-                {(session.user.role != "user") ? <th>Manage</th> : <></>}
+      <table
+        style={{ overflow: "hidden" }}
+        className="table table-bordered py-3 table-hover"
+      >
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Added Time</th>
+            <th>Client Code</th>
+            {(session.user.role == "admin" || session.user.role == "super") ? <th>Client Name</th> : <></>}
+            <th>Folder</th>
+            <th>Quantity</th>
+            <th>Download Date</th>
+            <th>Delivery Time</th>
+            <th>Task</th>
+            <th>E.T.</th>
+            <th>Production</th>
+            <th>QC1</th>
+            <th>Comment</th>
+            <th>Status</th>
+            {(session.user.role != "user") ? <th>Manage</th> : <></>}
+          </tr>
+        </thead>
+        <tbody>
+          {orders &&
+            orders.map((order, index) => (
+              <tr key={order._id}>
+                <td>{index + 1}</td>
+                <td className="text-break">
+                  {order.date_today}
+                  <span className="text-body-secondary"> | </span>
+                  {order.time_now}
+                </td>
+                <td className="text-break">{order.client_code}</td>
+
+                {(session.user.role == "admin" || session.user.role == "super") ? <td className="text-break">{order.client_name}</td> : <></>}
+
+                <td className="text-break">{order.folder}</td>
+                <td className="text-break">{order.quantity}</td>
+                <td className="text-break">{order.download_date}</td>
+                <td className="text-break">
+                  {order.delivery_date}
+                  <span className="text-body-secondary"> | </span>
+                  {order.delivery_bd_time}
+                </td>
+                <td className="text-break">{order.task}</td>
+                <td className="text-break">{order.et}</td>
+                <td className="text-break">{order.production}</td>
+                <td className="text-break">{order.qc1}</td>
+                <td className="text-break">{order.comment}</td>
+                <td className="text-break">{order.status}</td>
+                {(session.user.role == "admin" || session.user.role == "super") ? (
+                  // Default state
+
+                  <td
+                    className="align-middle"
+                    style={{ textAlign: "center" }}
+                  >
+                    <button
+                      onClick={() =>
+                        setManageData({
+                          _id: order._id,
+                          client_code: order.client_code,
+                          client_name: order.client_name,
+                          folder: order.folder,
+                          quantity: order.quantity,
+                          download_date: order.download_date,
+                          delivery_date: order.delivery_date,
+                          delivery_bd_time: order.delivery_bd_time,
+                          task: order.task,
+                          et: order.et,
+                          production: order.production,
+                          qc1: order.qc1,
+                          comment: order.comment,
+                          status: order.status,
+                        })
+                      }
+                      className="btn btn-sm btn-outline-primary me-1"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editModal"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setManageData({ _id: order._id })}
+                      className="btn btn-sm btn-outline-danger me-1"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={
+                        order.status === "Finished"
+                          ? () => RedoOrder(order)
+                          : () => FinishOrder(order)
+                      }
+                      className={`btn btn-sm ${order.status === "Finished"
+                        ? "btn-outline-warning"
+                        : "btn-outline-success"
+                        }`}
+                    >
+                      {order.status === "Finished" ? "Redo" : "Finish"}
+                    </button>
+                  </td>
+                ) : (
+                  <></>
+                )}
+
+
+
+                {(session.user.role == "manager") ? (
+                  // Default state
+
+                  <td
+                    className="align-middle"
+                    style={{ textAlign: "center" }}
+                  >
+                    <button
+                      onClick={() =>
+                        setManageData({
+                          _id: order._id,
+                          production: order.production,
+                          qc1: order.qc1,
+                          comment: order.comment,
+                        })
+                      }
+                      className="btn btn-sm btn-outline-primary me-1"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editModal0"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                ) : (
+                  <></>
+                )}
+
+
+
               </tr>
-            </thead>
-            <tbody>
-              {orders &&
-                orders.map((order, index) => (
-                  <tr key={order._id}>
-                    <td>{index + 1}</td>
-                    <td className="text-break">
-                      {order.date_today}
-                      <span className="text-body-secondary"> | </span>
-                      {order.time_now}
-                    </td>
-                    <td className="text-break">{order.client_code}</td>
-                    <td className="text-break">{order.client_name}</td>
-                    <td className="text-break">{order.folder}</td>
-                    <td className="text-break">{order.quantity}</td>
-                    <td className="text-break">{order.download_date}</td>
-                    <td className="text-break">
-                      {order.delivery_date}
-                      <span className="text-body-secondary"> | </span>
-                      {order.delivery_bd_time}
-                    </td>
-                    <td className="text-break">{order.task}</td>
-                    <td className="text-break">{order.et}</td>
-                    <td className="text-break">{order.production}</td>
-                    <td className="text-break">{order.qc1}</td>
-                    <td className="text-break">{order.comment}</td>
-                    <td className="text-break">{order.status}</td>
-                    {(session.user.role == "admin" || session.user.role == "super") ? (
-                      // Default state
-
-                      <td
-                        className="align-middle"
-                        style={{ textAlign: "center" }}
-                      >
-                        <button
-                          onClick={() =>
-                            setManageData({
-                              _id: order._id,
-                              client_code: order.client_code,
-                              client_name: order.client_name,
-                              folder: order.folder,
-                              quantity: order.quantity,
-                              download_date: order.download_date,
-                              delivery_date: order.delivery_date,
-                              delivery_bd_time: order.delivery_bd_time,
-                              task: order.task,
-                              et: order.et,
-                              production: order.production,
-                              qc1: order.qc1,
-                              comment: order.comment,
-                              status: order.status,
-                            })
-                          }
-                          className="btn btn-sm btn-outline-primary me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#editModal"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setManageData({ _id: order._id })}
-                          className="btn btn-sm btn-outline-danger me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#deleteModal"
-                        >
-                          Delete
-                        </button>
-                        <button
-                          onClick={
-                            order.status === "Finished"
-                              ? () => RedoOrder(order)
-                              : () => FinishOrder(order)
-                          }
-                          className={`btn btn-sm ${order.status === "Finished"
-                            ? "btn-outline-warning"
-                            : "btn-outline-success"
-                            }`}
-                        >
-                          {order.status === "Finished" ? "Redo" : "Finish"}
-                        </button>
-                      </td>
-                    ) : (
-                      <></>
-                    )}
-
-
-
-                    {(session.user.role == "manager") ? (
-                      // Default state
-
-                      <td
-                        className="align-middle"
-                        style={{ textAlign: "center" }}
-                      >
-                        <button
-                          onClick={() =>
-                            setManageData({
-                              _id: order._id,
-                              production: order.production,
-                              qc1: order.qc1,
-                              comment: order.comment,
-                            })
-                          }
-                          className="btn btn-sm btn-outline-primary me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#editModal0"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    ) : (
-                      <></>
-                    )}
-
-
-
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+            ))}
+        </tbody>
+      </table>
 
       <div
         className="modal fade"

@@ -116,12 +116,38 @@ async function handleGetAllOrder(req, res) {
   try {
     const orders = await Order.find().lean();
 
-    res.status(200).json(orders);
+    // Sorting orders based on specified criteria
+    const sortedOrders = orders.sort((a, b) => {
+      // Helper function to determine order priority based on status
+      const getOrderPriority = (order) => {
+        if (order.status === "Correction" || order.status === "Test") {
+          return 0; // Orders with status "Correction" or "Test"
+        } else if (order.status !== "Finished") {
+          return 1; // Non-finished tasks
+        } else {
+          return 2; // Finished orders
+        }
+      };
+
+      const priorityA = getOrderPriority(a);
+      const priorityB = getOrderPriority(b);
+
+      // If priorities are equal, maintain original order
+      if (priorityA === priorityB) {
+        return 0;
+      }
+
+      // Sort in ascending order of priority
+      return priorityA - priorityB;
+    });
+
+    res.status(200).json(sortedOrders);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
+
 
 async function handleGetOrdersByFilter(req, res) {
   try {
