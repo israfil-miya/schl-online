@@ -56,28 +56,28 @@ export default function Users() {
   const AddNewUser = async (e) => {
     e.preventDefault();
 
-
-
-
     if (session.user.role == "admin" && (role == "super" || role == "admin")) {
 
       toast.error("You don't have the permission")
       return;
     }
 
-
-
-    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
+    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/approval", {
       method: "POST",
-      body: JSON.stringify({ name, password, role }),
+      body: JSON.stringify({ 
+        req_type: "User Create",
+        req_by: session.user.name,
+        name,
+        password,
+        role
+       }),
       headers: {
         "Content-Type": "application/json",
       },
     });
     const result = await res.json();
     if (!result.error) {
-      toast.success("Added new user");
-      await GetAllUsers();
+      toast.success("Request sent for approval");
     }
 
     // console.log(result);

@@ -9,14 +9,8 @@ import Navbar from "../components/navbar";
 export default function Browse() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [orders, setOrders] = useState(null);
-  const [fromTime, setFromTime] = useState("");
-  const [toTime, setToTime] = useState("");
-  const [foldetFilter, setFolderFilter] = useState("");
-  const [clientFilter, setClientFilter] = useState("");
-  const [taskFilter, setTaskFilter] = useState("");
-  const [isFiltered, setIsFiltered] = useState(0);
-
+  const [orderInfo, setOrderInfo] = useState(null)
+  const [approvals, setApprovals] = useState([]);
 
   async function fetchOrderData(url, options) {
     const res = await fetch(url, options);
@@ -26,12 +20,36 @@ export default function Browse() {
 
   async function GetAllOrdersNonApproved() {
     try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
       const options = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          getallorders: true,
+          getallordersnonapproved: true,
+        },
+      };
+
+      const ordersList = await fetchOrderData(url, options);
+
+      if (!ordersList.error) {
+        setApprovals(ordersList);
+      } else {
+        toast.error("Unable to retrieve waiting list");
+      }
+    } catch (error) {
+      console.error("Error fetching waiting list:", error);
+      toast.error("Error retrieving waiting list");
+    }
+  }
+
+  async function GetOrderInfoById(orderId) {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getorderinfobyid: true,
         },
       };
 
@@ -76,58 +94,22 @@ export default function Browse() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Delete</td>
-                <td>Not approved</td>
-                <td>
-                  <button>
-                    View
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Delete</td>
-                <td>Not approved</td>
-                <td>
-                  <button>
-                    View
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Delete</td>
-                <td>Approved</td>
-                <td>
-                  <button>
-                    View
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td>Delete</td>
-                <td>Not approved</td>
-                <td>
-                  <button>
-                    View
-                  </button>
-                </td>
-              </tr>
 
-              <tr>
-                <td>5</td>
-                <td>Delete</td>
-                <td>Approved</td>
-                <td>
-                  <button>
-                    View
-                  </button>
-                </td>
 
-              </tr>
+              {approvals &&
+                approvals.map((approveReq, index) => (
+                  <tr key={approveReq._id}>
+                    <td>{index + 1}</td>
+                    <td>{approveReq.req_type}</td>
+                    <td>{approveReq.req_approved ? "Approved" : "Not approved"}</td>
+                    <td>
+                      <button className="btn btn-sm btn-outline-primary">
+                        Approve
+                      </button>
+                    </td>
+                  </tr>
+
+                ))}
 
             </tbody>
           </table>

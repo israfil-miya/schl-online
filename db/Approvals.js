@@ -9,9 +9,24 @@ const ApprovalSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    id: {
+    req_by: {
         type: String,
     },
+
+
+
+    name: {
+        type: String,
+    },
+    password: {
+        type: String,
+    },
+    role: {
+        type: String,
+    },
+
+
+
     client_code: {
         type: String,
     },
@@ -24,7 +39,6 @@ const ApprovalSchema = new mongoose.Schema({
     quantity: {
         type: Number,
     },
-
     download_date: {
         type: String,
     },
@@ -52,6 +66,8 @@ const ApprovalSchema = new mongoose.Schema({
     status: {
         type: String,
     },
+
+
 });
 
 module.exports = mongoose.models.Approval || mongoose.model("Approval", ApprovalSchema);
