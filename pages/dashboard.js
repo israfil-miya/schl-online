@@ -1,132 +1,108 @@
-import React from "react";
-import { getSession, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
-
 import Navbar from "../components/navbar";
+import { useEffect, useState } from "react";
+import { getSession, useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
 
-export default function Browse() {
-  const { data: session } = useSession();
+import Statistics from "../components/statistics";
+import Approvals from "../components/approvals";
+import Users from "../components/users";
+
+import Link from "next/link";
+import { useRouter } from "next/router";
+import toast from "react-hot-toast";
+
+export default function Admin() {
+  let [component, setComponent] = useState("approvals");
   const router = useRouter();
-  const [orderInfo, setOrderInfo] = useState(null)
-  const [approvals, setApprovals] = useState([]);
-
-  async function fetchOrderData(url, options) {
-    const res = await fetch(url, options);
-    const data = await res.json();
-    return data;
-  }
-
-  async function GetAllOrdersNonApproved() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getallordersnonapproved: true,
-        },
-      };
-
-      const ordersList = await fetchOrderData(url, options);
-
-      if (!ordersList.error) {
-        setApprovals(ordersList);
-      } else {
-        toast.error("Unable to retrieve waiting list");
-      }
-    } catch (error) {
-      console.error("Error fetching waiting list:", error);
-      toast.error("Error retrieving waiting list");
-    }
-  }
-
-  async function GetOrderInfoById(orderId) {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getorderinfobyid: true,
-        },
-      };
-
-      const ordersList = await fetchOrderData(url, options);
-
-      if (!ordersList.error) {
-        setOrders(ordersList);
-      } else {
-        toast.error("Unable to retrieve orders list");
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Error retrieving orders");
-    }
-  }
-
+  let { error, success } = router.query;
 
   useEffect(() => {
-    GetAllOrdersNonApproved();
-  }, []);
-
+    if (error) {
+      toast.error(error, {
+        toastId: "error",
+      });
+      error = undefined;
+      router.replace("/admin");
+    }
+    if (success) {
+      toast.success(success, {
+        toastId: "success",
+      });
+      success = undefined;
+      router.replace("/admin");
+    }
+  }, [error, success, router, component]);
 
   return (
     <>
       <Navbar navFor="dashboard" />
-
-      <div className="container my-5">
-        <div className="waiting-list">
-          <h5 className="py-3">Waiting for approval</h5>
-
-
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
+      <ul className="nav nav-tabs nav-justified mt-3" role="tablist">
+        {/*         
+        <li className="nav-item" role="presentation">
+          <Link
+            className={component == "users" ? "nav-link active" : "nav-link"}
+            href=""
+            onClick={() => setComponent("users")}
+            role="tab"
           >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Request Type</th>
-                <th>Resust Status</th>
-                <th>Manage</th>
-              </tr>
-            </thead>
-            <tbody>
+            Users
+          </Link>
+        </li> */}
 
+        <li className="nav-item" role="presentation">
+          <Link
+            className={
+              component == "approvals" ? "nav-link active" : "nav-link"
+            }
+            href=""
+            onClick={() => setComponent("approvals")}
+            role="tab"
+          >
+            Approvals
+          </Link>
+        </li>
 
-              {approvals &&
-                approvals.map((approveReq, index) => (
-                  <tr key={approveReq._id}>
-                    <td>{index + 1}</td>
-                    <td>{approveReq.req_type}</td>
-                    <td>{approveReq.req_approved ? "Approved" : "Not approved"}</td>
-                    <td>
-                      <button className="btn btn-sm btn-outline-primary">
-                        Approve
-                      </button>
-                    </td>
-                  </tr>
+        <li className="nav-item" role="presentation">
+          <Link
+            className={
+              component == "statistics" ? "nav-link active" : "nav-link"
+            }
+            href=""
+            onClick={() => setComponent("statistics")}
+            role="tab"
+          >
+            Statistics
+          </Link>
+        </li>
+      </ul>
+      {/* {component == "users" && <Users />} */}
+      {component == "approvals" && <Approvals />}
+      {component == "statistics" && <Statistics />}
 
-                ))}
-
-            </tbody>
-          </table>
-
-        </div>
-      </div>
       <style jsx>
         {`
-          .table {
-            font-size: 15px
-          }
-
-          th,
-          td {
-            padding: 3px 6px;
+          .nav {
+            color: white;
           }
         `}
       </style>
-    </>)
+    </>
+  );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // code for redirect if not logged in
+  if (!session || session.user.role != "super") {
+    return {
+      redirect: {
+        destination: "/?error=You need Super role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }

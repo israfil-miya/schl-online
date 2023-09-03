@@ -15,7 +15,7 @@ export default function Users() {
     name: "",
     password: "",
     role: "",
-  })
+  });
   const [manageData, setManageData] = useState({
     _id: "",
     name: "",
@@ -57,27 +57,49 @@ export default function Users() {
     e.preventDefault();
 
     if (session.user.role == "admin" && (role == "super" || role == "admin")) {
-
-      toast.error("You don't have the permission")
+      toast.error("You don't have the permission");
       return;
     }
+    let result;
 
-    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/approval", {
-      method: "POST",
-      body: JSON.stringify({ 
-        req_type: "User Create",
-        req_by: session.user.name,
-        name,
-        password,
-        role
-       }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const result = await res.json();
-    if (!result.error) {
-      toast.success("Request sent for approval");
+    if (session.user.role == "super") {
+      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          password,
+          role,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      result = await res.json();
+      if (!result.error) {
+        await GetAllUsers();
+        toast.success("Created new user");
+      }
+    } else {
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            req_type: "User Create",
+            req_by: session.user.name,
+            name,
+            password,
+            role,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      result = await res.json();
+      if (!result.error) {
+        toast.success("Request sent for approval");
+      }
     }
 
     // console.log(result);
@@ -92,53 +114,69 @@ export default function Users() {
   };
 
   async function deleteUser(deleteUserData) {
-
-
-
-    if ((session.user.role == "admin" && (deleteUserData.role == "super" || deleteUserData.role == "admin")) ||
-      (session.user._id == deleteUserData._id )) {
-
-      toast.error("You don't have the permission")
+    if (
+      (session.user.role == "admin" &&
+        (deleteUserData.role == "super" || deleteUserData.role == "admin")) ||
+      session.user._id == deleteUserData._id
+    ) {
+      toast.error("You don't have the permission");
       return;
     }
 
+    let result;
 
-
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/user`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        deleteUser: true,
-        id: deleteUserData._id,
-      },
-    };
-
-    try {
-      const resData = await fetchUserData(url, options);
-
-      if (!resData.error) {
-        toast.success("Deleted the user data", {
-          duration: 3500,
-        });
+    if (session.user.role == "super") {
+      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          deleteUser: true,
+          id: deleteUserData._id,
+        },
+      });
+      result = await res.json();
+      if (!result.error) {
         await GetAllUsers();
-      } else {
-        toast.error("Unable to delete user");
+        toast.success("Deleted the user");
       }
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Error deleting user");
+    } else {
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            req_type: "User Delete",
+            req_by: session.user.name,
+            id: deleteUserData._id,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      result = await res.json();
+      if (!result.error) {
+        toast.success("Request sent for approval");
+      }
+    }
+    // console.log(result);
+
+    if (result.error) {
+      router.replace("/admin?error=" + result.message);
     }
   }
 
   async function editUser() {
-
-
-
-    if ((session.user.role == "admin" && (manageData.role == "super" || manageData.role == "admin" || editUserData.role == "super" || editUserData.role == "admin")) ||
-      (session.user._id == editUserData._id && session.user.role != manageData.role)) {
-
-      toast.error("You don't have the permission")
+    if (
+      (session.user.role == "admin" &&
+        (manageData.role == "super" ||
+          manageData.role == "admin" ||
+          editUserData.role == "super" ||
+          editUserData.role == "admin")) ||
+      (session.user._id == editUserData._id &&
+        session.user.role != manageData.role)
+    ) {
+      toast.error("You don't have the permission");
       return;
     }
 
@@ -256,13 +294,13 @@ export default function Users() {
                               name: user.name,
                               password: user.password,
                               role: user.role,
-                            })
+                            });
                             setEditUserData({
                               _id: user._id,
                               name: user.name,
                               password: user.password,
                               role: user.role,
-                            })
+                            });
                           }}
                           data-bs-toggle="modal"
                           data-bs-target="#editModal"

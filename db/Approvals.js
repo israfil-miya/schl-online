@@ -5,13 +5,18 @@ const ApprovalSchema = new mongoose.Schema({
     req_type: {
         type: String,
     },
-    req_approved: {
-        type: Boolean,
-        default: false
-    },
     req_by: {
         type: String,
     },
+    checked_by: {
+        type: String,
+        default: "None"
+    },
+    is_rejected: {
+        type: String,
+        default: false
+    },
+    
 
 
 
@@ -67,7 +72,8 @@ const ApprovalSchema = new mongoose.Schema({
         type: String,
     },
 
-
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.models.Approval || mongoose.model("Approval", ApprovalSchema);

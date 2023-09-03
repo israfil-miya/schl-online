@@ -167,31 +167,42 @@ export default function Browse() {
   };
 
   async function deleteOrder() {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        deleteorder: true,
-        id: manageData._id,
-      },
-    };
+    let result;
 
-    try {
-      const resData = await fetchOrderData(url, options);
-
-      if (!resData.error) {
-        toast.success("Deleted the order data", {
-          duration: 3500,
-        });
+    if (session.user.role == "super") {
+      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          deleteorder: true,
+          id: manageData._id,
+        },
+      });
+      result = await res.json();
+      if (!result.error) {
         if (!isFiltered) await GetAllOrders();
         else await filteredData();
-      } else {
-        toast.error("Unable to delete order");
+        toast.success("Deleted the task");
       }
-    } catch (error) {
-      console.error("Error deleting order:", error);
-      toast.error("Error deleting order");
+    } else {
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            req_type: "Task Delete",
+            req_by: session.user.name,
+            id: manageData._id,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      result = await res.json();
+      if (!result.error) {
+        toast.success("Request sent for approval");
+      }
     }
   }
 
@@ -318,7 +329,6 @@ export default function Browse() {
         </div>
       </div>
 
-
       <table
         style={{ overflow: "hidden" }}
         className="table table-bordered py-3 table-hover"
@@ -328,7 +338,11 @@ export default function Browse() {
             <th>#</th>
             <th>Added Time</th>
             <th>Client Code</th>
-            {(session.user.role == "admin" || session.user.role == "super") ? <th>Client Name</th> : <></>}
+            {session.user.role == "admin" || session.user.role == "super" ? (
+              <th>Client Name</th>
+            ) : (
+              <></>
+            )}
             <th>Folder</th>
             <th>Quantity</th>
             <th>Download Date</th>
@@ -339,7 +353,7 @@ export default function Browse() {
             <th>QC1</th>
             <th>Comment</th>
             <th>Status</th>
-            {(session.user.role != "user") ? <th>Manage</th> : <></>}
+            {session.user.role != "user" ? <th>Manage</th> : <></>}
           </tr>
         </thead>
         <tbody>
@@ -354,7 +368,12 @@ export default function Browse() {
                 </td>
                 <td className="text-break">{order.client_code}</td>
 
-                {(session.user.role == "admin" || session.user.role == "super") ? <td className="text-break">{order.client_name}</td> : <></>}
+                {session.user.role == "admin" ||
+                session.user.role == "super" ? (
+                  <td className="text-break">{order.client_name}</td>
+                ) : (
+                  <></>
+                )}
 
                 <td className="text-break">{order.folder}</td>
                 <td className="text-break">{order.quantity}</td>
@@ -370,13 +389,11 @@ export default function Browse() {
                 <td className="text-break">{order.qc1}</td>
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
-                {(session.user.role == "admin" || session.user.role == "super") ? (
+                {session.user.role == "admin" ||
+                session.user.role == "super" ? (
                   // Default state
 
-                  <td
-                    className="align-middle"
-                    style={{ textAlign: "center" }}
-                  >
+                  <td className="align-middle" style={{ textAlign: "center" }}>
                     <button
                       onClick={() =>
                         setManageData({
@@ -416,10 +433,11 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${order.status === "Finished"
-                        ? "btn-outline-warning"
-                        : "btn-outline-success"
-                        }`}
+                      className={`btn btn-sm ${
+                        order.status === "Finished"
+                          ? "btn-outline-warning"
+                          : "btn-outline-success"
+                      }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>
@@ -428,15 +446,10 @@ export default function Browse() {
                   <></>
                 )}
 
-
-
-                {(session.user.role == "manager") ? (
+                {session.user.role == "manager" ? (
                   // Default state
 
-                  <td
-                    className="align-middle"
-                    style={{ textAlign: "center" }}
-                  >
+                  <td className="align-middle" style={{ textAlign: "center" }}>
                     <button
                       onClick={() =>
                         setManageData({
@@ -456,9 +469,6 @@ export default function Browse() {
                 ) : (
                   <></>
                 )}
-
-
-
               </tr>
             ))}
         </tbody>
@@ -746,7 +756,7 @@ export default function Browse() {
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Delete Order Confirmation
+                Delete Task Confirmation
               </h1>
               <button
                 type="button"
@@ -756,7 +766,7 @@ export default function Browse() {
               ></button>
             </div>
             <div className="modal-body">
-              <p>Do you really want to delete this order?</p>
+              <p>Do you really want to delete this task?</p>
             </div>
             <div className="modal-footer p-1">
               <button
@@ -778,9 +788,6 @@ export default function Browse() {
           </div>
         </div>
       </div>
-
-
-
 
       <div
         className="modal fade"
@@ -877,14 +884,10 @@ export default function Browse() {
         </div>
       </div>
 
-
-
-
-
       <style jsx>
         {`
           .table {
-            font-size: 15px
+            font-size: 15px;
           }
 
           th,

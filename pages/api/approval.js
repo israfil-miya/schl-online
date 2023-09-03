@@ -1,4 +1,4 @@
-import Approval from "../../db/Approvals"
+import Approval from "../../db/Approvals";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -8,35 +8,14 @@ function sendError(res, statusCode, message) {
   });
 }
 
-async function handleSignIn(req, res) {
-  const { name, password } = req.headers;
-
-  try {
-    const userData = await User.findOne({
-      name: name,
-      password: password,
-    });
-
-    if (userData) {
-      res.status(200).json(userData);
-    } else {
-      sendError(res, 400, "No account found");
-    }
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
 async function handleNewReq(req, res) {
   const data = req.body;
 
   try {
-    const resData = await Approval.create(data, {
-      new: true,
-    });
+    const resData = await Approval.create(data);
 
     if (resData) {
+      console.log(resData);
       res.status(200).json(resData);
     } else {
       sendError(res, 400, "Unable to send request");
@@ -47,11 +26,47 @@ async function handleNewReq(req, res) {
   }
 }
 
+async function handleResponse(req, res) {
+  const data = req.body;
 
+  console.log("Reached at least here")
 
-async function handleGetAllOrdersNonApproved(req, res) {
+  if (data.response == "reject") {
+    const resData = await Approval.findByIdAndUpdate(data._id, {
+      checked_by: data.checked_by,
+      is_rejected: true,
+    });
+
+    if (resData) {
+      console.log(resData);
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "Unable to send request");
+    }
+  }
+
+  // try {
+  //   const resData = await Approval.create(data);
+
+  //   if (resData) {
+  //     console.log(resData)
+  //     res.status(200).json(resData);
+  //   } else {
+  //     sendError(res, 400, "Unable to send request");
+  //   }
+  // } catch (e) {
+  //   console.error(e);
+  //   sendError(res, 500, "An error occurred");
+  // }
+}
+
+async function handleGetAllOrdersForApproval(req, res) {
   try {
-    const resData = await Approval.find({req_approved: false});
+    const resData = await Approval.find({
+      req_type: {
+        $regex: /^Task/i, // (case-insensitive)
+      },
+    });
     res.status(200).json(resData);
   } catch (e) {
     console.error(e);
@@ -59,33 +74,13 @@ async function handleGetAllOrdersNonApproved(req, res) {
   }
 }
 
-async function handleEditUser(req, res) {
-  const data = req.body;
-  // console.log("Received edit request with data:", data);
-
+async function handleGetAllUsersForApproval(req, res) {
   try {
-    const resData = await User.findByIdAndUpdate(data._id, data, {
-      new: true,
+    const resData = await Approval.find({
+      req_type: {
+        $regex: /^User/i, // (case-insensitive)
+      },
     });
-
-    if (resData) {
-      res.status(200).json(resData);
-    } else {
-      sendError(res, 400, "No user found");
-    }
-  } catch (e) {
-    console.error(e);
-    if (e.code === 11000)
-      sendError(res, 500, "A user with this name already exists");
-    else sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleDeleteUser(req, res) {
-  let data = req.headers;
-
-  try {
-    const resData = await User.findByIdAndDelete(data.id);
     res.status(200).json(resData);
   } catch (e) {
     console.error(e);
@@ -98,23 +93,19 @@ export default async function handle(req, res) {
 
   switch (method) {
     case "GET":
-      if (req.headers.signin) {
-        await handleSignIn(req, res);
-      } else if (req.headers.getallordersnonapproved) {
-        await handleGetAllOrdersNonApproved(req, res);
-      } else if (req.headers.deleteuser) {
-        await handleDeleteUser(req, res);
+      if (req.headers.getallordersforapproval) {
+        await handleGetAllOrdersForApproval(req, res);
+      } else if (req.headers.getallusersforapproval) {
+        await handleGetAllUsersForApproval(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
       break;
 
     case "POST":
-      if (req.headers.edituser) {
-        await handleEditUser(req, res);
-      } else {
-        await handleNewReq(req, res);
-      }
+      if (req.body.response) {
+        await handleResponse(req, res);
+      } else await handleNewReq(req, res);
 
       break;
 
