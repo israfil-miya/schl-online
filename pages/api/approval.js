@@ -1,4 +1,6 @@
 import Approval from "../../db/Approvals";
+import User from "../../db/Users";
+import Order from "../../db/Orders";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -12,8 +14,7 @@ async function handleNewReq(req, res) {
   const data = req.body;
 
   try {
-
-    console.log("data: ", data)
+    console.log("data: ", data);
     const resData = await Approval.create(data);
 
     if (resData) {
@@ -31,6 +32,7 @@ async function handleNewReq(req, res) {
 async function handleResponse(req, res) {
   const data = req.body;
 
+  console.log("THE DATA ON HANDLE RESPONSE: ", data);
 
   if (data.response == "reject") {
     const resData = await Approval.findByIdAndUpdate(data._id, {
@@ -43,6 +45,78 @@ async function handleResponse(req, res) {
       res.status(200).json(resData);
     } else {
       sendError(res, 400, "Unable to send request");
+    }
+  }
+
+  if (data.response == "approve") {
+    if (data.req_type == "User Delete") {
+      const resData = await User.findByIdAndDelete(data.id);
+      const updateApprovaL = await Approval.findByIdAndUpdate(
+        data._id,
+        {
+          checked_by: data.checked_by,
+          is_rejected: false,
+        },
+        { new: true }
+      );
+
+      if (resData) {
+        console.log(resData);
+        res.status(200).json(updateApprovaL);
+      } else {
+        sendError(res, 400, "Unable to send request");
+      }
+    }
+
+    if (data.req_type == "User Create") {
+      const resData = await User.findOneAndUpdate(
+        { name: data.name },
+        {
+          name: data.name,
+          password: data.password,
+          role: data.role,
+        },
+        {
+          new: true,
+          upsert: true,
+        }
+      );
+
+      const updateApprovaL = await Approval.findByIdAndUpdate(
+        data._id,
+        {
+          checked_by: data.checked_by,
+          is_rejected: false,
+        },
+        { new: true }
+      );
+
+      if (resData) {
+        console.log(resData);
+        res.status(200).json(updateApprovaL);
+      } else {
+        sendError(res, 400, "Unable to send request");
+      }
+    }
+
+    if (data.req_type == "Task Delete") {
+      const resData = await Order.findByIdAndDelete(data.id);
+
+      const updateApprovaL = await Approval.findByIdAndUpdate(
+        data._id,
+        {
+          checked_by: data.checked_by,
+          is_rejected: false,
+        },
+        { new: true }
+      );
+
+      if (resData) {
+        console.log(resData);
+        res.status(200).json(updateApprovaL);
+      } else {
+        sendError(res, 400, "Unable to send request");
+      }
     }
   }
 

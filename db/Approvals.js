@@ -13,7 +13,7 @@ const ApprovalSchema = new mongoose.Schema({
         default: "None"
     },
     is_rejected: {
-        type: String,
+        type: Boolean,
         default: false
     },
     

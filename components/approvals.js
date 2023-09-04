@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-export default function Browse() {
+export default function Approvals() {
   const { data: session } = useSession();
   const router = useRouter();
   const [usersApprovals, setUsersApprovals] = useState([]);
@@ -12,6 +12,7 @@ export default function Browse() {
   const [orderInfo, setOrderInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
   const [manageData, setManageData] = useState({});
+  const [modalTempStore, setModalTempStore] = useState({});
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
@@ -123,14 +124,16 @@ export default function Browse() {
 
   async function handleResponse(data) {
     try {
-      console.log("THIS DATA: ", data);
+      console.log("THIS DATA BEFORE RESPONSE: ", data);
+
+
+
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
       const options = {
         method: "POST",
         body: JSON.stringify({
-          response: data.response,
+          ...data,
           checked_by: session.user.name,
-          _id: data._id,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -238,21 +241,25 @@ export default function Browse() {
                       {approveReq.checked_by == "None" ? (
                         <>
                           <button
-                            onClick={() => handleResponse({
+                            onClick={() => setModalTempStore({
                               ...approveReq,
                               response: "approve",
                             })}
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmModal"
                             className="btn btn-sm btn-outline-success me-1">
                             Approve
                           </button>
                           <button
                             className="btn btn-sm btn-outline-danger me-1"
                             onClick={() =>
-                              handleResponse({
+                              setModalTempStore({
                                 ...approveReq,
                                 response: "reject",
                               })
                             }
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmModal"
                           >
                             Reject
                           </button>
@@ -369,21 +376,25 @@ export default function Browse() {
                       {approveReq.checked_by == "None" ? (
                         <>
                           <button
-                            onClick={() => handleResponse({
+                            onClick={() => setModalTempStore({
                               ...approveReq,
                               response: "approve",
                             })}
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmModal"
                             className="btn btn-sm btn-outline-success me-1">
                             Approve
                           </button>
                           <button
                             className="btn btn-sm btn-outline-danger me-1"
                             onClick={() =>
-                              handleResponse({
+                              setModalTempStore({
                                 ...approveReq,
                                 response: "reject",
                               })
                             }
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmModal"
                           >
                             Reject
                           </button>
@@ -715,7 +726,9 @@ export default function Browse() {
               <button
                 type="button"
                 className="btn btn-sm btn-outline-success"
-                onClick={() => handleResponse({
+                data-bs-toggle="modal"
+                data-bs-target="#confirmModal"
+                onClick={() => setModalTempStore({
                   ...manageData,
                   response: "approve",
                 })}
@@ -733,8 +746,6 @@ export default function Browse() {
           </div>
         </div>
       </div>
-
-
 
       <div
         className="modal fade"
@@ -806,6 +817,49 @@ export default function Browse() {
                 data-bs-dismiss="modal"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="modal fade"
+        id="confirmModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Action Confirmation
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure about your action?</p>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                No
+              </button>
+              <button
+                onClick={() => handleResponse(modalTempStore)}
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+                data-bs-dismiss="modal"
+              >
+                Yes
               </button>
             </div>
           </div>
