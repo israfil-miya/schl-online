@@ -12,6 +12,8 @@ async function handleNewReq(req, res) {
   const data = req.body;
 
   try {
+
+    console.log("data: ", data)
     const resData = await Approval.create(data);
 
     if (resData) {
@@ -29,7 +31,6 @@ async function handleNewReq(req, res) {
 async function handleResponse(req, res) {
   const data = req.body;
 
-  console.log("Reached at least here")
 
   if (data.response == "reject") {
     const resData = await Approval.findByIdAndUpdate(data._id, {

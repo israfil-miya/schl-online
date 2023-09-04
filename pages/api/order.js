@@ -68,7 +68,7 @@ async function handleGetOrdersUnFinished(req, res) {
     }).lean();
 
 
-    if(!orders) res.status(200).json([]);
+    if (!orders) res.status(200).json([]);
 
 
     const sortedOrders = orders
@@ -148,6 +148,20 @@ async function handleGetAllOrder(req, res) {
   }
 }
 
+async function handleGetOrdersById(req, res) {
+  try {
+    let data = req.headers
+    const orders = await Order.findById(data.id).lean();
+
+    if (!orders) sendError(res, 400, "No order found with the id");
+    else
+      res.status(200).json(orders);
+
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 
 async function handleGetOrdersByFilter(req, res) {
   try {
@@ -193,7 +207,7 @@ async function handleGetOrdersByFilter(req, res) {
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
-      { status: {  $nin: ["Finished", "Correction", "Test"] } },
+      { status: { $nin: ["Finished", "Correction", "Test"] } },
       { delivery_date: 1, delivery_bd_time: 1 }
     ).lean();
 
@@ -257,7 +271,7 @@ async function handleFinishOrder(req, res) {
     const data = req.headers;
     console.log("Received edit request with data:", data);
 
-    const resData = await Order.findByIdAndUpdate(data.id, {status: "Finished"}, {
+    const resData = await Order.findByIdAndUpdate(data.id, { status: "Finished" }, {
       new: true,
     });
 
@@ -277,7 +291,7 @@ async function handleRedoOrder(req, res) {
     const data = req.headers;
     console.log("Received edit request with data:", data);
 
-    const resData = await Order.findByIdAndUpdate(data.id, {status: "Correction"}, {
+    const resData = await Order.findByIdAndUpdate(data.id, { status: "Correction" }, {
       new: true,
     });
 
@@ -313,6 +327,8 @@ export default async function handle(req, res) {
         await handleFinishOrder(req, res);
       } else if (req.headers.redoorder) {
         await handleRedoOrder(req, res);
+      } else if (req.headers.getordersbyid) {
+        await handleGetOrdersById(req, res);
       } else if (req.headers.gettimeperiods) {
         await handleGetTimePeriods(req, res);
       } else {

@@ -63,6 +63,28 @@ async function handleGetAllUser(req, res) {
   }
 }
 
+async function handleGetUsersById(req, res) {
+  try {
+    let data = req.headers
+
+
+console.log("USER DATA: ", data)
+
+
+    const users = await User.findById(data.id).lean();
+
+    console.log("Users return data: ", users)
+
+    if (!users) sendError(res, 400, "No user found with the id");
+    else
+      res.status(200).json(users);
+
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 async function handleEditUser(req, res) {
   const data = req.body;
   // console.log("Received edit request with data:", data);
@@ -106,6 +128,8 @@ export default async function handle(req, res) {
         await handleSignIn(req, res);
       } else if (req.headers.getalluser) {
         await handleGetAllUser(req, res);
+      } else if (req.headers.getusersbyid) {
+          await handleGetUsersById(req, res);
       } else if (req.headers.deleteuser) {
         await handleDeleteUser(req, res);
       } else {

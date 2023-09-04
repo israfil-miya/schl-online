@@ -31,6 +31,12 @@ const ApprovalSchema = new mongoose.Schema({
     },
 
 
+    
+    id: {
+        type: String,
+    },
+
+
 
     client_code: {
         type: String,

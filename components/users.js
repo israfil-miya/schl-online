@@ -140,6 +140,12 @@ export default function Users() {
         toast.success("Deleted the user");
       }
     } else {
+
+
+
+      console.log('Delete User Data: ', deleteUserData)
+
+
       const res = await fetch(
         process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
         {

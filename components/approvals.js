@@ -9,6 +9,8 @@ export default function Browse() {
   const router = useRouter();
   const [usersApprovals, setUsersApprovals] = useState([]);
   const [ordersApprovals, setOrdersApprovals] = useState([]);
+  const [orderInfo, setOrderInfo] = useState({});
+  const [userInfo, setUserInfo] = useState({});
   const [manageData, setManageData] = useState({});
 
   async function fetchApi(url, options) {
@@ -41,6 +43,60 @@ export default function Browse() {
     }
   }
 
+  async function GetOrdersById(id) {
+    try {
+
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getordersbyid: true,
+          id
+        },
+      };
+
+      const resData = await fetchApi(url, options);
+
+      if (!resData.error) {
+        setOrderInfo(resData);
+      } else {
+        toast.error("Unable to retrieve order info");
+      }
+
+    } catch (error) {
+      console.error("Error fetching order info:", error);
+      toast.error("Error retrieving order info");
+    }
+  }
+
+  async function GetUsersById(id) {
+    try {
+
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/user`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getusersbyid: true,
+          id
+        },
+      };
+
+      const resData = await fetchApi(url, options);
+
+      if (!resData.error) {
+        setUserInfo(resData);
+      } else {
+        toast.error("Unable to retrieve user info");
+      }
+
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      toast.error("Error retrieving user info");
+    }
+  }
+
   async function GetAllUsersForApproval() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
@@ -67,7 +123,7 @@ export default function Browse() {
 
   async function handleResponse(data) {
     try {
-      console.log(data);
+      console.log("THIS DATA: ", data);
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
       const options = {
         method: "POST",
@@ -84,9 +140,9 @@ export default function Browse() {
       const resData = await fetchApi(url, options);
 
       if (!resData.error) {
-        if (manageData.req_type.split(" ")[0] == "User") {
+        if (resData.req_type.split(" ")[0] == "User") {
           await GetAllUsersForApproval();
-        } else if (manageData.req_type.split(" ")[0] == "Task") {
+        } else if (resData.req_type.split(" ")[0] == "Task") {
           await GetAllOrdersForApproval();
         } else return;
       } else {
@@ -150,13 +206,13 @@ export default function Browse() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -181,7 +237,12 @@ export default function Browse() {
                     >
                       {approveReq.checked_by == "None" ? (
                         <>
-                          <button className="btn btn-sm btn-outline-success me-1">
+                          <button
+                            onClick={() => handleResponse({
+                              ...approveReq,
+                              response: "approve",
+                            })}
+                            className="btn btn-sm btn-outline-success me-1">
                             Approve
                           </button>
                           <button
@@ -195,9 +256,26 @@ export default function Browse() {
                           >
                             Reject
                           </button>
-                          <button className="btn btn-sm btn-outline-primary">
-                            View
-                          </button>
+
+                          {approveReq.req_type.split(" ")[1] == "Delete" ?
+                            <button onClick={() =>
+                              GetUsersById(approveReq.id)
+                            }
+                              className="btn btn-sm btn-outline-primary"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal1">
+                              View
+                            </button> : <button onClick={() =>
+                              setManageData(approveReq)
+                            }
+                              className="btn btn-sm btn-outline-primary"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal2">
+                              View
+                            </button>
+
+                          }
+
                         </>
                       ) : (
                         <p>
@@ -259,13 +337,13 @@ export default function Browse() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -290,7 +368,12 @@ export default function Browse() {
                     >
                       {approveReq.checked_by == "None" ? (
                         <>
-                          <button className="btn btn-sm btn-outline-success me-1">
+                          <button
+                            onClick={() => handleResponse({
+                              ...approveReq,
+                              response: "approve",
+                            })}
+                            className="btn btn-sm btn-outline-success me-1">
                             Approve
                           </button>
                           <button
@@ -304,7 +387,14 @@ export default function Browse() {
                           >
                             Reject
                           </button>
-                          <button className="btn btn-sm btn-outline-primary">
+                          <button
+                            onClick={() =>
+                              GetOrdersById(approveReq.id)
+                            }
+                            className="btn btn-sm btn-outline-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal"
+                          >
                             View
                           </button>
                         </>
@@ -339,6 +429,389 @@ export default function Browse() {
           </table>
         </div>
       </div>
+
+
+
+      <div
+        className="modal fade"
+        id="editModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Task Info
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="clientCode" className="form-label">
+                  Client Code
+                </label>
+                <input
+                  value={orderInfo.client_code}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="clientCode"
+                  placeholder="Client Code"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="clientName" className="form-label">
+                  Client Name
+                </label>
+                <input
+                  value={orderInfo.client_name}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="clientName"
+                  placeholder="Client Name"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="folder" className="form-label">
+                  Folder
+                </label>
+                <input
+                  value={orderInfo.folder}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="folder"
+                  placeholder="Folder"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="quantity" className="form-label">
+                  Quantity
+                </label>
+                <input
+                  value={orderInfo.quantity}
+                  disabled
+                  type="number"
+                  className="form-control"
+                  id="quantity"
+                  placeholder="Quantity"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="downloadDate" className="form-label">
+                  Download Date
+                </label>
+                <input
+                  value={orderInfo.download_date}
+                  disabled
+                  type="date"
+                  className="form-control"
+                  id="downloadDate"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="deliveryDate" className="form-label">
+                  Delivery Date
+                </label>
+                <input
+                  value={orderInfo.delivery_date}
+                  disabled
+                  type="date"
+                  className="form-control"
+                  id="deliveryDate"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="deliveryBDTime" className="form-label">
+                  Delivery BD Time
+                </label>
+                <input
+                  value={orderInfo.delivery_bd_time}
+                  disabled
+                  type="time"
+                  className="form-control"
+                  id="deliveryBDTime"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="task" className="form-label">
+                  Task
+                </label>
+                <input
+                  value={orderInfo.task}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="task"
+                  placeholder="Task"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="et" className="form-label">
+                  E.T.
+                </label>
+                <input
+                  value={orderInfo.et}
+                  disabled
+                  type="number"
+                  className="form-control"
+                  id="et"
+                  placeholder="E.T."
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="production" className="form-label">
+                  Production
+                </label>
+                <input
+                  value={orderInfo.production}
+                  disabled
+                  type="string"
+                  className="form-control"
+                  id="production"
+                  placeholder="Production"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="qc1" className="form-label">
+                  QC1
+                </label>
+                <input
+                  value={orderInfo.qc1}
+                  disabled
+                  type="number"
+                  className="form-control"
+                  id="qc1"
+                  placeholder="QC1"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="comments" className="form-label">
+                  Comment
+                </label>
+                <input
+                  value={orderInfo.comment}
+                  disabled
+                  className="form-control"
+                  id="comment"
+                  rows="3"
+                  placeholder="Comment"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="status" className="form-label">
+                  Status
+                </label>
+                <input
+                  value={orderInfo.status}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="status"
+                  placeholder="Status"
+                />
+              </div>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div
+        className="modal fade"
+        id="editModal2"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Edit User
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Name
+                </label>
+                <input
+                  required
+                  value={manageData.name}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      name: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Password
+                </label>
+                <input
+                  required
+                  value={manageData.password}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      password: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Role
+                </label>
+
+                <select
+                  className="form-select"
+                  id="floatingSelect"
+                  required
+                  value={manageData.role}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      role: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                  <option value="super">Super</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-success"
+                onClick={() => handleResponse({
+                  ...manageData,
+                  response: "approve",
+                })}
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div
+        className="modal fade"
+        id="editModal1"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                User Info
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Name
+                </label>
+                <input
+                  required
+                  value={userInfo.name}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Password
+                </label>
+                <input
+                  required
+                  value={userInfo.password}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Role
+                </label>
+
+                <select
+                  className="form-select"
+                  id="floatingSelect"
+                  required
+                  value={userInfo.role}
+                  disabled
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                  <option value="super">Super</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <style jsx>
         {`
           .table {
