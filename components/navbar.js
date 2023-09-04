@@ -9,7 +9,7 @@ const cities = [
   "America/New_York",
   "Europe/Paris",
   "Europe/London",
-  "Asia/Tokyo",
+  "Asia/Riyadh",
   "Asia/Dhaka",
   // Add more cities as needed
 ];
