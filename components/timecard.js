@@ -19,7 +19,7 @@ const TimeCard = ({ city }) => {
             word-wrap: break-word;
             word-break: normal;
             hyphens: auto;
-            border-radius: 0 0 14px 0;
+            border-radius: 0 0 20px 0;
           }
 
           .custom-card-header {
