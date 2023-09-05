@@ -6,11 +6,13 @@ import TimeCard from "./timecard";
 import { useState, useEffect } from "react";
 
 const cities = [
-  "America/New_York",
+  "Asia/Dhaka",
   "Europe/Paris",
+  "Australia/Canberra",
+  "America/New_York",
   "Europe/London",
   "Asia/Riyadh",
-  "Asia/Dhaka",
+
   // Add more cities as needed
 ];
 export default function Navbar({ navFor }) {
