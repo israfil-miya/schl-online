@@ -62,6 +62,25 @@ async function handleEditClient(req, res) {
   }
 }
 
+async function handleGetClientsById(req, res) {
+  try {
+    let data = req.headers
+
+
+
+
+    const clients = await Client.findById(data.id).lean();
+
+
+    if (!clients) sendError(res, 400, "No client found with the id");
+    else
+      res.status(200).json(clients);
+
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 
 async function handleGetClientNameByCode(req, res) {
   try {
@@ -89,17 +108,6 @@ async function handleDeleteClient(req, res) {
   }
 }
 
-async function handleGetClientInfo(req, res) {
-  let data = req.headers;
-
-  try {
-    const resData = await Client.findById(data._id);
-    res.status(200).json(resData);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -112,8 +120,8 @@ export default async function handle(req, res) {
         await handleDeleteClient(req, res);
       } else if (req.headers.getclientnamebycode) {
         await handleGetClientNameByCode(req, res);
-      } else if (req.headers.getclientinfo) {
-        await handleGetClientInfo(req, res);
+      } else if (req.headers.getclientsbyid) {
+        await handleGetClientsById(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 
 export default function Clients() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [clients, setClients] = useState([]);
   const [clientCode, setClientCode] = useState("");
   const [clientName, setClientName] = useState("");
@@ -78,30 +80,52 @@ export default function Clients() {
   }
 
   async function deleteClient(deleteClientData) {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        deleteclient: true,
-        id: deleteClientData._id,
-      },
-    };
 
-    try {
-      const resData = await fetchClientData(url, options);
 
-      if (!resData.error) {
-        toast.success("Deleted the client data", {
-          duration: 3500,
-        });
+    let result;
+
+    if (session.user.role == "super") {
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/client",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            deleteclient: true,
+            id: deleteClientData._id,
+          },
+        }
+      );
+      result = await res.json();
+      if (!result.error) {
         await getAllClients();
-      } else {
-        toast.error("Unable to delete client");
+        toast.success("Deleted the client");
       }
-    } catch (error) {
-      console.error("Error deleting client:", error);
-      toast.error("Error deleting client");
+    } else {
+
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            req_type: "Client Delete",
+            req_by: session.user.name,
+            id: deleteClientData._id,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      result = await res.json();
+      if (!result.error) {
+        toast.success("Request sent for approval");
+      }
+    }
+    // console.log(result);
+
+    if (result.error) {
+      router.replace("/admin?error=" + result.message);
     }
   }
 

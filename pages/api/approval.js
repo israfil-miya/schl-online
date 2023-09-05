@@ -1,6 +1,7 @@
 import Approval from "../../db/Approvals";
 import User from "../../db/Users";
 import Order from "../../db/Orders";
+import Client from "../../db/Clients"
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -68,6 +69,7 @@ async function handleResponse(req, res) {
       }
     }
 
+
     if (data.req_type == "User Create") {
       const resData = await User.findOneAndUpdate(
         { name: data.name },
@@ -118,6 +120,25 @@ async function handleResponse(req, res) {
         sendError(res, 400, "Unable to send request");
       }
     }
+
+    if (data.req_type == "Client Delete") {
+      const resData = await Client.findByIdAndDelete(data.id);
+      const updateApprovaL = await Approval.findByIdAndUpdate(
+        data._id,
+        {
+          checked_by: data.checked_by,
+          is_rejected: false,
+        },
+        { new: true }
+      );
+
+      if (resData) {
+        console.log(resData);
+        res.status(200).json(updateApprovaL);
+      } else {
+        sendError(res, 400, "Unable to send request");
+      }
+    }
   }
 
   // try {
@@ -135,13 +156,16 @@ async function handleResponse(req, res) {
   // }
 }
 
+
+
+
 async function handleGetAllOrdersForApproval(req, res) {
   try {
     const resData = await Approval.find({
       req_type: {
         $regex: /^Task/i, // (case-insensitive)
       },
-    });
+    }).sort({ checked_by: 1, _id: 1 }); // Sort by "checked_by" ascending, "_id" as tiebreaker
     res.status(200).json(resData);
   } catch (e) {
     console.error(e);
@@ -155,13 +179,29 @@ async function handleGetAllUsersForApproval(req, res) {
       req_type: {
         $regex: /^User/i, // (case-insensitive)
       },
-    });
+    }).sort({ checked_by: 1, _id: 1 }); // Sort by "checked_by" ascending, "_id" as tiebreaker
     res.status(200).json(resData);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
+
+async function handleGetAllClientsForApproval(req, res) {
+  try {
+    const resData = await Approval.find({
+      req_type: {
+        $regex: /^Client/i, // (case-insensitive)
+      },
+    }).sort({ checked_by: 1, _id: 1 }); // Sort by "checked_by" ascending, "_id" as tiebreaker
+    res.status(200).json(resData);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -172,6 +212,8 @@ export default async function handle(req, res) {
         await handleGetAllOrdersForApproval(req, res);
       } else if (req.headers.getallusersforapproval) {
         await handleGetAllUsersForApproval(req, res);
+      } else if (req.headers.getallclientsforapproval) {
+        await handleGetAllClientsForApproval(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

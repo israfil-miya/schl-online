@@ -1,12 +1,23 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css");
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: Arial, sans-serif;
 }
 
+/* For titles and headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  /* Use Helvetica for a modern look */
+  font-family: Helvetica, Arial, sans-serif;
+  /* or Use Georgia for a classic look */
+  /* font-family: Georgia, serif; */
+}
 
 a {
   color: inherit;
