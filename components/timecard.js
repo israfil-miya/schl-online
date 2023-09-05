@@ -6,7 +6,12 @@ const TimeCard = ({ city }) => {
   return (
     <>
       <div className="card border shadow-sm custom-card">
-        <div className="card-header fw-light bg-dark px-2 py-0 text-center custom-card-header">{city.split("/")[1].replace("_", " ").replace("Paris", "CET").replace("Riyadh", "GULF")}</div>
+        <div className="card-header fw-light bg-dark px-2 py-0 text-center custom-card-header">{city.split("/")[1]
+        .replace("_", " ")
+        .replace("Paris", "CET")
+        .replace("Riyadh", "GULF")
+        .replace("Canberra", "Australia")
+        }</div>
         <div className=" text-center bg-light card-body py-0">
           <span className="fw-medium"><Moment format="hh:mm A" interval={1000} tz={city} /></span>
         </div>
