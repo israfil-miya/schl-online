@@ -113,6 +113,7 @@ async function handleGetOrdersRedo(req, res) {
 }
 
 async function handleGetAllOrder(req, res) {
+  
   try {
     const orders = await Order.find().lean();
 
@@ -142,6 +143,63 @@ async function handleGetAllOrder(req, res) {
     });
 
     res.status(200).json(sortedOrders);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+
+async function handleGetAllOrderPaginated(req, res) {
+  const ITEMS_PER_PAGE = 20;
+  const page = req.headers.page || 1;
+
+  // Put all your query params in here
+  const query = {};
+  try {
+    const skip = (page - 1) * ITEMS_PER_PAGE; // 1 * 20 = 20
+
+    const count = await Order.estimatedDocumentCount(query);
+
+    const orders = await Order.find(query).limit(ITEMS_PER_PAGE).skip(skip).lean()
+
+
+     const sortedOrders = orders.sort((a, b) => {
+       // Helper function to determine order priority based on status
+       const getOrderPriority = (order) => {
+         if (order.status === "Correction" || order.status === "Test") {
+           return 0; // Orders with status "Correction" or "Test"
+         } else if (order.status !== "Finished") {
+           return 1; // Non-finished tasks
+         } else {
+           return 2; // Finished orders
+         }
+       };
+
+       const priorityA = getOrderPriority(a);
+       const priorityB = getOrderPriority(b);
+
+       // If priorities are equal, maintain original order
+       if (priorityA === priorityB) {
+         return 0;
+       }
+
+       // Sort in ascending order of priority
+       return priorityA - priorityB;
+     });
+
+
+    const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // 400 items / 20 = 20
+
+
+    res.status(200).json({
+      pagination: {
+        count,
+        pageCount,
+      },
+      items: sortedOrders,
+    });
+
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
@@ -312,7 +370,7 @@ export default async function handle(req, res) {
   switch (method) {
     case "GET":
       if (req.headers.getallorders) {
-        await handleGetAllOrder(req, res);
+        await handleGetAllOrderPaginated(req, res);
       } else if (req.headers.getonlytime) {
         await handleGetOnlyTime(req, res);
       } else if (req.headers.deleteorder) {

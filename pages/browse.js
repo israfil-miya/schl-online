@@ -8,6 +8,11 @@ import Navbar from "../components/navbar";
 
 export default function Browse() {
   const { data: session } = useSession();
+
+
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+
   const router = useRouter();
   const [orders, setOrders] = useState(null);
   const [fromTime, setFromTime] = useState("");
@@ -47,10 +52,14 @@ export default function Browse() {
         headers: {
           "Content-Type": "application/json",
           getallorders: true,
+          page
         },
       };
 
       const ordersList = await fetchOrderData(url, options);
+
+
+      console.log(ordersList)
 
       if (!ordersList.error) {
         setOrders(ordersList);
@@ -243,9 +252,36 @@ export default function Browse() {
     }
   }
 
+
+
+  function handlePrevious() {
+    setPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
+
+  function handleNext() {
+    setPage((p) => {
+      if (p === pageCount) return p;
+      return p + 1;
+    });
+  }
+
+
+
   useEffect(() => {
     GetAllOrders();
-  }, []);
+    if (orders) {
+      setPageCount(orders.pagination.pageCount);
+    }
+
+  }, [orders?.pagination?.pageCount]);
+
+
+  useEffect(() => {
+    GetAllOrders();
+  }, [page]);
 
   return (
     <>
@@ -328,7 +364,25 @@ export default function Browse() {
           </button>
         </div>
       </div>
+      <div className="float-end">
 
+
+
+
+        <div className="btn-group me-5 my-3" role="group" aria-label="Basic outlined example">
+          <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={handlePrevious}>
+            Previous
+          </button>
+          <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === pageCount} onClick={handleNext}>
+            Next
+          </button>
+        </div>
+
+
+
+
+
+      </div>
       <table
         style={{ overflow: "hidden" }}
         className="table table-bordered py-3 table-hover"
@@ -357,8 +411,8 @@ export default function Browse() {
           </tr>
         </thead>
         <tbody>
-          {orders &&
-            orders.map((order, index) => (
+          {orders?.items &&
+            orders?.items.map((order, index) => (
               <tr key={order._id}>
                 <td>{index + 1}</td>
                 <td className="text-break">
@@ -369,7 +423,7 @@ export default function Browse() {
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||
-                session.user.role == "super" ? (
+                  session.user.role == "super" ? (
                   <td className="text-break">{order.client_name}</td>
                 ) : (
                   <></>
@@ -390,7 +444,7 @@ export default function Browse() {
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
-                session.user.role == "super" ? (
+                  session.user.role == "super" ? (
                   // Default state
 
                   <td className="align-middle" style={{ textAlign: "center" }}>
@@ -433,11 +487,10 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${
-                        order.status === "Finished"
-                          ? "btn-outline-warning"
-                          : "btn-outline-success"
-                      }`}
+                      className={`btn btn-sm ${order.status === "Finished"
+                        ? "btn-outline-warning"
+                        : "btn-outline-success"
+                        }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>
