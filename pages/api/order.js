@@ -197,7 +197,8 @@ async function handleGetOrdersById(req, res) {
 
 async function handleGetOrdersByFilter(req, res) {
   try {
-    const { fromtime, totime, folder, client, task } = req.headers;
+    const { fromtime, totime, folder, client, task, page } = req.headers;
+    const ITEMS_PER_PAGE = 20; // Number of items per page
 
     console.log(
       "Received request with parameters:",
@@ -205,7 +206,8 @@ async function handleGetOrdersByFilter(req, res) {
       totime,
       folder,
       client,
-      task
+      task,
+      page
     );
 
     let query = {};
@@ -218,23 +220,65 @@ async function handleGetOrdersByFilter(req, res) {
       if (totime) query.date_today.$lte = totime;
     }
 
-
-    console.log(query)
+    console.log(query);
 
     if (Object.keys(query).length === 0 && query.constructor === Object)
       sendError(res, 400, "No filter applied");
     else {
-      const orders = await Order.find(query).lean();
+      // Calculate the number of documents to skip based on the current page
+      const skip = (page - 1) * ITEMS_PER_PAGE;
+      const pipeline = [
+        { $match: query }, // Apply the query filter
+        {
+          $addFields: {
+            customSortField: {
+              $cond: {
+                if: {
+                  $or: [
+                    { $eq: ["$status", "Correction"] },
+                    { $eq: ["$status", "Test"] },
+                  ],
+                },
+                then: 0,
+                else: {
+                  $cond: {
+                    if: { $ne: ["$status", "Finished"] },
+                    then: 1,
+                    else: 2,
+                  },
+                },
+              },
+            },
+          },
+        },
+        { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
+        { $skip: skip }, // Skip items for pagination
+        { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
+      ];
 
-      console.log(orders)
+      const count = await Order.countDocuments(query); // Count the total matching documents
 
-      res.status(200).json(orders);
+
+
+      const orders = await Order.aggregate(pipeline).exec();
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: orders,
+      });
     }
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
+
+
 
 
 

@@ -99,6 +99,7 @@ export default function Browse() {
         task: taskFilter,
         fromtime: adjustedFromTime,
         totime: adjustedToTime,
+        page, // Include the current page in the request headers
       },
     };
 
@@ -271,16 +272,14 @@ export default function Browse() {
 
 
   useEffect(() => {
-    GetAllOrders();
-    if (orders) {
-      setPageCount(orders.pagination.pageCount);
-    }
-
+    if (!isFiltered) GetAllOrders();
+    if (orders) setPageCount(orders.pagination.pageCount);
   }, [orders?.pagination?.pageCount]);
 
 
   useEffect(() => {
-    GetAllOrders();
+    if (!isFiltered) GetAllOrders();
+    else filteredData()
   }, [page]);
 
   return (
