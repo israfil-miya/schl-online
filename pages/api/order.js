@@ -112,42 +112,6 @@ async function handleGetOrdersRedo(req, res) {
   }
 }
 
-async function handleGetAllOrder(req, res) {
-  
-  try {
-    const orders = await Order.find().lean();
-
-    // Sorting orders based on specified criteria
-    const sortedOrders = orders.sort((a, b) => {
-      // Helper function to determine order priority based on status
-      const getOrderPriority = (order) => {
-        if (order.status === "Correction" || order.status === "Test") {
-          return 0; // Orders with status "Correction" or "Test"
-        } else if (order.status !== "Finished") {
-          return 1; // Non-finished tasks
-        } else {
-          return 2; // Finished orders
-        }
-      };
-
-      const priorityA = getOrderPriority(a);
-      const priorityB = getOrderPriority(b);
-
-      // If priorities are equal, maintain original order
-      if (priorityA === priorityB) {
-        return 0;
-      }
-
-      // Sort in ascending order of priority
-      return priorityA - priorityB;
-    });
-
-    res.status(200).json(sortedOrders);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
 
 
 async function handleGetAllOrderPaginated(req, res) {
@@ -156,55 +120,63 @@ async function handleGetAllOrderPaginated(req, res) {
 
   // Put all your query params in here
   const query = {};
+
   try {
-    const skip = (page - 1) * ITEMS_PER_PAGE; // 1 * 20 = 20
+    const skip = (page - 1) * ITEMS_PER_PAGE; // Calculate the number of items to skip
+
+    // Add a new field "customSortField" based on your custom sorting criteria
+    const pipeline = [
+      { $match: query }, // Apply the query filter
+      {
+        $addFields: {
+          customSortField: {
+            $cond: {
+              if: {
+                $or: [
+                  { $eq: ["$status", "Correction"] },
+                  { $eq: ["$status", "Test"] },
+                ],
+              },
+              then: 0,
+              else: {
+                $cond: {
+                  if: { $ne: ["$status", "Finished"] },
+                  then: 1,
+                  else: 2,
+                },
+              },
+            },
+          },
+        },
+      },
+      { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
+      { $skip: skip }, // Skip items for pagination
+      { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
+    ];
 
     const count = await Order.estimatedDocumentCount(query);
 
-    const orders = await Order.find(query).limit(ITEMS_PER_PAGE).skip(skip).lean()
+    // Execute the aggregation pipeline and convert the result to an array
+    const orders = await Order.aggregate(pipeline).exec();
 
+    const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
 
-     const sortedOrders = orders.sort((a, b) => {
-       // Helper function to determine order priority based on status
-       const getOrderPriority = (order) => {
-         if (order.status === "Correction" || order.status === "Test") {
-           return 0; // Orders with status "Correction" or "Test"
-         } else if (order.status !== "Finished") {
-           return 1; // Non-finished tasks
-         } else {
-           return 2; // Finished orders
-         }
-       };
-
-       const priorityA = getOrderPriority(a);
-       const priorityB = getOrderPriority(b);
-
-       // If priorities are equal, maintain original order
-       if (priorityA === priorityB) {
-         return 0;
-       }
-
-       // Sort in ascending order of priority
-       return priorityA - priorityB;
-     });
-
-
-    const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // 400 items / 20 = 20
-
-
+    // Send the response with pagination information and sorted, paginated data
     res.status(200).json({
       pagination: {
         count,
         pageCount,
       },
-      items: sortedOrders,
+      items: orders,
     });
-
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
+
+
+
 
 async function handleGetOrdersById(req, res) {
   try {
@@ -220,6 +192,8 @@ async function handleGetOrdersById(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
+
 
 async function handleGetOrdersByFilter(req, res) {
   try {
@@ -261,6 +235,9 @@ async function handleGetOrdersByFilter(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
+
+
 
 async function handleGetOnlyTime(req, res) {
   try {
