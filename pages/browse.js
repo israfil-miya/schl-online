@@ -273,7 +273,7 @@ export default function Browse() {
 
    useEffect(() => {
      if (!isFiltered) GetAllOrders();
-     if (orders) setPageCount(orders.pagination.pageCount);
+     if (orders) setPageCount(orders?.pagination?.pageCount);
    }, [orders?.pagination?.pageCount]);
 
 
