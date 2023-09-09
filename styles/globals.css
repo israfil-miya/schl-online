@@ -3,7 +3,7 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Karla', 'lato', sans-serif !important;
 }
 
 /* For titles and headings */
@@ -14,7 +14,8 @@ h4,
 h5,
 h6 {
   /* Use Helvetica for a modern look */
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: 'Lato' !important;
+  text-transform: capitalize;
   /* or Use Georgia for a classic look */
   /* font-family: Georgia, serif; */
 }

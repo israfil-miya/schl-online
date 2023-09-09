@@ -271,16 +271,16 @@ export default function Browse() {
 
 
 
-  useEffect(() => {
-    if (!isFiltered) GetAllOrders();
-    if (orders) setPageCount(orders.pagination.pageCount);
-  }, [orders?.pagination?.pageCount]);
+   useEffect(() => {
+     if (!isFiltered) GetAllOrders();
+     if (orders) setPageCount(orders.pagination.pageCount);
+   }, [orders?.pagination?.pageCount]);
 
 
-  useEffect(() => {
-    if (!isFiltered) GetAllOrders();
-    else filteredData()
-  }, [page]);
+   useEffect(() => {
+     if (!isFiltered) GetAllOrders();
+     else filteredData()
+   }, [page]);
 
   return (
     <>

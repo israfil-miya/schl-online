@@ -2,7 +2,6 @@ import Order from "../../db/Orders";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 
-
 function calculateTimeDifference(deliveryDate, deliveryTime) {
   const is12HourFormat = /am|pm/i.test(deliveryTime);
   const [time, meridiem] = deliveryTime.split(/\s+/);
@@ -20,7 +19,9 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
 
   function getCurrentAsiaDhakaTime() {
     const now = new Date();
-    const asiaDhakaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
+    const asiaDhakaTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" })
+    );
     return asiaDhakaTime;
   }
 
@@ -28,15 +29,20 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
 
   // Convert deliveryDate to a valid JavaScript Date object
   const [day, month, year] = deliveryDate.split("-").map(Number);
-  const deliveryDateTime = new Date(year, month - 1, day, adjustedHours, minutes, 0, 0);
+  const deliveryDateTime = new Date(
+    year,
+    month - 1,
+    day,
+    adjustedHours,
+    minutes,
+    0,
+    0
+  );
 
   const timeDifferenceMs = deliveryDateTime - asiaDhakaTime;
 
   return timeDifferenceMs;
 }
-
-
-
 
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -64,12 +70,10 @@ async function handleNewOrder(req, res) {
 async function handleGetOrdersUnFinished(req, res) {
   try {
     const orders = await Order.find({
-      status: { $nin: ["Finished", "Correction", "Test"] }
+      status: { $nin: ["Finished", "Correction", "Test"] },
     }).lean();
 
-
     if (!orders) res.status(200).json([]);
-
 
     const sortedOrders = orders
       .map((order) => ({
@@ -81,7 +85,6 @@ async function handleGetOrdersUnFinished(req, res) {
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
 
-
     res.status(200).json(sortedOrders);
   } catch (e) {
     console.error(e);
@@ -92,7 +95,7 @@ async function handleGetOrdersUnFinished(req, res) {
 async function handleGetOrdersRedo(req, res) {
   try {
     const orders = await Order.find({
-      status: { $in: ["Correction", "Test"], $ne: "Finished" }
+      status: { $in: ["Correction", "Test"], $ne: "Finished" },
     }).lean();
 
     const sortedOrders = orders
@@ -111,8 +114,6 @@ async function handleGetOrdersRedo(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 async function handleGetAllOrderPaginated(req, res) {
   const ITEMS_PER_PAGE = 20;
@@ -175,113 +176,148 @@ async function handleGetAllOrderPaginated(req, res) {
   }
 }
 
-
-
-
 async function handleGetOrdersById(req, res) {
   try {
-    let data = req.headers
+    let data = req.headers;
     const orders = await Order.findById(data.id).lean();
 
     if (!orders) sendError(res, 400, "No order found with the id");
-    else
-      res.status(200).json(orders);
-
+    else res.status(200).json(orders);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 async function handleGetOrdersByFilter(req, res) {
   try {
-    const { fromtime, totime, folder, client, task, page } = req.headers;
-    const ITEMS_PER_PAGE = 20; // Number of items per page
+    const { fromtime, totime, folder, client, task } = req.headers;
 
-    console.log(
-      "Received request with parameters:",
-      fromtime,
-      totime,
-      folder,
-      client,
-      task,
-      page
-    );
+    const pipeline = [];
 
-    let query = {};
-    if (folder) query.folder = folder;
-    if (client) query.client_code = client;
-    if (task) query.task = task;
+    if (folder) pipeline.push({ $match: { folder } });
+    if (client) pipeline.push({ $match: { client_code: client } });
+    if (task) pipeline.push({ $match: { task } });
+
     if (fromtime || totime) {
-      query.date_today = {};
-      if (fromtime) query.date_today.$gte = fromtime;
-      if (totime) query.date_today.$lte = totime;
-    }
+      const dateFilter = {};
+      if (fromtime) dateFilter.$gte = new Date(fromtime);
+      if (totime) dateFilter.$lte = new Date(totime);
 
-    console.log(query);
+      // Add checks to ensure dates are not undefined before conversion
+      if (dateFilter.$gte) {
+        dateFilter.$gte = dateFilter.$gte.toISOString();
+      }
+      if (dateFilter.$lte) {
+        dateFilter.$lte = dateFilter.$lte.toISOString();
+      }
 
-    if (Object.keys(query).length === 0 && query.constructor === Object)
-      sendError(res, 400, "No filter applied");
-    else {
-      // Calculate the number of documents to skip based on the current page
-      const skip = (page - 1) * ITEMS_PER_PAGE;
-      const pipeline = [
-        { $match: query }, // Apply the query filter
-        {
-          $addFields: {
-            customSortField: {
-              $cond: {
-                if: {
-                  $or: [
-                    { $eq: ["$status", "Correction"] },
-                    { $eq: ["$status", "Test"] },
-                  ],
-                },
-                then: 0,
-                else: {
-                  $cond: {
-                    if: { $ne: ["$status", "Finished"] },
-                    then: 1,
-                    else: 2,
-                  },
-                },
-              },
-            },
-          },
+      pipeline.push({
+        $match: {
+          date_today: dateFilter, // No need to use $gte and $lte here
         },
-        { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-        { $skip: skip }, // Skip items for pagination
-        { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
-      ];
-
-      const count = await Order.countDocuments(query); // Count the total matching documents
-
-
-
-      const orders = await Order.aggregate(pipeline).exec();
-
-      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
-
-      res.status(200).json({
-        pagination: {
-          count,
-          pageCount,
-        },
-        items: orders,
       });
     }
+
+    pipeline.push({ $project: { _id: 0 } }); // Exclude _id field if needed
+
+    const orders = await Order.aggregate(pipeline);
+
+    orders?.map((order, index) => {
+      console.log(`${index}| ${order.date_today}`);
+    });
+    console.log(orders.length)
+
+    res.status(200).json(orders);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
 
+// async function handleGetOrdersByFilter(req, res) {
+//   try {
+//     const { fromtime, totime, folder, client, task } = req.headers;
+//     const page = req.headers.page || 1;
+//     const ITEMS_PER_PAGE = 20; // Number of items per page
 
+//     console.log(
+//       "Received request with parameters:",
+//       fromtime,
+//       totime,
+//       folder,
+//       client,
+//       task,
+//       page
+//     );
 
+//     let query = {};
+//     if (folder) query.folder = folder;
+//     if (client) query.client_code = client;
+//     if (task) query.task = task;
+//     if (fromtime || totime) {
+//       query.date_today = {};
+//       if (fromtime) query.date_today.$gte = fromtime;
+//       if (totime) query.date_today.$lte = totime;
+//     }
 
+//     console.log(query);
 
+//     if (Object.keys(query).length === 0 && query.constructor === Object)
+//       sendError(res, 400, "No filter applied");
+//     else {
+//       // Calculate the number of documents to skip based on the current page
+//       const skip = (page - 1) * ITEMS_PER_PAGE;
+//       const pipeline = [
+//         { $match: query }, // Apply the query filter
+//         {
+//           $addFields: {
+//             customSortField: {
+//               $cond: {
+//                 if: {
+//                   $or: [
+//                     { $eq: ["$status", "Correction"] },
+//                     { $eq: ["$status", "Test"] },
+//                   ],
+//                 },
+//                 then: 0,
+//                 else: {
+//                   $cond: {
+//                     if: { $ne: ["$status", "Finished"] },
+//                     then: 1,
+//                     else: 2,
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//         },
+//         { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
+//         { $skip: skip }, // Skip items for pagination
+//         { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
+//       ];
+
+//       const count = await Order.countDocuments(query); // Count the total matching documents
+
+//       const orders = await Order.aggregate(pipeline).exec();
+
+//       console.log("FILTERED ORDERS: ", orders)
+
+//       const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+//       res.status(200).json({
+//         pagination: {
+//           count,
+//           pageCount,
+//         },
+//         items: orders,
+//       });
+//     }
+//   } catch (e) {
+//     console.error(e);
+//     sendError(res, 500, "An error occurred");
+//   }
+// }
 
 async function handleGetOnlyTime(req, res) {
   try {
@@ -350,9 +386,13 @@ async function handleFinishOrder(req, res) {
     const data = req.headers;
     console.log("Received edit request with data:", data);
 
-    const resData = await Order.findByIdAndUpdate(data.id, { status: "Finished" }, {
-      new: true,
-    });
+    const resData = await Order.findByIdAndUpdate(
+      data.id,
+      { status: "Finished" },
+      {
+        new: true,
+      }
+    );
 
     if (resData) {
       res.status(200).json(resData);
@@ -370,9 +410,13 @@ async function handleRedoOrder(req, res) {
     const data = req.headers;
     console.log("Received edit request with data:", data);
 
-    const resData = await Order.findByIdAndUpdate(data.id, { status: "Correction" }, {
-      new: true,
-    });
+    const resData = await Order.findByIdAndUpdate(
+      data.id,
+      { status: "Correction" },
+      {
+        new: true,
+      }
+    );
 
     if (resData) {
       res.status(200).json(resData);

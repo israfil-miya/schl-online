@@ -64,11 +64,11 @@ console.log(timeNow());
 const OrderSchema = new mongoose.Schema({
   date_today: {
     type: String,
-    default: dateToday(),
+    default: dateToday,
   },
   time_now: {
     type: String,
-    default: timeNow(),
+    default: timeNow,
   },
   client_code: {
     type: String,
