@@ -25,6 +25,15 @@ function calculateCountdown(timeDifferenceMs) {
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
+function isoDateToDdMmYyyy(isoDate) {
+  const date = new Date(isoDate);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear().toString();
+
+  return `${day}-${month}-${year}`;
+}
+
 export default function Home({ orders, ordersRedo }) {
   const router = useRouter();
   let { error, success } = router.query;
@@ -108,7 +117,7 @@ export default function Home({ orders, ordersRedo }) {
                     <tr key={order._id}>
                       <td>{index + 1}</td>
                       <td className="text-break">
-                        {order.date_today}
+                        {isoDateToDdMmYyyy(order.date_today)}
                         <span className="text-body-secondary"> | </span>
                         {order.time_now}
                       </td>

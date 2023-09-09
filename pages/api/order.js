@@ -189,135 +189,208 @@ async function handleGetOrdersById(req, res) {
   }
 }
 
-async function handleGetOrdersByFilter(req, res) {
+// async function handleGetOrdersByFilter(req, res) {
+//   try {
+//     const { fromtime, totime, folder, client, task } = req.headers;
+
+//     const pipeline = [];
+
+//     if (folder) pipeline.push({ $match: { folder } });
+//     if (client) pipeline.push({ $match: { client_code: client } });
+//     if (task) pipeline.push({ $match: { task } });
+
+//     if (fromtime || totime) {
+//       const dateFilter = {};
+//       if (fromtime) dateFilter.$gte = new Date(fromtime);
+//       if (totime) dateFilter.$lte = new Date(totime);
+
+//       // Add checks to ensure dates are not undefined before conversion
+//       if (dateFilter.$gte) {
+//         dateFilter.$gte = dateFilter.$gte.toISOString();
+//       }
+//       if (dateFilter.$lte) {
+//         dateFilter.$lte = dateFilter.$lte.toISOString();
+//       }
+
+//       pipeline.push({
+//         $match: {
+//           date_today: dateFilter, // No need to use $gte and $lte here
+//         },
+//       });
+//     }
+
+//     pipeline.push({ $project: { _id: 0 } }); // Exclude _id field if needed
+
+//     const orders = await Order.aggregate(pipeline);
+
+//     orders?.map((order, index) => {
+//       console.log(`${index}| ${order.date_today}`);
+//     });
+//     console.log(orders.length)
+
+//     res.status(200).json(orders);
+//   } catch (e) {
+//     console.error(e);
+//     sendError(res, 500, "An error occurred");
+//   }
+// }
+
+
+
+
+function ddMmYyyyToIsoDate(ddMmYyyy) {
   try {
-    const { fromtime, totime, folder, client, task } = req.headers;
-
-    const pipeline = [];
-
-    if (folder) pipeline.push({ $match: { folder } });
-    if (client) pipeline.push({ $match: { client_code: client } });
-    if (task) pipeline.push({ $match: { task } });
-
-    if (fromtime || totime) {
-      const dateFilter = {};
-      if (fromtime) dateFilter.$gte = new Date(fromtime);
-      if (totime) dateFilter.$lte = new Date(totime);
-
-      // Add checks to ensure dates are not undefined before conversion
-      if (dateFilter.$gte) {
-        dateFilter.$gte = dateFilter.$gte.toISOString();
-      }
-      if (dateFilter.$lte) {
-        dateFilter.$lte = dateFilter.$lte.toISOString();
-      }
-
-      pipeline.push({
-        $match: {
-          date_today: dateFilter, // No need to use $gte and $lte here
-        },
-      });
+    const parts = ddMmYyyy.split('-');
+    if (parts.length !== 3) {
+      throw new Error('Invalid date format: Incorrect number of parts');
     }
 
-    pipeline.push({ $project: { _id: 0 } }); // Exclude _id field if needed
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
 
-    const orders = await Order.aggregate(pipeline);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+      throw new Error('Invalid date format: Parts are not numbers');
+    }
 
-    orders?.map((order, index) => {
-      console.log(`${index}| ${order.date_today}`);
-    });
-    console.log(orders.length)
+    // Months are 0-based in JavaScript, so subtract 1 from the month
+    const date = new Date(year, month - 1, day);
 
-    res.status(200).json(orders);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date: Resulting date is NaN');
+    }
+
+    // Convert to ISODate format
+    const isoDate = date.toISOString();
+    console.log(`Converted ${ddMmYyyy} to ISODate: ${isoDate}`);
+    return isoDate;
+  } catch (error) {
+    console.error(`Error converting ${ddMmYyyy} to ISODate: ${error.message}`);
+    throw error;
+  }
+}
+
+
+
+
+// async function handleGetOrdersyFilter(req, res) {
+//   try {
+//     const { fromtime, totime, folder, client, task } = req.headers;
+//     const page = req.headers.page || 1;
+//     const ITEMS_PER_PAGE = 20; // Number of items per page
+
+//     console.log(`Received fromtime: ${fromtime}, totime: ${totime}`);
+
+//     // Convert fromtime and totime to ISODate format directly
+//     const adjustedFromtime = ddMmYyyyToIsoDate(fromtime);
+//     const adjustedTotime = ddMmYyyyToIsoDate(totime);
+
+//     console.log(`Adjusted fromtime: ${adjustedFromtime}, totime: ${adjustedTotime}`);
+
+//     let query = {
+//       createdAt: { $gte: adjustedFromtime, $lte: adjustedTotime }
+//     };
+
+//     console.log(query);
+
+//     const count = await Order.countDocuments(query); // Count the total matching documents
+
+//     const orders = await Order.find(query);
+
+//     orders?.map((order, index) => {
+//       console.log(`${index}| ${order.date_today}`);
+//     });
+//     console.log(`Total orders found: ${orders.length}`);
+
+//     const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+//     // Calculate the number of documents to skip based on the current page
+//     const skip = (page - 1) * ITEMS_PER_PAGE;
+
+//     res.status(200).json({
+//       pagination: {
+//         count,
+//         pageCount,
+//       },
+//       items: orders,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     sendError(res, 500, "An error occurred");
+//   }
+// }
+
+
+
+
+
+
+
+
+async function handleGetOrdersByFilter (req, res) {
+  try {
+    const { fromtime, totime, folder, client, task } = req.headers;
+    const page = req.headers.page || 1;
+    const ITEMS_PER_PAGE = 20; // Number of items per page
+
+    console.log(
+      "Received request with parameters:",
+      fromtime,
+      totime,
+      folder,
+      client,
+      task,
+      page
+    );
+
+
+
+
+    let query = {};
+    if (folder) query.folder = folder;
+    if (client) query.client_code = client;
+    if (task) query.task = task;
+    if (fromtime || totime) {
+      query.createdAt = {}
+      if (fromtime) query.createdAt.$gte= ddMmYyyyToIsoDate(fromtime);
+      if (totime) query.createdAt.$lte= ddMmYyyyToIsoDate(totime);
+    }
+
+    console.log(query);
+
+    if (Object.keys(query).length === 0 && query.constructor === Object)
+      sendError(res, 400, "No filter applied");
+    else {
+      // Calculate the number of documents to skip based on the current page
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+    
+    const pipeline = [ { $match: query } ];
+
+    
+      const count = await Order.countDocuments(query); // Count the total matching documents
+
+      const orders = await Order.aggregate(pipeline).exec()
+
+      console.log("FILTERED ORDERS: ", orders)
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: orders,
+      });
+    }
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
 
-// async function handleGetOrdersByFilter(req, res) {
-//   try {
-//     const { fromtime, totime, folder, client, task } = req.headers;
-//     const page = req.headers.page || 1;
-//     const ITEMS_PER_PAGE = 20; // Number of items per page
 
-//     console.log(
-//       "Received request with parameters:",
-//       fromtime,
-//       totime,
-//       folder,
-//       client,
-//       task,
-//       page
-//     );
 
-//     let query = {};
-//     if (folder) query.folder = folder;
-//     if (client) query.client_code = client;
-//     if (task) query.task = task;
-//     if (fromtime || totime) {
-//       query.date_today = {};
-//       if (fromtime) query.date_today.$gte = fromtime;
-//       if (totime) query.date_today.$lte = totime;
-//     }
-
-//     console.log(query);
-
-//     if (Object.keys(query).length === 0 && query.constructor === Object)
-//       sendError(res, 400, "No filter applied");
-//     else {
-//       // Calculate the number of documents to skip based on the current page
-//       const skip = (page - 1) * ITEMS_PER_PAGE;
-//       const pipeline = [
-//         { $match: query }, // Apply the query filter
-//         {
-//           $addFields: {
-//             customSortField: {
-//               $cond: {
-//                 if: {
-//                   $or: [
-//                     { $eq: ["$status", "Correction"] },
-//                     { $eq: ["$status", "Test"] },
-//                   ],
-//                 },
-//                 then: 0,
-//                 else: {
-//                   $cond: {
-//                     if: { $ne: ["$status", "Finished"] },
-//                     then: 1,
-//                     else: 2,
-//                   },
-//                 },
-//               },
-//             },
-//           },
-//         },
-//         { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-//         { $skip: skip }, // Skip items for pagination
-//         { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
-//       ];
-
-//       const count = await Order.countDocuments(query); // Count the total matching documents
-
-//       const orders = await Order.aggregate(pipeline).exec();
-
-//       console.log("FILTERED ORDERS: ", orders)
-
-//       const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
-
-//       res.status(200).json({
-//         pagination: {
-//           count,
-//           pageCount,
-//         },
-//         items: orders,
-//       });
-//     }
-//   } catch (e) {
-//     console.error(e);
-//     sendError(res, 500, "An error occurred");
-//   }
-// }
 
 async function handleGetOnlyTime(req, res) {
   try {
