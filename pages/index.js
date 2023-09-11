@@ -117,7 +117,7 @@ export default function Home({ orders, ordersRedo }) {
                     <tr key={order._id}>
                       <td>{index + 1}</td>
                       <td className="text-break">
-                        {isoDateToDdMmYyyy(order.date_today)}
+                        {isoDateToDdMmYyyy(order.createdAt)}
                         <span className="text-body-secondary"> | </span>
                         {order.time_now}
                       </td>
@@ -194,7 +194,7 @@ export default function Home({ orders, ordersRedo }) {
                     >
                       <td>{index + 1}</td>
                       <td className="text-break">
-                        {order.date_today}
+                        {isoDateToDdMmYyyy(order.createdAt)}
                         <span className="text-body-secondary"> | </span>
                         {order.time_now}
                       </td>
