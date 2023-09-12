@@ -363,12 +363,12 @@ export default function Browse() {
           </button>
         </div>
       </div>
+
       <div className="float-end">
-
-
-
-
         <div className="btn-group me-5 my-3" role="group" aria-label="Basic outlined example">
+          <span className="me-3">
+          Page <strong>{page}/{pageCount}</strong>
+          </span>
           <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={handlePrevious}>
             Previous
           </button>
@@ -376,11 +376,13 @@ export default function Browse() {
             Next
           </button>
         </div>
-
-
-
-
-
+      </div>
+      <div className="float-start">
+        <div className={`btn-group ms-5 my-3" ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
+          <button type="button" className="btn btn-sm btn-outline-success" >
+            EXCEL EXPORT
+          </button>
+        </div>
       </div>
       <table
         style={{ overflow: "hidden" }}
