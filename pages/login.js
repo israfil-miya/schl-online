@@ -84,10 +84,12 @@ export default function Login() {
                 />
                 <label htmlFor="floatingPassword">Password</label>
               </div>
-
-              <button type="submit" className="btn btn-outline-primary mb-4">
-                Login
-              </button>
+                <button
+                  type="submit"
+                  className="btn w-100 btn-outline-dark mb-4"
+                >
+                  Login
+                </button>
             </form>
           </div>
         </div>
