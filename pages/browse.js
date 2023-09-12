@@ -366,9 +366,9 @@ export default function Browse() {
 
       <div className="float-end">
         <div className="btn-group me-5 my-3" role="group" aria-label="Basic outlined example">
-          <span className="me-3">
+          {orders && <span className="me-3">
           Page <strong>{page}/{pageCount}</strong>
-          </span>
+          </span> }
           <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={handlePrevious}>
             Previous
           </button>
