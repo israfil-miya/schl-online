@@ -46,7 +46,7 @@ export default function Navbar({ navFor }) {
     // Render time cards only if it's a desktop screen
     if (isDesktop) {
       return (
-        <ul className="navbar-nav  me-auto ">
+        <ul className="navbar-nav  m-auto ">
           {cities.map((city, index) => (
             <li className="mx-1" key={index}>
               <TimeCard city={city} />
@@ -62,82 +62,36 @@ export default function Navbar({ navFor }) {
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
         <div className="container-fluid">
-          <Link
-            className="navbar-brand d-flex align-items-center"
-            href="/"
-          >
-            <Image
-              src="/images/NEW-SCH-logo-text-grey.png"
-              alt="Logo"
-              width="40"
-              height="44"
-              className="d-inline-block me-2"
-            />
-            SCHL PORTAL
-          </Link>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarText"
-            aria-controls="navbarText"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
+
+            <Link
+              className="navbar-brand d-flex align-items-center"
+              href="/"
+            >
+              <Image
+                src="/images/NEW-SCH-logo-text-grey.png"
+                alt="Logo"
+                width="100"
+                height="70"
+                className="d-inline-block me-2"
+              />
+              <h4 className="fw-medium">Studio Click House Ltd.</h4>
+            </Link>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarText"
+              aria-controls="navbarText"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+   
+
+
+
           <div className="collapse navbar-collapse" id="navbarText">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <Link
-                  className={navFor == "tasks" ? "nav-link active" : "nav-link"}
-                  href="/"
-                >
-                  Tasks
-                </Link>
-              </li>
-
-              <li className="nav-item">
-                <Link
-                  className={
-                    navFor == "browse" ? "nav-link active" : "nav-link"
-                  }
-                  href="/browse"
-                >
-                  Browse
-                </Link>
-              </li>
-
-              {session.user.role == "admin" || session.user.role == "super" ? (
-                <li className="nav-item">
-                  <Link
-                    className={
-                      navFor == "admin" ? "nav-link active" : "nav-link"
-                    }
-                    href="/admin"
-                  >
-                    Admin
-                  </Link>
-                </li>
-              ) : (
-                <></>
-              )}
-              {session.user.role == "super" ? (
-                <li className="nav-item">
-                  <Link
-                    className={
-                      navFor == "dashboard" ? "nav-link active" : "nav-link"
-                    }
-                    href="/dashboard"
-                  >
-                    Dashboard
-                  </Link>
-                </li>
-              ) : (
-                <></>
-              )}
-            </ul>
-
             {renderTimeCards()}
 
             <div className="navbar-text d-flex me-3">
@@ -183,15 +137,64 @@ export default function Navbar({ navFor }) {
           </div>
         </div>
       </nav>
+
+
+
+
+
+      <nav className="nav bg-dark nav-pills flex-column flex-sm-row">
+        <Link
+          className={navFor == "tasks" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"}
+          href="/"
+        >
+          Tasks
+        </Link>
+
+        <Link
+          className={
+            navFor == "browse" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"
+          }
+          href="/browse"
+        >
+          Browse
+        </Link>
+
+        {session.user.role == "admin" || session.user.role == "super" ? (
+          <Link
+            className={
+              navFor == "admin" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"
+            }
+            href="/admin"
+          >
+            Admin
+          </Link>
+        ) : (
+          <></>
+        )}
+
+        {session.user.role == "super" ? (
+          <Link
+            className={
+              navFor == "dashboard" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"
+            }
+            href="/dashboard"
+          >
+            Dashboard
+          </Link>
+        ) : (
+          <></>
+        )}
+      </nav>
       <style jsx>
         {`
-          /* Other styles... */
 
           @media (min-width: 992px) {
             .navbar-nav.time-cards-list {
               margin: none;
             }
           }
+
+          
         `}
       </style>
     </>
