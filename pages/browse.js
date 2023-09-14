@@ -218,23 +218,12 @@ export default function Browse() {
   }
 
   async function editOrder() {
-    console.log("This Dil date: ",manageData.delivery_date)
-    console.log("This Down date: ",manageData.download_date)
-
-
-    // Check if download_date is in "YYYY-MM-DD" format and convert if needed
-  if (manageData.download_date && manageData.download_date.includes("-")) {
-    manageData.download_date = convertToDDMMYYYY(manageData.download_date);
-  }
-
-  // Check if delivery_date is in "YYYY-MM-DD" format and convert if needed
-  if (manageData.delivery_date && manageData.delivery_date.includes("-")) {
-    manageData.delivery_date = convertToDDMMYYYY(manageData.delivery_date);
-  }
-
-
-    console.log("This Dil date: ",manageData.delivery_date)
-    console.log("This Down date: ",manageData.download_date)
+    if (manageData.download_date && manageData.download_date.includes("-")) {
+      manageData.download_date = convertToDDMMYYYY(manageData.download_date);
+    }
+    if (manageData.delivery_date && manageData.delivery_date.includes("-")) {
+      manageData.delivery_date = convertToDDMMYYYY(manageData.delivery_date);
+    }
 
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {

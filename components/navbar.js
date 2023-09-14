@@ -64,34 +64,30 @@ export default function Navbar({ navFor }) {
       <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
         <div className="container-fluid">
 
-            <Link
-              className="navbar-brand d-flex align-items-center"
-              href="/"
-            >
-              <Image
-                src="/images/NEW-SCH-logo-text-grey.png"
-                alt="Logo"
-                width="100"
-                height="70"
-                className="d-inline-block me-2"
-              />
-              <h4 className="mt-3 fw-medium">Studio Click House Ltd.</h4>
-            </Link>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarText"
-              aria-controls="navbarText"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-   
-
-
-
+          <Link
+            className="navbar-brand d-flex align-items-center"
+            href="/"
+          >
+            <Image
+              src="/images/NEW-SCH-logo-text-grey.png"
+              alt="Logo"
+              width="100"
+              height="70"
+              className="d-inline-block me-2"
+            />
+            <h4 className="mt-3 fw-medium">Studio Click House Ltd.</h4>
+          </Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarText"
+            aria-controls="navbarText"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
           <div className="collapse navbar-collapse" id="navbarText">
             {renderTimeCards()}
 
@@ -141,34 +137,30 @@ export default function Navbar({ navFor }) {
 
 
       <div className={`${styles.nav}`}>
-      <Link className={`${styles.navitem} ${navFor === 'tasks' ? styles.active : ''}`} href="/">
-        Tasks
-      </Link>
-      <Link className={`${styles.navitem} ${navFor === 'browse' ? styles.active : ''}`} href="/browse">
-        Browse
-      </Link>
-      {/* Check for admin or super role to display Admin link */}
-      {session.user.role === 'admin' || session.user.role === 'super' ? (
-        <Link className={`${styles.navitem} ${navFor === 'admin' ? styles.active : ''}`} href="/admin">
-          Admin
+        <Link className={`${styles.navitem} ${navFor === 'tasks' ? styles.active : ''}`} href="/">
+          Tasks
         </Link>
-      ) : null}
-      {/* Check for super role to display Dashboard link */}
-      {session.user.role === 'super' ? (
-        <Link className={`${styles.navitem} ${navFor === 'dashboard' ? styles.active : ''}`} href="/dashboard">
-          Dashboard
+        <Link className={`${styles.navitem} ${navFor === 'browse' ? styles.active : ''}`} href="/browse">
+          Browse
         </Link>
-      ) : null}
-    </div>
+        {session.user.role === 'admin' || session.user.role === 'super' ? (
+          <Link className={`${styles.navitem} ${navFor === 'admin' ? styles.active : ''}`} href="/admin">
+            Admin
+          </Link>
+        ) : null}
+        {session.user.role === 'super' ? (
+          <Link className={`${styles.navitem} ${navFor === 'dashboard' ? styles.active : ''}`} href="/dashboard">
+            Dashboard
+          </Link>
+        ) : null}
+      </div>
       <style jsx>
         {`
-
           @media (min-width: 992px) {
             .navbar-nav.time-cards-list {
               margin: none;
             }
           }
-          
         `}
       </style>
     </>
