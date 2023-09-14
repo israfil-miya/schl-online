@@ -364,36 +364,32 @@ export default function Browse() {
           </button>
         </div>
       </div>
-
-
+      
       {orders?.items?.length && (
-  <div className="container mb-5">
-    <div className="float-end" style={{ display: 'flex', alignItems: 'center' }}>
-      <span className="me-3">
-        Page <strong>{page}/{pageCount}</strong>
-      </span>
-      <div className="btn-group" role="group" aria-label="Basic outlined example">
-        <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={handlePrevious}>
-          Previous
-        </button>
-        <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === pageCount} onClick={handleNext}>
-          Next
-        </button>
-      </div>
-    </div>
+        <div className="container mb-5">
+          <div className="float-end" style={{ display: 'flex', alignItems: 'center' }}>
+            <span className="me-3">
+              Page <strong>{page}/{pageCount}</strong>
+            </span>
+            <div className="btn-group" role="group" aria-label="Basic outlined example">
+              <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={handlePrevious}>
+                Previous
+              </button>
+              <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === pageCount} onClick={handleNext}>
+                Next
+              </button>
+            </div>
+          </div>
 
-    <div className="float-start">
-      <div className={`btn-group ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
-        <button type="button" className="btn btn-sm btn-outline-success">
-          EXCEL EXPORT
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
+          <div className="float-start">
+            <div className={`btn-group ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
+              <button type="button" className="btn btn-sm btn-outline-success">
+                EXCEL EXPORT
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <table
         style={{ overflow: "hidden" }}
