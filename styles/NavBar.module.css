@@ -1,0 +1,23 @@
+.nav {
+    display: flex;
+    background-color: #343a40; /* Dark background color */
+  }
+  
+  .navitem {
+    flex: 1; /* Equal width for each link */
+    text-align: center; /* Center align text */
+    text-decoration: none;
+    color: white; /* Text color */
+    padding: 10px; /* Adjust padding for each link */
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+    margin-right: 10px; /* Add margin to create spacing between links */
+  }
+  
+  /* Remove margin from the last link to avoid extra spacing */
+  .navitem:last-child {
+    margin-right: 0;
+  }
+  
+  .active {
+    background-color: #7aa63e; /* Active link background color */
+  }

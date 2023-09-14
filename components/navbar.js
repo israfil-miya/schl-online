@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import TimeCard from "./timecard";
 import { useState, useEffect } from "react";
+import styles from '../styles/NavBar.module.css';
 
 const cities = [
   "Asia/Dhaka",
@@ -74,7 +75,7 @@ export default function Navbar({ navFor }) {
                 height="70"
                 className="d-inline-block me-2"
               />
-              <h4 className="fw-medium">Studio Click House Ltd.</h4>
+              <h4 className="mt-3 fw-medium">Studio Click House Ltd.</h4>
             </Link>
             <button
               className="navbar-toggler"
@@ -139,52 +140,26 @@ export default function Navbar({ navFor }) {
       </nav>
 
 
-
-
-
-      <nav className="nav bg-dark nav-pills flex-column flex-sm-row">
-        <Link
-          className={navFor == "tasks" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"}
-          href="/"
-        >
-          Tasks
+      <div className={`${styles.nav}`}>
+      <Link className={`${styles.navitem} ${navFor === 'tasks' ? styles.active : ''}`} href="/">
+        Tasks
+      </Link>
+      <Link className={`${styles.navitem} ${navFor === 'browse' ? styles.active : ''}`} href="/browse">
+        Browse
+      </Link>
+      {/* Check for admin or super role to display Admin link */}
+      {session.user.role === 'admin' || session.user.role === 'super' ? (
+        <Link className={`${styles.navitem} ${navFor === 'admin' ? styles.active : ''}`} href="/admin">
+          Admin
         </Link>
-
-        <Link
-          className={
-            navFor == "browse" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"
-          }
-          href="/browse"
-        >
-          Browse
+      ) : null}
+      {/* Check for super role to display Dashboard link */}
+      {session.user.role === 'super' ? (
+        <Link className={`${styles.navitem} ${navFor === 'dashboard' ? styles.active : ''}`} href="/dashboard">
+          Dashboard
         </Link>
-
-        {session.user.role == "admin" || session.user.role == "super" ? (
-          <Link
-            className={
-              navFor == "admin" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"
-            }
-            href="/admin"
-          >
-            Admin
-          </Link>
-        ) : (
-          <></>
-        )}
-
-        {session.user.role == "super" ? (
-          <Link
-            className={
-              navFor == "dashboard" ? "nav-link flex-sm-fill text-sm-center active" : "flex-sm-fill text-sm-center nav-link"
-            }
-            href="/dashboard"
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <></>
-        )}
-      </nav>
+      ) : null}
+    </div>
       <style jsx>
         {`
 
@@ -193,7 +168,6 @@ export default function Navbar({ navFor }) {
               margin: none;
             }
           }
-
           
         `}
       </style>
