@@ -75,7 +75,7 @@ export default function Navbar({ navFor }) {
               height="70"
               className="d-inline-block me-2"
             />
-            <h4 className="mt-3 fw-medium">Studio Click House Ltd.</h4>
+            <h4 className="mt-3 fw-semibold">Studio Click House Ltd.</h4>
           </Link>
           <button
             className="navbar-toggler"

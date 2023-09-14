@@ -4,6 +4,8 @@
   }
   
   .navitem {
+    font-weight: 600;
+    text-transform: uppercase;
     flex: 1; /* Equal width for each link */
     text-align: center; /* Center align text */
     text-decoration: none;
@@ -12,7 +14,9 @@
     transition: background-color 0.3s ease; /* Smooth background color transition */
     margin-right: 10px; /* Add margin to create spacing between links */
   }
-  
+  .navitem:hover{
+    color: rgba(255, 255, 255, 0.9);
+  }
   /* Remove margin from the last link to avoid extra spacing */
   .navitem:last-child {
     margin-right: 0;
