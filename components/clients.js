@@ -397,6 +397,8 @@ export default function Clients() {
               ></button>
             </div>
             <div className="modal-body">
+
+              
               <div className="m-3">
                 <label htmlFor="date" className="form-label">
                   Client Code
