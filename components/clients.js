@@ -10,10 +10,26 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [clientCode, setClientCode] = useState("");
   const [clientName, setClientName] = useState("");
+  const [marketer, setMarketer] = useState("")
+  const [contactPerson, setContactPerson] = useState("")
+  const [designation, setDesignation] = useState("")
+  const [contactNumber, setContactNumber] = useState("")
+  const [email, setEmail] = useState("")
+  const [country, setCountry] = useState("")
+  const [price, setPrice] = useState("")
+
+
   const [manageData, setManageData] = useState({
     _id: "",
     client_code: "",
     client_name: "",
+    marketer: "",
+    contact_person: "",
+    designation: "",
+    contact_number: "",
+    email: "",
+    country: "",
+    price: "",
   });
 
   async function fetchClientData(url, options) {
@@ -55,6 +71,13 @@ export default function Clients() {
       body: JSON.stringify({
         client_code: clientCode,
         client_name: clientName,
+        marketer,
+        contact_person: contactPerson,
+        designation,
+        contact_number: contactNumber,
+        email,
+        country,
+        price
       }),
       headers: {
         "Content-Type": "application/json",
@@ -162,8 +185,8 @@ export default function Clients() {
   }, []);
 
   return (
-    <div className="container my-5">
-      <div className="add-client">
+    <div className="my-5">
+      <div className="container add-client">
         <h5 className="py-3">Add New Client</h5>
         <form onSubmit={addNewClient} id="inputForm">
           <div className="mb-3">
@@ -190,19 +213,111 @@ export default function Clients() {
               id="clientName"
             />
           </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Marketer Name
+            </label>
+            <input
+              value={marketer}
+              onChange={(e) => setMarketer(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Contact Person
+            </label>
+            <input
+              value={contactPerson}
+              onChange={(e) => setContactPerson(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Designation
+            </label>
+            <input
+              value={designation}
+              onChange={(e) => setDesignation(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Contact Number
+            </label>
+            <input
+              value={contactNumber}
+              onChange={(e) => setContactNumber(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Email
+            </label>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Country
+            </label>
+            <input
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Price
+            </label>
+            <input
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
           <button type="submit" className="btn btn-sm btn-outline-primary">
             Submit
           </button>
         </form>
       </div>
       <div className="client-list my-5">
-        <h5 className="py-3">List of Client</h5>
+
+      <h5 className="text-center py-4">Clients List</h5>
         <table className="table p-3 table-hover">
           <thead>
             <tr>
               <th>#</th>
               <th>Client Code</th>
               <th>Client Name</th>
+              <th>Marketer Name</th>
+              <th>Contact Person</th>
+              <th>Designation</th>
+              <th>Contact Number</th>
+              <th>Email</th>
+              <th>Country</th>
+              <th>Price</th>
               <th>Manage</th>
             </tr>
           </thead>
@@ -212,6 +327,13 @@ export default function Clients() {
                 <td>{index + 1}</td>
                 <td>{client.client_code}</td>
                 <td>{client.client_name}</td>
+                <td>{client.marketer}</td>
+                <td>{client.contact_person}</td>
+                <td>{client.designation}</td>
+                <td>{client.contact_number}</td>
+                <td>{client.email}</td>
+                <td>{client.country}</td>
+                <td>{client.price}</td>
                 <td>
                   <button
                     onClick={() =>
@@ -219,6 +341,13 @@ export default function Clients() {
                         _id: client._id,
                         client_code: client.client_code,
                         client_name: client.client_name,
+                        marketer: client.marketer,
+                        contact_person: client.contact_person,
+                        designation: client.designation,
+                        contact_number: client.contact_number,
+                        email: client.email,
+                        country: client.country,
+                        price: client.price
                       })
                     }
                     data-bs-toggle="modal"
@@ -228,6 +357,13 @@ export default function Clients() {
                   >
                     Edit
                   </button>
+                  <Link
+                    type="button"
+                    href={`/client/${client._id}`}
+                    className="btn me-2 btn-sm btn-outline-warning"
+                  >
+                    View
+                  </Link>
                   <button
                     type="button"
                     onClick={() => deleteClient(client)}
@@ -247,7 +383,7 @@ export default function Clients() {
         tabIndex="-1"
         aria-hidden="true"
       >
-        <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-dialog modal-dialog-scrollable modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
@@ -293,6 +429,119 @@ export default function Clients() {
                   className="form-control"
                 />
               </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Marketer Name
+                </label>
+                <input
+                  value={manageData.marketer}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      marketer: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Contact Person
+                </label>
+                <input
+                  value={manageData.contact_person}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      contact_person: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Designation
+                </label>
+                <input
+                  value={manageData.designation}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      designation: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Contact Number
+                </label>
+                <input
+                  value={manageData.contact_number}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      contact_number: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Email
+                </label>
+                <input
+                  value={manageData.email}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      email: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Country
+                </label>
+                <input
+                  value={manageData.country}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      country: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Price
+                </label>
+                <input
+                  value={manageData.price}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      price: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
             </div>
             <div className="modal-footer p-1">
               <button
