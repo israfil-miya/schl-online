@@ -529,9 +529,9 @@ export default function Clients() {
               </div>
               <div className="m-3">
                 <label htmlFor="date" className="form-label">
-                  Price
+                  Prices
                 </label>
-                <input
+                <textarea
                   value={manageData.price}
                   onChange={(e) =>
                     setManageData((prevData) => ({

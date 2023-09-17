@@ -9,7 +9,6 @@ import Navbar from "../components/navbar";
 export default function Browse() {
   const { data: session } = useSession();
 
-
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
@@ -52,14 +51,13 @@ export default function Browse() {
         headers: {
           "Content-Type": "application/json",
           getallorders: true,
-          page
+          page,
         },
       };
 
       const ordersList = await fetchOrderData(url, options);
 
-
-      console.log(ordersList)
+      console.log(ordersList);
 
       if (!ordersList.error) {
         setOrders(ordersList);
@@ -74,7 +72,7 @@ export default function Browse() {
 
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
-    if (year.length != 4) return dateString
+    if (year.length != 4) return dateString;
     return `${day}-${month}-${year}`;
   };
 
@@ -254,8 +252,6 @@ export default function Browse() {
     }
   }
 
-
-
   function handlePrevious() {
     setPage((p) => {
       if (p === 1) return p;
@@ -270,17 +266,14 @@ export default function Browse() {
     });
   }
 
-
-
   useEffect(() => {
     if (!isFiltered) GetAllOrders();
     if (orders) setPageCount(orders?.pagination?.pageCount);
   }, [orders?.pagination?.pageCount]);
 
-
   useEffect(() => {
     if (!isFiltered) GetAllOrders();
-    else filteredData()
+    else filteredData();
   }, [page]);
 
   return (
@@ -364,30 +357,50 @@ export default function Browse() {
           </button>
         </div>
       </div>
-      
+
       {orders?.items?.length && (
         <div className="container mb-5">
-          <div className="float-end" style={{ display: 'flex', alignItems: 'center' }}>
+          <div
+            className="float-end"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <span className="me-3">
-              Page <strong>{page}/{pageCount}</strong>
+              Page{" "}
+              <strong>
+                {page}/{pageCount}
+              </strong>
             </span>
-            <div className="btn-group" role="group" aria-label="Basic outlined example">
-              <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === 1} onClick={handlePrevious}>
+            <div
+              className="btn-group"
+              role="group"
+              aria-label="Basic outlined example"
+            >
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={page === 1}
+                onClick={handlePrevious}
+              >
                 Previous
               </button>
-              <button type="button" className="btn btn-sm btn-outline-secondary" disabled={page === pageCount} onClick={handleNext}>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={page === pageCount}
+                onClick={handleNext}
+              >
                 Next
               </button>
             </div>
           </div>
 
-          <div className="float-start">
+          {/* <div className="float-start">
             <div className={`btn-group ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
               <button type="button" className="btn btn-sm btn-outline-success">
                 EXCEL EXPORT
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
 
@@ -431,7 +444,7 @@ export default function Browse() {
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||
-                  session.user.role == "super" ? (
+                session.user.role == "super" ? (
                   <td className="text-break">{order.client_name}</td>
                 ) : (
                   <></>
@@ -452,7 +465,7 @@ export default function Browse() {
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
-                  session.user.role == "super" ? (
+                session.user.role == "super" ? (
                   // Default state
 
                   <td className="align-middle" style={{ textAlign: "center" }}>
@@ -495,10 +508,11 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${order.status === "Finished"
-                        ? "btn-outline-warning"
-                        : "btn-outline-success"
-                        }`}
+                      className={`btn btn-sm ${
+                        order.status === "Finished"
+                          ? "btn-outline-warning"
+                          : "btn-outline-success"
+                      }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>
