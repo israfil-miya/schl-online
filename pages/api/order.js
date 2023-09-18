@@ -227,7 +227,7 @@ async function handleGetOrdersByFilter(req, res) {
   try {
     const { fromtime, totime, folder, client, task } = req.headers;
     const page = req.headers.page || 1;
-    const ITEMS_PER_PAGE = 20; // Number of items per page
+    const ITEMS_PER_PAGE = 5; // Number of items per page
 
     console.log(
       "Received request with parameters:",
@@ -418,6 +418,27 @@ async function handleRedoOrder(req, res) {
   }
 }
 
+async function handleGetAllOrdersOfClient(req, res) {
+  try {
+    const data = req.headers;
+    console.log("Received edit request with data of Client:", data);
+
+    const resData = await Order.find({client_code: data.client_code});
+
+    console.log(resData)
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No order found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -443,6 +464,8 @@ export default async function handle(req, res) {
         await handleGetOrdersById(req, res);
       } else if (req.headers.gettimeperiods) {
         await handleGetTimePeriods(req, res);
+      } else if (req.headers.getallordersofclient) {
+        await handleGetAllOrdersOfClient(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

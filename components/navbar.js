@@ -69,6 +69,7 @@ export default function Navbar({ navFor }) {
             href="/"
           >
             <Image
+              priority
               src="/images/NEW-SCH-logo-text-grey.png"
               alt="Logo"
               width="100"

@@ -8,8 +8,11 @@ import Navbar from "../../components/navbar";
 export default function ClientDetails() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [client, setClient] = useState({});
+  const [client, setClient] = useState(null);
   const clientId = router.query.clientId;
+  const [orders, setOrders] = useState([])
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -48,7 +51,20 @@ export default function ClientDetails() {
     },
   });
 
-  async function fetchClientData(url, options) {
+
+  const [fromTime, setFromTime] = useState("");
+  const [toTime, setToTime] = useState("");
+  const [foldetFilter, setFolderFilter] = useState("");
+  const [taskFilter, setTaskFilter] = useState("");
+
+
+
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length != 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
+  async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
@@ -66,7 +82,7 @@ export default function ClientDetails() {
         },
       };
 
-      const clientData = await fetchClientData(url, options);
+      const clientData = await fetchApi(url, options);
 
       if (!clientData.error) {
         setClient(clientData);
@@ -91,6 +107,47 @@ export default function ClientDetails() {
     }
   }
 
+  async function getAllOrdersOfClient() {
+    let adjustedFromTime = fromTime;
+    let adjustedToTime = toTime;
+
+    if (fromTime) {
+      adjustedFromTime = convertToDDMMYYYY(fromTime);
+    }
+    if (toTime) {
+      adjustedToTime = convertToDDMMYYYY(toTime);
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getordersbyfilter: true,
+        folder: foldetFilter,
+        client: client.client_code,
+        task: taskFilter,
+        fromtime: adjustedFromTime,
+        totime: adjustedToTime,
+        page, // Include the current page in the request headers
+      },
+    };
+
+    try {
+      const orders = await fetchApi(url, options);
+
+      if (!orders.error) {
+        setOrders(orders);
+      }
+
+    } catch (error) {
+      console.error("Error fetching filtered orders:", error);
+    }
+  }
+
+
+
+
   async function editClient() {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
     const options = {
@@ -103,7 +160,7 @@ export default function ClientDetails() {
     };
 
     try {
-      const result = await fetchClientData(url, options);
+      const result = await fetchApi(url, options);
 
       if (!result.error) {
         toast.success("Edited the client data", {
@@ -119,9 +176,33 @@ export default function ClientDetails() {
     }
   }
 
+
+
+  function handlePrevious() {
+    setPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
+
+  function handleNext() {
+    setPage((p) => {
+      if (p === pageCount) return p;
+      return p + 1;
+    });
+  }
+
   useEffect(() => {
     getClientDetails();
   }, []);
+
+  useEffect(() => {
+
+    if (client) {
+      getAllOrdersOfClient();
+      setPageCount(orders?.pagination?.pageCount);
+    }
+  }, [page, client, orders?.pagination?.pageCount]);
 
   return (
     <div>
@@ -289,7 +370,164 @@ export default function ClientDetails() {
           </div>
         </div>
         <div className="row align-items-start">
-          <div className="col border rounded-0 p-3">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
+              <div
+                className="filter_time me-3"
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <strong>Date: </strong>
+                <input
+                  type="date"
+                  className="form-control mx-2 custom-input"
+                  value={fromTime}
+                  onChange={(e) => setFromTime(e.target.value)}
+                />
+                <span> To </span>
+                <input
+                  type="date"
+                  className="form-control ms-2 custom-input"
+                  value={toTime}
+                  onChange={(e) => setToTime(e.target.value)}
+                />
+              </div>
+
+              <div
+                style={{ display: "flex", alignItems: "center" }}
+                className="filter_folder me-3"
+              >
+                <strong>Folder: </strong>
+                <input
+                  type="text"
+                  placeholder="Folder"
+                  className="form-control ms-2 custom-input"
+                  value={foldetFilter}
+                  onChange={(e) => setFolderFilter(e.target.value)}
+                />
+              </div>
+
+              <div
+                style={{ display: "flex", alignItems: "center" }}
+                className="filter_task me-3"
+              >
+                <strong>Task: </strong>
+                <input
+                  type="text"
+                  placeholder="Task"
+                  className="form-control ms-2 custom-input"
+                  value={taskFilter}
+                  onChange={(e) => setTaskFilter(e.target.value)}
+                />
+              </div>
+
+              <button
+                onClick={getAllOrdersOfClient}
+                className="btn ms-4 btn-sm btn-outline-primary"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+          {orders?.items?.length !== 0 && (
+            <div className="container mb-3">
+              <div
+                className="float-end"
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <span className="me-3">
+                  Page{" "}
+                  <strong>
+                    {page}/{pageCount}
+                  </strong>
+                </span>
+                <div
+                  className="btn-group"
+                  role="group"
+                  aria-label="Basic outlined example"
+                >
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    disabled={page === 1}
+                    onClick={handlePrevious}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    disabled={page === pageCount}
+                    onClick={handleNext}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          )}
+          <table
+            style={{ overflow: "hidden" }}
+            className="table table-bordered mb-5 table-hover"
+          >
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Added Time</th>
+                <th>Client Code</th>
+                <th>Client Name</th>
+                <th>Folder</th>
+                <th>Quantity</th>
+                <th>Download Date</th>
+                <th>Delivery Time</th>
+                <th>Task</th>
+                <th>E.T.</th>
+                <th>Production</th>
+                <th>QC1</th>
+                <th>Comment</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders?.items &&
+                orders?.items.map((order, index) => (
+                  <tr key={order._id}>
+                    <td>{index + 1}</td>
+                    <td className="text-break">
+                      {order.date_today}
+                      <span className="text-body-secondary"> | </span>
+                      {order.time_now}
+                    </td>
+                    <td className="text-break">{order.client_code}</td>
+
+                    <td className="text-break">{order.client_name}</td>
+
+
+                    <td className="text-break">{order.folder}</td>
+                    <td className="text-break">{order.quantity}</td>
+                    <td className="text-break">{order.download_date}</td>
+                    <td className="text-break">
+                      {order.delivery_date}
+                      <span className="text-body-secondary"> | </span>
+                      {order.delivery_bd_time}
+                    </td>
+                    <td className="text-break">{order.task}</td>
+                    <td className="text-break">{order.et}</td>
+                    <td className="text-break">{order.production}</td>
+                    <td className="text-break">{order.qc1}</td>
+                    <td className="text-break">{order.comment}</td>
+                    <td className="text-break">{order.status}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          {orders?.items?.length !== 0 && <div className="col border rounded-0 p-3">
             <h5 className="py-2">Create Invoice</h5>
             <div className="row">
               <div className="col-md-6 mb-3">
@@ -439,7 +677,7 @@ export default function ClientDetails() {
             >
               Create an Invoice
             </button>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
