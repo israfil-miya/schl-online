@@ -151,6 +151,7 @@ async function handleGetAllOrderPaginated(req, res) {
         },
       },
       { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
+      { $sort: { updatedAt: -1 } },
       { $skip: skip }, // Skip items for pagination
       { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
     ];
@@ -282,6 +283,7 @@ async function handleGetOrdersByFilter(req, res) {
           },
         },
         { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
+        { $sort: { updatedAt: -1 } },
         { $skip: skip }, // Skip items for pagination
         { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page ];
       ];

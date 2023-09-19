@@ -27,28 +27,27 @@ export default function ClientDetails() {
     price: "",
   });
 
-  const [invoiceData, setInvoiceData] = useState({
-    customer: {
-      _id: "",
-      client_name: "",
-      contact_person: "",
-      contact_number: "",
-      email: "",
-      price: "",
-      address: "",
-    },
-    vendor: {
-      comapny_name: "Studio Click House",
-      contact_person: session?.user?.name,
-      contact_number: "+46855924212, +8801819727117",
-      email: "info@studioclickhouse.com",
-      street_address: "Ma Holycity Tower, Level 2",
-      city: "Demra, Dhaka-1361, Bangladesh",
-    },
-    time: {
-      fromTime: "",
-      toTime: "",
-    },
+  const [invoiceCustomerData, setInvoiceCustomerData] = useState({
+    _id: "",
+    client_name: "",
+    contact_person: "",
+    contact_number: "",
+    email: "",
+    price: "",
+    address: "",
+  });
+  const [invoiceVendorData, setInvoiceVendorData] = useState({
+    comapny_name: "Studio Click House",
+    contact_person: session?.user?.name,
+    contact_number: "+46855924212, +8801819727117",
+    email: "info@studioclickhouse.com",
+    street_address: "Ma Holycity Tower, Level 2",
+    city: "Demra, Dhaka-1361, Bangladesh",
+  });
+  const [invoiceTimeData, setInvoiceTimeData] = useState({
+    fromTime: "",
+    toTime: "",
+
   });
 
 
@@ -56,6 +55,8 @@ export default function ClientDetails() {
   const [toTime, setToTime] = useState("");
   const [foldetFilter, setFolderFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
+
+
 
 
 
@@ -87,16 +88,16 @@ export default function ClientDetails() {
       if (!clientData.error) {
         setClient(clientData);
         setManageData(clientData);
-        setInvoiceData({
-          customer: {
-            _id: clientData?._id,
-            client_name: clientData?.client_name,
-            contact_person: clientData?.contact_person,
-            contact_number: clientData?.contact_number,
-            email: clientData?.email,
-            price: clientData?.price,
-            address: clientData?.country,
-          },
+        setInvoiceCustomerData({
+
+          _id: clientData?._id,
+          client_name: clientData?.client_name,
+          contact_person: clientData?.contact_person,
+          contact_number: clientData?.contact_number,
+          email: clientData?.email,
+          price: clientData?.price,
+          address: clientData?.country,
+
         });
       } else {
         toast.error("Unable to retrieve client");
@@ -145,7 +146,34 @@ export default function ClientDetails() {
     }
   }
 
+  async function createInvoice() {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invoice`;
 
+    const InvoiceData = {
+      customer: invoiceCustomerData,
+      vendor: invoiceVendorData,
+      time: invoiceTimeData 
+    }
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: InvoiceData })
+    };
+
+    try {
+      const response = await fetchApi(url, options);
+
+      if (!response.error) {
+        console.log(response)
+      }
+
+    } catch (error) {
+      console.error("Error generating Invoice:", error);
+    }
+  }
 
 
   async function editClient() {
@@ -211,7 +239,7 @@ export default function ClientDetails() {
       <div className="container rounded border shadow-sm my-5">
         <div className="row align-items-start">
           <div className="col border rounded-0 p-3">
-            <h5 className="py-2">Client Details</h5>
+            <h4 className="py-2 text-center">Client Details</h4>
 
             <div className="row">
               <div className="col-md-6 mb-3">
@@ -480,8 +508,6 @@ export default function ClientDetails() {
               <tr>
                 <th>#</th>
                 <th>Added Time</th>
-                <th>Client Code</th>
-                <th>Client Name</th>
                 <th>Folder</th>
                 <th>Quantity</th>
                 <th>Download Date</th>
@@ -504,9 +530,6 @@ export default function ClientDetails() {
                       <span className="text-body-secondary"> | </span>
                       {order.time_now}
                     </td>
-                    <td className="text-break">{order.client_code}</td>
-
-                    <td className="text-break">{order.client_name}</td>
 
 
                     <td className="text-break">{order.folder}</td>
@@ -528,20 +551,23 @@ export default function ClientDetails() {
             </tbody>
           </table>
           {orders?.items?.length !== 0 && <div className="col border rounded-0 p-3">
-            <h5 className="py-2">Create Invoice</h5>
-            <div className="row">
+            <h4 className="py-2 text-center">Create Invoice</h4>
+
+
+            <h5>Customer details</h5>
+            <div className="row mb-4">
               <div className="col-md-6 mb-3">
                 <label htmlFor="date" className="form-label">
-                  Company Name (Customer)
+                  Company Name
                 </label>
                 <input
-                  value={invoiceData?.customer?.client_name}
+                  value={invoiceCustomerData?.client_name}
                   onChange={(e) =>
-                    setInvoiceData((prevData) => ({
-                      customer: {
-                        ...prevData,
-                        client_name: e.target.value,
-                      },
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      client_name: e.target.value,
+
                     }))
                   }
                   type="text"
@@ -551,34 +577,16 @@ export default function ClientDetails() {
 
               <div className="col-md-6 mb-3">
                 <label htmlFor="date" className="form-label">
-                  Contact Person (Customer)
+                  Contact Person
                 </label>
                 <input
-                  value={invoiceData?.customer?.contact_person}
+                  value={invoiceCustomerData?.contact_person}
                   onChange={(e) =>
-                    setInvoiceData((prevData) => ({
-                      customer: {
-                        ...prevData,
-                        contact_person: e.target.value,
-                      },
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Number (Customer)
-                </label>
-                <input
-                  value={invoiceData?.customer?.contact_number}
-                  onChange={(e) =>
-                    setInvoiceData((prevData) => ({
-                      customer: {
-                        ...prevData,
-                        contact_number: e.target.value,
-                      },
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      contact_person: e.target.value,
+
                     }))
                   }
                   type="text"
@@ -588,16 +596,16 @@ export default function ClientDetails() {
 
               <div className="col-md-6 mb-3">
                 <label htmlFor="date" className="form-label">
-                  Address (Customer)
+                  Contact Number
                 </label>
                 <input
-                  value={invoiceData?.customer?.address}
+                  value={invoiceCustomerData?.contact_number}
                   onChange={(e) =>
-                    setInvoiceData((prevData) => ({
-                      customer: {
-                        ...prevData,
-                        address: e.target.value,
-                      },
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      contact_number: e.target.value,
+
                     }))
                   }
                   type="text"
@@ -607,22 +615,42 @@ export default function ClientDetails() {
 
               <div className="col-md-6 mb-3">
                 <label htmlFor="date" className="form-label">
-                  Email (Customer)
+                  Address
                 </label>
                 <input
-                  value={invoiceData?.customer?.email}
+                  value={invoiceCustomerData?.address}
                   onChange={(e) =>
-                    setInvoiceData((prevData) => ({
-                      customer: {
-                        ...prevData,
-                        email: e.target.value,
-                      },
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      address: e.target.value,
+
                     }))
                   }
                   type="text"
                   className="form-control"
                 />
               </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Email
+                </label>
+                <input
+                  value={invoiceCustomerData?.email}
+                  onChange={(e) =>
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      email: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
               <div className=" col-md-6 mb-3">
                 <label htmlFor="date" className="form-label">
                   Time Period
@@ -634,18 +662,24 @@ export default function ClientDetails() {
                   <input
                     type="date"
                     className="form-control me-2 custom-input"
-                    value={invoiceData?.time?.fromTime}
+                    value={invoiceTimeData?.fromTime}
                     onChange={(e) =>
-                      setInvoiceData({ time: { fromTime: e.target.value } })
+                      setInvoiceTimeData((prevData) => ({
+
+                        ...prevData, fromTime: e.target.value
+                      }))
                     }
                   />
                   <span> To </span>
                   <input
                     type="date"
                     className="form-control ms-2 custom-input"
-                    value={invoiceData?.time?.toTime}
+                    value={invoiceTimeData?.toTime}
                     onChange={(e) =>
-                      setInvoiceData({ time: { toTime: e.target.value } })
+                      setInvoiceTimeData((prevData) => ({
+
+                        ...prevData, toTime: e.target.value
+                      }))
                     }
                   />
                 </div>
@@ -656,13 +690,13 @@ export default function ClientDetails() {
                   Prices
                 </label>
                 <textarea
-                  value={invoiceData?.customer?.price}
+                  value={invoiceCustomerData?.price}
                   onChange={(e) =>
-                    setInvoiceData((prevData) => ({
-                      customer: {
-                        ...prevData,
-                        price: e.target.value,
-                      },
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      price: e.target.value,
+
                     }))
                   }
                   type="text"
@@ -670,8 +704,128 @@ export default function ClientDetails() {
                 />
               </div>
             </div>
+
+
+            <h5 className="mt-4">Vendor details</h5>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Company Name
+                </label>
+                <input
+                  value={invoiceVendorData?.comapny_name}
+                  onChange={(e) =>
+                    setInvoiceVendorData((prevData) => ({
+
+                      ...prevData,
+                      comapny_name: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Contact Person
+                </label>
+                <input
+                  value={invoiceVendorData?.contact_person}
+                  onChange={(e) =>
+                    setInvoiceVendorData((prevData) => ({
+
+                      ...prevData,
+                      contact_person: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Contact Number
+                </label>
+                <input
+                  value={invoiceVendorData?.contact_number}
+                  onChange={(e) =>
+                    setInvoiceVendorData((prevData) => ({
+
+                      ...prevData,
+                      contact_number: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Street Address
+                </label>
+                <input
+                  value={invoiceVendorData?.street_address}
+                  onChange={(e) =>
+                    setInvoiceVendorData((prevData) => ({
+
+                      ...prevData,
+                      street_address: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  City
+                </label>
+                <input
+                  value={invoiceVendorData?.city}
+                  onChange={(e) =>
+                    setInvoiceVendorData((prevData) => ({
+
+                      ...prevData,
+                      city: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Email
+                </label>
+                <input
+                  value={invoiceVendorData?.email}
+                  onChange={(e) =>
+                    setInvoiceVendorData((prevData) => ({
+
+                      ...prevData,
+                      email: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+            </div>
+
+
             <button
-              onClick={null}
+              onClick={createInvoice}
               type="button"
               className="btn float-end btn-outline-success"
             >
@@ -680,6 +834,11 @@ export default function ClientDetails() {
           </div>}
         </div>
       </div>
+
+
+
+
+
     </div>
   );
 }
