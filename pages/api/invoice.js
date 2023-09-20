@@ -1,3 +1,6 @@
+import invoice from "../../components/generateInvoice"
+
+
 export default async function handle(req, res) {
     const { method } = req;
   
@@ -10,7 +13,7 @@ export default async function handle(req, res) {
   
       case "POST":
         console.log(req.body?.data)
-        res.status(200).json(req.body?.data);
+        res.status(200).json({url: await invoice()});
   
         break;
   

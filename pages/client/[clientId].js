@@ -5,6 +5,8 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import Navbar from "../../components/navbar";
 
+import generateInvoice from "../../components/generateInvoice"
+
 export default function ClientDetails() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -31,24 +33,27 @@ export default function ClientDetails() {
     _id: "",
     client_name: "",
     contact_person: "",
+    address: "",
     contact_number: "",
     email: "",
     price: "",
-    address: "",
+
   });
   const [invoiceVendorData, setInvoiceVendorData] = useState({
     comapny_name: "Studio Click House",
     contact_person: session?.user?.name,
-    contact_number: "+46855924212, +8801819727117",
-    email: "info@studioclickhouse.com",
     street_address: "Ma Holycity Tower, Level 2",
     city: "Demra, Dhaka-1361, Bangladesh",
+    contact_number: "+46855924212, +8801819727117",
+    email: "info@studioclickhouse.com",
   });
   const [invoiceTimeData, setInvoiceTimeData] = useState({
     fromTime: "",
     toTime: "",
 
   });
+
+  const [ordersForInvoice, setOrdersForInvoice] = useState([])
 
 
   const [fromTime, setFromTime] = useState("");
@@ -108,7 +113,7 @@ export default function ClientDetails() {
     }
   }
 
-  async function getAllOrdersOfClient() {
+  async function getAllOrdersOfClientPaginated() {
     let adjustedFromTime = fromTime;
     let adjustedToTime = toTime;
 
@@ -146,29 +151,56 @@ export default function ClientDetails() {
     }
   }
 
+  async function getAllOrdersOfClientInvoice() {
+    let adjustedFromTime = fromTime;
+    let adjustedToTime = toTime;
+
+    if (fromTime) {
+      adjustedFromTime = convertToDDMMYYYY(fromTime);
+    }
+    if (toTime) {
+      adjustedToTime = convertToDDMMYYYY(toTime);
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getordersbyfilter: true,
+        folder: foldetFilter,
+        client: client.client_code,
+        task: taskFilter,
+        fromtime: adjustedFromTime,
+        totime: adjustedToTime,
+        not_paginated: true // Include the current page in the request headers
+      },
+    };
+
+    try {
+      const orders = await fetchApi(url, options);
+
+      if (!orders.error) {
+        setOrdersForInvoice(orders);
+      }
+
+    } catch (error) {
+      console.error("Error fetching filtered orders:", error);
+    }
+  }
+
   async function createInvoice() {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invoice`;
 
     const InvoiceData = {
       customer: invoiceCustomerData,
       vendor: invoiceVendorData,
-      time: invoiceTimeData 
+      time: invoiceTimeData
     }
 
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ data: InvoiceData })
-    };
 
     try {
-      const response = await fetchApi(url, options);
 
-      if (!response.error) {
-        console.log(response)
-      }
+      await generateInvoice(InvoiceData)
 
     } catch (error) {
       console.error("Error generating Invoice:", error);
@@ -227,7 +259,7 @@ export default function ClientDetails() {
   useEffect(() => {
 
     if (client) {
-      getAllOrdersOfClient();
+      getAllOrdersOfClientPaginated();
       setPageCount(orders?.pagination?.pageCount);
     }
   }, [page, client, orders?.pagination?.pageCount]);
@@ -455,7 +487,7 @@ export default function ClientDetails() {
               </div>
 
               <button
-                onClick={getAllOrdersOfClient}
+                onClick={getAllOrdersOfClientPaginated}
                 className="btn ms-4 btn-sm btn-outline-primary"
               >
                 Search
