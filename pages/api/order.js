@@ -258,7 +258,7 @@ async function handleGetOrdersByFilter(req, res) {
       // Calculate the number of documents to skip based on the current page
       const skip = (page - 1) * ITEMS_PER_PAGE;
 
-      const pipeline = [
+      let pipeline = [
         { $match: query }, // Apply the query filter
         {
           $addFields: {
@@ -283,16 +283,21 @@ async function handleGetOrdersByFilter(req, res) {
           },
         },
         { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-        { $sort: { updatedAt: -1 } },
-        { $skip: skip }, // Skip items for pagination
-        { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page ];
+        { $sort: { updatedAt: -1 } }, // Limit the number of items per page ];
       ];
+
+      if (!req.headers.not_paginated) pipeline = [
+        ...pipeline, { $skip: skip }, // Skip items for pagination
+        { $limit: ITEMS_PER_PAGE }
+      ]
+
+      console.log(pipeline)
 
       const count = await Order.countDocuments(query); // Count the total matching documents
 
       const orders = await Order.aggregate(pipeline).exec();
 
-      console.log("FILTERED ORDERS: ", orders);
+      console.log("FILTERED ORDERS: ", orders.length);
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
 
@@ -425,7 +430,7 @@ async function handleGetAllOrdersOfClient(req, res) {
     const data = req.headers;
     console.log("Received edit request with data of Client:", data);
 
-    const resData = await Order.find({client_code: data.client_code});
+    const resData = await Order.find({ client_code: data.client_code });
 
     console.log(resData)
 

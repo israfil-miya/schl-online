@@ -47,11 +47,6 @@ export default function ClientDetails() {
     contact_number: "+46855924212, +8801819727117",
     email: "info@studioclickhouse.com",
   });
-  const [invoiceTimeData, setInvoiceTimeData] = useState({
-    fromTime: "",
-    toTime: "",
-
-  });
 
   const [ordersForInvoice, setOrdersForInvoice] = useState([])
 
@@ -181,7 +176,7 @@ export default function ClientDetails() {
       const orders = await fetchApi(url, options);
 
       if (!orders.error) {
-        setOrdersForInvoice(orders);
+        setOrdersForInvoice(orders.items);
       }
 
     } catch (error) {
@@ -189,16 +184,62 @@ export default function ClientDetails() {
     }
   }
 
+  function seperator(data) {
+    const lines = data.trim().split("\n");
+
+    const prices = {};
+    let currency = "";
+
+    lines.forEach((line) => {
+      const [service, priceStr] = line.split(" - ");
+
+      if (!currency) {
+        const currencyMatch = priceStr.match(/([A-Za-z]+)/);
+        if (currencyMatch) {
+          currency = currencyMatch[0];
+        }
+      }
+
+      const price = parseFloat(priceStr);
+      prices[service.toLowerCase()] = price;
+    });
+
+    return {prices, currency}
+  }
+
   async function createInvoice() {
 
     const InvoiceData = {
       customer: invoiceCustomerData,
       vendor: invoiceVendorData,
-      time: invoiceTimeData
     }
 
 
     try {
+      await getAllOrdersOfClientInvoice()
+
+      let billData = [];
+
+      const pricesInfo = seperator(InvoiceData.customer.price)
+      console.log(ordersForInvoice)
+
+
+
+      ordersForInvoice.map((order, index) => {
+        billData.push({
+          date: order.date_today,
+          job_name: order.folder,
+          quantity: 5,
+          unit_price: 5000,
+          total: function () {
+            return this.quantity * this.unit_price;
+          }
+        })
+
+
+      })
+
+
 
       await generateInvoice(InvoiceData)
 
@@ -681,40 +722,6 @@ export default function ClientDetails() {
                   type="text"
                   className="form-control"
                 />
-              </div>
-
-              <div className=" col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Time Period
-                </label>
-                <div
-                  className="filter_time"
-                  style={{ display: "flex", alignItems: "center" }}
-                >
-                  <input
-                    type="date"
-                    className="form-control me-2 custom-input"
-                    value={invoiceTimeData?.fromTime}
-                    onChange={(e) =>
-                      setInvoiceTimeData((prevData) => ({
-
-                        ...prevData, fromTime: e.target.value
-                      }))
-                    }
-                  />
-                  <span> To </span>
-                  <input
-                    type="date"
-                    className="form-control ms-2 custom-input"
-                    value={invoiceTimeData?.toTime}
-                    onChange={(e) =>
-                      setInvoiceTimeData((prevData) => ({
-
-                        ...prevData, toTime: e.target.value
-                      }))
-                    }
-                  />
-                </div>
               </div>
 
               <div className="mb-3">
