@@ -37,6 +37,7 @@ export default function ClientDetails() {
     contact_number: "",
     email: "",
     price: "",
+    invoice_number: ""
 
   });
   const [invoiceVendorData, setInvoiceVendorData] = useState({
@@ -47,8 +48,6 @@ export default function ClientDetails() {
     contact_number: "+46855924212, +8801819727117",
     email: "info@studioclickhouse.com",
   });
-
-  const [ordersForInvoice, setOrdersForInvoice] = useState([])
 
 
   const [fromTime, setFromTime] = useState("");
@@ -176,7 +175,7 @@ export default function ClientDetails() {
       const orders = await fetchApi(url, options);
 
       if (!orders.error) {
-        setOrdersForInvoice(orders.items);
+        return orders?.items
       }
 
     } catch (error) {
@@ -184,69 +183,108 @@ export default function ClientDetails() {
     }
   }
 
-  function seperator(data) {
-    const lines = data.trim().split("\n");
 
-    const prices = {};
-    let currency = "";
 
+
+
+
+
+  function extractTaskPrices(taskPriceString) {
+    const taskPrices = {};
+
+    // Split the task price string into lines
+    const lines = taskPriceString.trim().split("\n");
+
+    // Iterate through each line
     lines.forEach((line) => {
-      const [service, priceStr] = line.split(" - ");
-
-      if (!currency) {
-        const currencyMatch = priceStr.match(/([A-Za-z]+)/);
-        if (currencyMatch) {
-          currency = currencyMatch[0];
-        }
-      }
-
+      const [task, priceStr] = line.split(" - ");
+      const taskName = task.trim().toLowerCase();
       const price = parseFloat(priceStr);
-      prices[service.toLowerCase()] = price;
+
+      if (!isNaN(price)) {
+        taskPrices[taskName] = price;
+      } else {
+        console.warn(`Invalid price for task: ${taskName}`);
+      }
     });
 
-    return {prices, currency}
+    return taskPrices;
   }
+
+  const calculateUnitPrice = (taskString, taskPrices) => {
+    // Split the task string by '+' to get individual tasks
+    const tasks = taskString.split("+").map((task) => task.trim().toLowerCase());
+
+    // Debug: Log the tasks to see if they are parsed correctly
+    console.log("Tasks:", tasks);
+
+    // Calculate the total unit price based on task prices
+    const unitPrice = tasks.reduce((totalPrice, task) => {
+      const taskPrice = taskPrices[task];
+      if (taskPrice !== undefined) {
+        return totalPrice + taskPrice;
+      } else {
+        // Debug: Log tasks with no defined price
+        console.warn(`No price defined for task: ${task}`);
+        return totalPrice;
+      }
+    }, 0);
+
+    return unitPrice;
+  };
 
   async function createInvoice() {
 
-    const InvoiceData = {
-      customer: invoiceCustomerData,
-      vendor: invoiceVendorData,
+
+
+    if (!invoiceCustomerData.invoice_number) {
+      toast.error("Please enter an Invoie Number")
+      return
     }
+
+    // Extract taskPrices from invoiceCustomerData.price
+    const taskPrices = extractTaskPrices(invoiceCustomerData.price);
 
 
     try {
-      await getAllOrdersOfClientInvoice()
+      // Fetch orders and wait for them to be retrieved
+      const orders = await getAllOrdersOfClientInvoice();
 
-      let billData = [];
+      // Check if orders is not undefined or empty before mapping
+      if (orders && orders.length > 0) {
+        const billData = orders.map((order, index) => {
+          const unitPrice = order.task ? calculateUnitPrice(order.task, taskPrices) : 0;
+          return {
+            date: order.date_today,
+            job_name: order.folder,
+            quantity: order.quantity,
+            unit_price: unitPrice,
+            total: function () {
+              return this.quantity * this.unit_price;
+            },
+          };
+        });
 
-      const pricesInfo = seperator(InvoiceData.customer.price)
-      console.log(ordersForInvoice)
+        // Generate the invoice using billData
+        const InvoiceData = {
+          customer: invoiceCustomerData,
+          vendor: invoiceVendorData,
+        };
 
-
-
-      ordersForInvoice.map((order, index) => {
-        billData.push({
-          date: order.date_today,
-          job_name: order.folder,
-          quantity: 5,
-          unit_price: 5000,
-          total: function () {
-            return this.quantity * this.unit_price;
-          }
-        })
-
-
-      })
-
-
-
-      await generateInvoice(InvoiceData)
-
+        await generateInvoice(InvoiceData, billData, "$");
+        console.log("Bill Data: ", billData);
+        setInvoiceCustomerData({...invoiceCustomerData, invoice_number: ""})
+      } else {
+        console.warn("No orders found.");
+      }
     } catch (error) {
       console.error("Error generating Invoice:", error);
     }
+
+
   }
+
+
 
 
   async function editClient() {
@@ -716,6 +754,26 @@ export default function ClientDetails() {
 
                       ...prevData,
                       email: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Invoice Number
+                </label>
+                <input
+                  required
+                  value={invoiceCustomerData?.invoice_number}
+                  onChange={(e) =>
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      invoice_number: e.target.value,
 
                     }))
                   }

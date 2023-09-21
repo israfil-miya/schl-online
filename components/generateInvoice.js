@@ -33,7 +33,7 @@ async function addHeader(sheet, cell, value, font, alignment, borderStyle, fillT
   }
 }
 
-const exportExcelFile = async (invoiceData) => {
+const exportExcelFile = async (invoiceData, billData, currencySymbol) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("INVOICE", {
     properties: { tabColor: { argb: "FFC0000" } },
@@ -42,9 +42,11 @@ const exportExcelFile = async (invoiceData) => {
     { width: 6.5 },
     { width: 6.5 },
     { width: 12.5 },
-    { width: 20.5 },
-    { width: 10.5 },
-    { width: 15.5 }
+    { width: 28 },
+    { width: 12 },
+    { width: 13 },
+    { width: 7 },
+    { width: 4 }
   ];
 
 
@@ -65,87 +67,20 @@ const exportExcelFile = async (invoiceData) => {
       invoiceData.customer.contact_number,
       invoiceData.customer.email,
     ],
+    
     vendorConstants: ["Company Name: ", "Contact Person: ", "Street Address: ",
       "City: ", "Phone: ", "Email: "],
     customerConstants: ["Company Name: ", "Contact Person: ", "Address: ",
       "Phone: ", "Email: "]
   };
-  const billData = [
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
-    {
-      date: "05-07-20121",
-      job_name: "ABCD RFGHIJKL MNOP QRST UVWX YZ123 4567 890",
-      quantity: 5,
-      unit_price: 5000,
-      total: function () {
-        return this.quantity * this.unit_price;
-      }
-    },
 
-
-
-  ]
-  const currencySymbol = '$'
   let afterBillTableRowNumber = 21
   let totalFiles = 0
   let subtotal = 0
-  const salesTax = 30 / 100
-  const discount = 10 / 100
-  const datetoday = "02 August 2023"
-  const invoiceNo = "ITSS0011"
+  const salesTax = 0
+  const discount = 0
+  const datetoday = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  const invoiceNo = invoiceData.customer.invoice_number
 
 
 
@@ -288,7 +223,7 @@ const exportExcelFile = async (invoiceData) => {
     });
 
 
-    if (contactDetails.customerConstants[i - 11]?.trim() === "Address:") row.height = 25
+    // if (contactDetails.customerConstants[i - 11]?.trim() === "Address:") row.height = 25
   }
 
   sheet.addConditionalFormatting({
@@ -472,7 +407,7 @@ const exportExcelFile = async (invoiceData) => {
   billData.forEach((data, index) => {
     index += 21
     let row = sheet.getRow(index)
-    row.height = 40
+    row.height = 20
 
 
     addHeader(sheet, `A${index}:B${index}`, data.date, {
