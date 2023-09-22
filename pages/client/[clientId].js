@@ -37,7 +37,8 @@ export default function ClientDetails() {
     contact_number: "",
     email: "",
     price: "",
-    invoice_number: ""
+    invoice_number: "",
+    currency: ""
 
   });
   const [invoiceVendorData, setInvoiceVendorData] = useState({
@@ -64,11 +65,12 @@ export default function ClientDetails() {
     if (year.length != 4) return dateString;
     return `${day}-${month}-${year}`;
   };
+
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
-  }
+  };
 
   async function getClientDetails() {
     try {
@@ -96,7 +98,7 @@ export default function ClientDetails() {
           email: clientData?.email,
           price: clientData?.price,
           address: clientData?.country,
-
+          invoice_number: clientData?.client_code.split("_")?.[1]+"00XX"
         });
       } else {
         toast.error("Unable to retrieve client");
@@ -105,7 +107,7 @@ export default function ClientDetails() {
       console.error("Error fetching client:", error);
       toast.error("Error retrieving client");
     }
-  }
+  };
 
   async function getAllOrdersOfClientPaginated() {
     let adjustedFromTime = fromTime;
@@ -143,7 +145,7 @@ export default function ClientDetails() {
     } catch (error) {
       console.error("Error fetching filtered orders:", error);
     }
-  }
+  };
 
   async function getAllOrdersOfClientInvoice() {
     let adjustedFromTime = fromTime;
@@ -181,7 +183,7 @@ export default function ClientDetails() {
     } catch (error) {
       console.error("Error fetching filtered orders:", error);
     }
-  }
+  };
 
 
 
@@ -271,9 +273,9 @@ export default function ClientDetails() {
           vendor: invoiceVendorData,
         };
 
-        await generateInvoice(InvoiceData, billData, "$");
+        await generateInvoice(InvoiceData, billData);
         console.log("Bill Data: ", billData);
-        setInvoiceCustomerData({...invoiceCustomerData, invoice_number: ""})
+        etInvoiceCustomerData({ ...invoiceCustomerData, invoice_number: invoiceCustomerData.client_code.split("_")?.[1]+"00XX" })
       } else {
         console.warn("No orders found.");
       }
@@ -282,37 +284,6 @@ export default function ClientDetails() {
     }
 
 
-  }
-
-
-
-
-  async function editClient() {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
-    const options = {
-      method: "POST",
-      body: JSON.stringify(manageData),
-      headers: {
-        "Content-Type": "application/json",
-        editclient: true,
-      },
-    };
-
-    try {
-      const result = await fetchApi(url, options);
-
-      if (!result.error) {
-        toast.success("Edited the client data", {
-          duration: 3500,
-        });
-        await getClientDetails();
-      } else {
-        router.replace(`/admin?error=${result.message}`);
-      }
-    } catch (error) {
-      console.error("Error editing client:", error);
-      toast.error("Error editing client");
-    }
   }
 
 
@@ -347,167 +318,8 @@ export default function ClientDetails() {
     <div>
       <Navbar navFor="admin" />
 
-      <div className="container rounded border shadow-sm my-5">
-        <div className="row align-items-start">
-          <div className="col border rounded-0 p-3">
-            <h4 className="py-2 text-center">Client Details</h4>
+      <div className="m-5">
 
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Client Code
-                </label>
-                <input
-                  value={manageData.client_code}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      client_code: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Client Name
-                </label>
-                <input
-                  value={manageData.client_name}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      client_name: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Marketer Name
-                </label>
-                <input
-                  value={manageData.marketer}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      marketer: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Person
-                </label>
-                <input
-                  value={manageData.contact_person}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      contact_person: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Designation
-                </label>
-                <input
-                  value={manageData.designation}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      designation: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Number
-                </label>
-                <input
-                  value={manageData.contact_number}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      contact_number: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Email
-                </label>
-                <input
-                  value={manageData.email}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      email: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Country
-                </label>
-                <input
-                  value={manageData.country}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      country: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Prices
-                </label>
-                <textarea
-                  value={manageData.price}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      price: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={editClient}
-              type="button"
-              className="btn float-end btn-outline-primary"
-            >
-              Update client details
-            </button>
-          </div>
-        </div>
         <div className="row align-items-start">
           <div
             style={{
@@ -782,7 +594,7 @@ export default function ClientDetails() {
                 />
               </div>
 
-              <div className="mb-3">
+              <div className="col-md-6 mb-3">
                 <label htmlFor="date" className="form-label">
                   Prices
                 </label>
@@ -800,6 +612,28 @@ export default function ClientDetails() {
                   className="form-control"
                 />
               </div>
+
+              <div className="col-md-6 mb-3">
+                <label htmlFor="date" className="form-label">
+                  Currency
+                </label>
+                <input
+                  required
+                  value={invoiceCustomerData?.currency}
+                  onChange={(e) =>
+                    setInvoiceCustomerData((prevData) => ({
+
+                      ...prevData,
+                      currency: e.target.value,
+
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+
             </div>
 
 

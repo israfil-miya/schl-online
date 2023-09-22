@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 
-import Statistics from "../components/statistics";
+
 import Approvals from "../components/approvals";
-import Users from "../components/users";
+import Clients from "../components/clients";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -22,14 +22,14 @@ export default function Admin() {
         toastId: "error",
       });
       error = undefined;
-      router.replace("/admin");
+      router.replace("/dashboard");
     }
     if (success) {
       toast.success(success, {
         toastId: "success",
       });
       success = undefined;
-      router.replace("/admin");
+      router.replace("/dashboard");
     }
   }, [error, success, router, component]);
 
@@ -64,20 +64,18 @@ export default function Admin() {
 
         <li className="nav-item" role="presentation">
           <Link
-            className={
-              component == "statistics" ? "nav-link active" : "nav-link"
-            }
+            className={component == "clients" ? "nav-link active" : "nav-link"}
             href=""
-            onClick={() => setComponent("statistics")}
+            onClick={() => setComponent("clients")}
             role="tab"
           >
-            Statistics
+            Clients Database
           </Link>
         </li>
       </ul>
       {/* {component == "users" && <Users />} */}
       {component == "approvals" && <Approvals />}
-      {component == "statistics" && <Statistics />}
+      {component == "clients" && <Clients />}
 
       <style jsx>
         {`

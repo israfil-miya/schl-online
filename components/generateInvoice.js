@@ -31,7 +31,7 @@ async function addHeader(sheet, cell, value, font, alignment, borderStyle, fillT
   }
 }
 
-const exportExcelFile = async (invoiceData, billData, currencySymbol) => {
+const exportExcelFile = async (invoiceData, billData) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("INVOICE", {
     properties: { tabColor: { argb: "FFC0000" } },
@@ -75,6 +75,7 @@ const exportExcelFile = async (invoiceData, billData, currencySymbol) => {
   let afterBillTableRowNumber = 21
   let totalFiles = 0
   let subtotal = 0
+  const currencySymbol = invoiceData.customer.currency
   const salesTax = 0
   const discount = 0
   const datetoday = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -87,7 +88,10 @@ const exportExcelFile = async (invoiceData, billData, currencySymbol) => {
 
 
   // LOGO
-  const logoCell = "B1:D8";
+  const logoCell = {
+    tl: { col: 2, row: 1 },
+  ext: { width: 210, height: 150 }
+  };
   const file = await getFileFromUrl('/images/NEW-SCH-logo-text-grey.png', 'logo.png');
   const logoDataUrl = await new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -100,6 +104,7 @@ const exportExcelFile = async (invoiceData, billData, currencySymbol) => {
     extension: 'png',
   });
   sheet.addImage(imageId2, logoCell);
+
 
   // HEADING
   addHeader(sheet, "E2:H5", "INVOICE", {

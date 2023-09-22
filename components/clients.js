@@ -357,13 +357,13 @@ export default function Clients() {
                   >
                     Edit
                   </button>
-                  <Link
+                  {session?.user?.role == "super" && <Link
                     type="button"
                     href={`/client/${client._id}`}
                     className="btn me-2 btn-sm btn-outline-warning"
                   >
                     View
-                  </Link>
+                  </Link> }
                   <button
                     type="button"
                     onClick={() => deleteClient(client)}
@@ -556,6 +556,7 @@ export default function Clients() {
               <button
                 onClick={editClient}
                 type="button"
+                data-bs-dismiss="modal"
                 className="btn btn-sm btn-outline-primary"
               >
                 Submit
