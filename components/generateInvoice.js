@@ -44,7 +44,7 @@ const exportExcelFile = async (invoiceData, billData) => {
     { width: 12 },
     { width: 13 },
     { width: 7 },
-    { width: 4 }
+    { width: 5 }
   ];
 
 
@@ -89,7 +89,7 @@ const exportExcelFile = async (invoiceData, billData) => {
 
   // LOGO
   const logoCell = {
-    tl: { col: 2, row: 1 },
+    tl: { col: 2, row: 0.5 },
   ext: { width: 210, height: 150 }
   };
   const file = await getFileFromUrl('/images/NEW-SCH-logo-text-grey.png', 'logo.png');

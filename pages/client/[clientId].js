@@ -16,22 +16,11 @@ export default function ClientDetails() {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
-  const [manageData, setManageData] = useState({
-    _id: "",
-    client_code: "",
-    client_name: "",
-    marketer: "",
-    contact_person: "",
-    designation: "",
-    contact_number: "",
-    email: "",
-    country: "",
-    price: "",
-  });
 
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
     _id: "",
     client_name: "",
+    client_code: "",
     contact_person: "",
     address: "",
     contact_number: "",
@@ -88,17 +77,17 @@ export default function ClientDetails() {
 
       if (!clientData.error) {
         setClient(clientData);
-        setManageData(clientData);
         setInvoiceCustomerData({
 
           _id: clientData?._id,
           client_name: clientData?.client_name,
+          client_code: clientData?.client_code,
           contact_person: clientData?.contact_person,
           contact_number: clientData?.contact_number,
           email: clientData?.email,
           price: clientData?.price,
           address: clientData?.country,
-          invoice_number: clientData?.client_code.split("_")?.[1]+"00XX"
+          invoice_number: clientData?.client_code.split("_")?.[1] + "00XX"
         });
       } else {
         toast.error("Unable to retrieve client");
@@ -192,25 +181,20 @@ export default function ClientDetails() {
 
 
   function extractTaskPrices(taskPriceString) {
-    const taskPrices = {};
 
-    // Split the task price string into lines
-    const lines = taskPriceString.trim().split("\n");
-
-    // Iterate through each line
-    lines.forEach((line) => {
-      const [task, priceStr] = line.split(" - ");
-      const taskName = task.trim().toLowerCase();
-      const price = parseFloat(priceStr);
-
-      if (!isNaN(price)) {
-        taskPrices[taskName] = price;
-      } else {
-        console.warn(`Invalid price for task: ${taskName}`);
+    const lines = taskPriceString.trim().split('\n');
+    const prices = {};
+    
+    lines.forEach(line => {
+      const parts = line.split(' - ');
+      if (parts.length === 2) {
+        const key = parts[0].trim().toLowerCase();
+        const value = parseInt(parts[1]);
+        prices[key] = value;
       }
     });
-
-    return taskPrices;
+console.log(prices)
+    return prices;
   }
 
   const calculateUnitPrice = (taskString, taskPrices) => {
@@ -241,6 +225,11 @@ export default function ClientDetails() {
 
     if (!invoiceCustomerData.invoice_number) {
       toast.error("Please enter an Invoie Number")
+      return
+    }
+
+    if (!invoiceCustomerData.currency) {
+      toast.error("Please enter a currency symbol/code")
       return
     }
 
@@ -275,7 +264,11 @@ export default function ClientDetails() {
 
         await generateInvoice(InvoiceData, billData);
         console.log("Bill Data: ", billData);
-        etInvoiceCustomerData({ ...invoiceCustomerData, invoice_number: invoiceCustomerData.client_code.split("_")?.[1]+"00XX" })
+        setInvoiceCustomerData(prevData => ({
+          ...prevData,
+          invoice_number: prevData?.client_code?.split("_")?.[1] + "00XX",
+          currency: ""
+        }));
       } else {
         console.warn("No orders found.");
       }

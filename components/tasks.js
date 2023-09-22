@@ -389,7 +389,7 @@ export default function Tasks() {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Client Name"
+                placeholder="Task"
                 value={selectedTasks.join("+")}
                 onChange={(e) => setSelectedTasks(e.target.value.split("+"))}
               />
