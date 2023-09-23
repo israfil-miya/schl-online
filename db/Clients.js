@@ -24,6 +24,9 @@ const ClientSchema = new mongoose.Schema({
   country: {
     type: String
   },
+  address: {
+    type: String
+  },
   prices: {
     type: String
   },

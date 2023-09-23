@@ -16,6 +16,7 @@ export default function Clients() {
   const [contactNumber, setContactNumber] = useState("")
   const [email, setEmail] = useState("")
   const [country, setCountry] = useState("")
+  const [address, setAddress] = useState("")
   const [prices, setPrices] = useState("")
   const [currency, setCurrency] = useState("")
 
@@ -30,6 +31,7 @@ export default function Clients() {
     contact_number: "",
     email: "",
     country: "",
+    address: "",
     prices: "",
     currency: "",
   });
@@ -79,6 +81,7 @@ export default function Clients() {
         contact_number: contactNumber,
         email,
         country,
+        address,
         prices,
         currency
       }),
@@ -271,6 +274,18 @@ export default function Clients() {
           </div>
           <div className="mb-3">
             <label htmlFor="clientName" className="form-label">
+              Address
+            </label>
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
               Prices
             </label>
             <textarea
@@ -314,6 +329,7 @@ export default function Clients() {
               <th>Contact Number</th>
               <th>Email</th>
               <th>Country</th>
+              <th>Address</th>
               <th>Prices</th>
               <th>Manage</th>
             </tr>
@@ -330,6 +346,7 @@ export default function Clients() {
                 <td>{client.contact_number}</td>
                 <td>{client.email}</td>
                 <td>{client.country}</td>
+                <td>{client.address}</td>
                 <td>{client.prices}</td>
                 <td>
                   <button
@@ -344,6 +361,7 @@ export default function Clients() {
                         contact_number: client.contact_number,
                         email: client.email,
                         country: client.country,
+                        address: client.address,
                         prices: client.prices,
                         currency: client.currency,
                       })
@@ -520,6 +538,22 @@ export default function Clients() {
                     setManageData((prevData) => ({
                       ...prevData,
                       country: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Address
+                </label>
+                <input
+                  value={manageData.address}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      address: e.target.value,
                     }))
                   }
                   type="text"
