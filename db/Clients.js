@@ -24,7 +24,10 @@ const ClientSchema = new mongoose.Schema({
   country: {
     type: String
   },
-  price: {
+  prices: {
+    type: String
+  },
+  currency: {
     type: String
   }
 });

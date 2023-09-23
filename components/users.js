@@ -125,23 +125,6 @@ export default function Users() {
 
     let result;
 
-    if (session.user.role == "super") {
-      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          deleteUser: true,
-          id: deleteUserData._id,
-        },
-      });
-      result = await res.json();
-      if (!result.error) {
-        await GetAllUsers();
-        toast.success("Deleted the user");
-      }
-    } else {
-
-
 
       console.log('Delete User Data: ', deleteUserData)
 
@@ -164,7 +147,7 @@ export default function Users() {
       if (!result.error) {
         toast.success("Request sent for approval");
       }
-    }
+    
     // console.log(result);
 
     if (result.error) {
@@ -290,7 +273,7 @@ export default function Users() {
                     <tr key={user._id}>
                       <td>{index + 1}</td>
                       <td>{user.name}</td>
-                      <td>{user.password}</td>
+                      <td>{((user.role == "super" || user.role == "admin") && session.user.role != "super") ? "XXXXXX" : user.password}</td>
                       <td>{user.role}</td>
                       <td>
                         <button
@@ -298,13 +281,13 @@ export default function Users() {
                             setManageData({
                               _id: user._id,
                               name: user.name,
-                              password: user.password,
+                              password: ((user.role == "super" || user.role == "admin") && session.user.role != "super") ? "XXXXXX" : user.password,
                               role: user.role,
                             });
                             setEditUserData({
                               _id: user._id,
                               name: user.name,
-                              password: user.password,
+                              password: ((user.role == "super" || user.role == "admin") && session.user.role != "super") ? "XXXXXX" : user.password,
                               role: user.role,
                             });
                           }}

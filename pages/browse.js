@@ -177,41 +177,23 @@ export default function Browse() {
 
   async function deleteOrder() {
     let result;
-
-    if (session.user.role == "super") {
-      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
-        method: "GET",
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          req_type: "Task Delete",
+          req_by: session.user.name,
+          id: manageData._id,
+        }),
         headers: {
           "Content-Type": "application/json",
-          deleteorder: true,
-          id: manageData._id,
         },
-      });
-      result = await res.json();
-      if (!result.error) {
-        if (!isFiltered) await GetAllOrders();
-        else await filteredData();
-        toast.success("Deleted the task");
       }
-    } else {
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            req_type: "Task Delete",
-            req_by: session.user.name,
-            id: manageData._id,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      result = await res.json();
-      if (!result.error) {
-        toast.success("Request sent for approval");
-      }
+    );
+    result = await res.json();
+    if (!result.error) {
+      toast.success("Request sent for approval");
     }
   }
 
@@ -444,7 +426,7 @@ export default function Browse() {
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||
-                session.user.role == "super" ? (
+                  session.user.role == "super" ? (
                   <td className="text-break">{order.client_name}</td>
                 ) : (
                   <></>
@@ -465,7 +447,7 @@ export default function Browse() {
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
-                session.user.role == "super" ? (
+                  session.user.role == "super" ? (
                   // Default state
 
                   <td className="align-middle" style={{ textAlign: "center" }}>
@@ -508,11 +490,10 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${
-                        order.status === "Finished"
+                      className={`btn btn-sm ${order.status === "Finished"
                           ? "btn-outline-warning"
                           : "btn-outline-success"
-                      }`}
+                        }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>

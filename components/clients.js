@@ -16,7 +16,8 @@ export default function Clients() {
   const [contactNumber, setContactNumber] = useState("")
   const [email, setEmail] = useState("")
   const [country, setCountry] = useState("")
-  const [price, setPrice] = useState("")
+  const [prices, setPrices] = useState("")
+  const [currency, setCurrency] = useState("")
 
 
   const [manageData, setManageData] = useState({
@@ -29,7 +30,8 @@ export default function Clients() {
     contact_number: "",
     email: "",
     country: "",
-    price: "",
+    prices: "",
+    currency: "",
   });
 
   async function fetchClientData(url, options) {
@@ -77,7 +79,8 @@ export default function Clients() {
         contact_number: contactNumber,
         email,
         country,
-        price
+        prices,
+        currency
       }),
       headers: {
         "Content-Type": "application/json",
@@ -107,44 +110,25 @@ export default function Clients() {
 
     let result;
 
-    if (session.user.role == "super") {
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + "/api/client",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            deleteclient: true,
-            id: deleteClientData._id,
-          },
-        }
-      );
-      result = await res.json();
-      if (!result.error) {
-        await getAllClients();
-        toast.success("Deleted the client");
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          req_type: "Client Delete",
+          req_by: session.user.name,
+          id: deleteClientData._id,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    } else {
-
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            req_type: "Client Delete",
-            req_by: session.user.name,
-            id: deleteClientData._id,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      result = await res.json();
-      if (!result.error) {
-        toast.success("Request sent for approval");
-      }
+    );
+    result = await res.json();
+    if (!result.error) {
+      toast.success("Request sent for approval");
     }
+
     // console.log(result);
 
     if (result.error) {
@@ -287,16 +271,29 @@ export default function Clients() {
           </div>
           <div className="mb-3">
             <label htmlFor="clientName" className="form-label">
-              Price
+              Prices
             </label>
-            <input
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+            <textarea
+              value={prices}
+              onChange={(e) => setPrices(e.target.value)}
               type="text"
               className="form-control"
               id="clientName"
             />
           </div>
+          <div className="mb-3">
+            <label htmlFor="clientName" className="form-label">
+              Currency
+            </label>
+            <input
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              type="text"
+              className="form-control"
+              id="clientName"
+            />
+          </div>
+
           <button type="submit" className="btn btn-sm btn-outline-primary">
             Submit
           </button>
@@ -304,7 +301,7 @@ export default function Clients() {
       </div>
       <div className="client-list my-5">
 
-      <h5 className="text-center py-4">Clients List</h5>
+        <h5 className="text-center py-4">Clients List</h5>
         <table className="table p-3 table-hover">
           <thead>
             <tr>
@@ -317,7 +314,7 @@ export default function Clients() {
               <th>Contact Number</th>
               <th>Email</th>
               <th>Country</th>
-              <th>Price</th>
+              <th>Prices</th>
               <th>Manage</th>
             </tr>
           </thead>
@@ -333,7 +330,7 @@ export default function Clients() {
                 <td>{client.contact_number}</td>
                 <td>{client.email}</td>
                 <td>{client.country}</td>
-                <td>{client.price}</td>
+                <td>{client.prices}</td>
                 <td>
                   <button
                     onClick={() =>
@@ -347,7 +344,8 @@ export default function Clients() {
                         contact_number: client.contact_number,
                         email: client.email,
                         country: client.country,
-                        price: client.price
+                        prices: client.prices,
+                        currency: client.currency,
                       })
                     }
                     data-bs-toggle="modal"
@@ -357,13 +355,14 @@ export default function Clients() {
                   >
                     Edit
                   </button>
-                  {session?.user?.role == "super" && <Link
+
+                  {/* {session?.user?.role == "super" && <Link
                     type="button"
                     href={`/client/${client._id}`}
                     className="btn me-2 btn-sm btn-outline-warning"
                   >
                     View
-                  </Link> }
+                  </Link> } */}
                   <button
                     type="button"
                     onClick={() => deleteClient(client)}
@@ -398,7 +397,7 @@ export default function Clients() {
             </div>
             <div className="modal-body">
 
-              
+
               <div className="m-3">
                 <label htmlFor="date" className="form-label">
                   Client Code
@@ -532,11 +531,27 @@ export default function Clients() {
                   Prices
                 </label>
                 <textarea
-                  value={manageData.price}
+                  value={manageData.prices}
                   onChange={(e) =>
                     setManageData((prevData) => ({
                       ...prevData,
-                      price: e.target.value,
+                      prices: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="date" className="form-label">
+                  Currency
+                </label>
+                <input
+                  value={manageData.currency}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      currency: e.target.value,
                     }))
                   }
                   type="text"

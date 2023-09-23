@@ -4,16 +4,15 @@ import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 
 
-import Approvals from "../components/approvals";
-import Clients from "../components/clients";
-import Invoice from "../components/invoice";
+import Create from "./invoiceTabs/create"
+import Database  from "./invoiceTabs/database"
 
 import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 
-export default function Admin() {
-  let [component, setComponent] = useState("approvals");
+export default function Invoice() {
+  let [component, setComponent] = useState("create");
   const router = useRouter();
   let { error, success } = router.query;
 
@@ -36,7 +35,6 @@ export default function Admin() {
 
   return (
     <>
-      <Navbar navFor="dashboard" />
       <ul className="nav nav-tabs nav-justified mt-3" role="tablist">
         {/*         
         <li className="nav-item" role="presentation">
@@ -53,41 +51,30 @@ export default function Admin() {
         <li className="nav-item" role="presentation">
           <Link
             className={
-              component == "approvals" ? "nav-link active" : "nav-link"
+              component == "create" ? "nav-link active" : "nav-link"
             }
             href=""
-            onClick={() => setComponent("approvals")}
+            onClick={() => setComponent("create")}
             role="tab"
           >
-            Approvals
+            Create Invoice
           </Link>
         </li>
 
         <li className="nav-item" role="presentation">
           <Link
-            className={component == "clients" ? "nav-link active" : "nav-link"}
+            className={component == "database" ? "nav-link active" : "nav-link"}
             href=""
-            onClick={() => setComponent("clients")}
+            onClick={() => setComponent("database")}
             role="tab"
           >
-            Clients Database
-          </Link>
-        </li>
-        <li className="nav-item" role="presentation">
-          <Link
-            className={component == "invoice" ? "nav-link active" : "nav-link"}
-            href=""
-            onClick={() => setComponent("invoice")}
-            role="tab"
-          >
-            Invoice
+            Invoice Database
           </Link>
         </li>
       </ul>
       {/* {component == "users" && <Users />} */}
-      {component == "approvals" && <Approvals />}
-      {component == "clients" && <Clients />}
-      {component == "invoice" && <Invoice />}
+      {component == "create" && <Create />}
+      {component == "database" && <Database />}
 
       <style jsx>
         {`
