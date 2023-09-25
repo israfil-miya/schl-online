@@ -62,19 +62,19 @@ async function handleEditClient(req, res) {
   }
 }
 
-async function handleGetClientsById(req, res) {
+async function handleGetClientsByCode(req, res) {
   try {
     let data = req.headers
 
 
 
 
-    const clients = await Client.findById(data.id).lean();
+    const client = await Client.findOne({client_code: data.client_code}).lean();
 
 
-    if (!clients) sendError(res, 400, "No client found with the id");
+    if (!client) sendError(res, 400, "No client found with the id");
     else
-      res.status(200).json(clients);
+      res.status(200).json(client);
 
   } catch (e) {
     console.error(e);
@@ -120,8 +120,8 @@ export default async function handle(req, res) {
         await handleDeleteClient(req, res);
       } else if (req.headers.getclientnamebycode) {
         await handleGetClientNameByCode(req, res);
-      } else if (req.headers.getclientsbyid) {
-        await handleGetClientsById(req, res);
+      } else if (req.headers.getclientsbycode) {
+        await handleGetClientsByCode(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

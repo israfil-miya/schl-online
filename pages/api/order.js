@@ -283,12 +283,17 @@ async function handleGetOrdersByFilter(req, res) {
           },
         },
         { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-        { $sort: { updatedAt: -1 } }, // Limit the number of items per page ];
+        // Limit the number of items per page ];
       ];
 
       if (!req.headers.not_paginated) pipeline = [
         ...pipeline, { $skip: skip }, // Skip items for pagination
-        { $limit: ITEMS_PER_PAGE }
+        { $limit: ITEMS_PER_PAGE },
+        { $sort: { updatedAt: -1 } }
+      ]
+      else  pipeline = [
+        ...pipeline,
+        { $sort: { createdAt: 1 } }
       ]
 
       console.log(pipeline)

@@ -279,16 +279,16 @@ export default function Users() {
                         <button
                           onClick={() => {
                             setManageData({
-                              _id: user._id,
-                              name: user.name,
+                              _id: user._id ?? "",
+                              name: user.name ?? "",
                               password: ((user.role == "super" || user.role == "admin") && session.user.role != "super") ? "XXXXXX" : user.password,
-                              role: user.role,
+                              role: user.role ?? "",
                             });
                             setEditUserData({
-                              _id: user._id,
-                              name: user.name,
+                              _id: user._id ?? "",
+                              name: user.name ?? "",
                               password: ((user.role == "super" || user.role == "admin") && session.user.role != "super") ? "XXXXXX" : user.password,
-                              role: user.role,
+                              role: user.role ?? "",
                             });
                           }}
                           data-bs-toggle="modal"

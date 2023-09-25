@@ -8,13 +8,13 @@ import Navbar from "../navbar";
 import generateInvoice from "../generateInvoice"
 
 export default function ClientDetails() {
-  const router = useRouter();
   const { data: session } = useSession();
   const [client, setClient] = useState(null);
-  const clientId = router.query.clientId;
   const [orders, setOrders] = useState([])
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
+  const [clients, setClients] = useState([])
+  const [selectedClientCode, setSelectedClientCode] = useState()
 
 
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
@@ -25,7 +25,7 @@ export default function ClientDetails() {
     address: "",
     contact_number: "",
     email: "",
-    price: "",
+    prices: "",
     invoice_number: "",
     currency: ""
 
@@ -64,16 +64,22 @@ export default function ClientDetails() {
   async function getClientDetails() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
+
+      console.log(selectedClientCode)
       const options = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          getclientsbyid: true,
-          id: clientId,
+          getclientsbycode: true,
+          client_code: selectedClientCode,
         },
       };
 
       const clientData = await fetchApi(url, options);
+
+
+      console.log(" CLIENTDATA: ", clientData)
+
 
       if (!clientData.error) {
         setClient(clientData);
@@ -85,9 +91,10 @@ export default function ClientDetails() {
           contact_person: clientData?.contact_person,
           contact_number: clientData?.contact_number,
           email: clientData?.email,
-          price: clientData?.price,
+          prices: clientData?.prices,
           address: clientData?.country,
-          invoice_number: clientData?.client_code.split("_")?.[1] + "00XX"
+          currency: clientData?.currency,
+          invoice_number: clientData?.client_code?.split("_")?.[1] + "00XX"
         });
       } else {
         toast.error("Unable to retrieve client");
@@ -95,44 +102,6 @@ export default function ClientDetails() {
     } catch (error) {
       console.error("Error fetching client:", error);
       toast.error("Error retrieving client");
-    }
-  };
-
-  async function getAllOrdersOfClientPaginated() {
-    let adjustedFromTime = fromTime;
-    let adjustedToTime = toTime;
-
-    if (fromTime) {
-      adjustedFromTime = convertToDDMMYYYY(fromTime);
-    }
-    if (toTime) {
-      adjustedToTime = convertToDDMMYYYY(toTime);
-    }
-
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getordersbyfilter: true,
-        folder: foldetFilter,
-        client: client.client_code,
-        task: taskFilter,
-        fromtime: adjustedFromTime,
-        totime: adjustedToTime,
-        page, // Include the current page in the request headers
-      },
-    };
-
-    try {
-      const orders = await fetchApi(url, options);
-
-      if (!orders.error) {
-        setOrders(orders);
-      }
-
-    } catch (error) {
-      console.error("Error fetching filtered orders:", error);
     }
   };
 
@@ -175,49 +144,115 @@ export default function ClientDetails() {
   };
 
 
+  async function getAllOrdersOfClientPaginated() {
+    let adjustedFromTime = fromTime;
+    let adjustedToTime = toTime;
+
+    if (fromTime) {
+      adjustedFromTime = convertToDDMMYYYY(fromTime);
+    }
+    if (toTime) {
+      adjustedToTime = convertToDDMMYYYY(toTime);
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getordersbyfilter: true,
+        folder: foldetFilter,
+        client: selectedClientCode,
+        task: taskFilter,
+        fromtime: adjustedFromTime,
+        totime: adjustedToTime,
+        page, // Include the current page in the request headers
+      },
+    };
+
+    try {
+      const orders = await fetchApi(url, options);
 
 
+      console.log(orders)
 
+      if (!orders.error) {
+        setOrders(orders);
+      }
+
+    } catch (error) {
+      console.error("Error fetching filtered orders:", error);
+    }
+  };
+
+
+  async function getAllClients() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallclients: true,
+        },
+      };
+
+      const clientsList = await fetchApi(url, options);
+
+      if (!clientsList.error) {
+
+        let clientsCodeAndId = []
+        clientsList.forEach((client, index) => {
+          clientsCodeAndId.push({ _id: client._id, client_code: client.client_code })
+        })
+
+
+        console.log(clientsCodeAndId)
+
+        setClients(clientsCodeAndId)
+
+      } else {
+        toast.error("Unable to retrieve clients list");
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      toast.error("Error retrieving clients");
+    }
+  }
 
 
   function extractTaskPrices(taskPriceString) {
-
-    const lines = taskPriceString.trim().split('\n');
+    const lines = taskPriceString?.trim()?.split('\n');
     const prices = {};
-    
+  
     lines.forEach(line => {
-      const parts = line.split(' - ');
+      const parts = line?.split(' - ');
       if (parts.length === 2) {
-        const key = parts[0].trim().toLowerCase();
-        const value = parseInt(parts[1]);
+        const key = parts[0]?.trim()?.toLowerCase();
+        const value = parseFloat(parts[1]); // Use parseFloat instead of parseInt
         prices[key] = value;
       }
     });
-console.log(prices)
+  
     return prices;
   }
-
+  
   const calculateUnitPrice = (taskString, taskPrices) => {
-    // Split the task string by '+' to get individual tasks
-    const tasks = taskString.split("+").map((task) => task.trim().toLowerCase());
-
-    // Debug: Log the tasks to see if they are parsed correctly
-    console.log("Tasks:", tasks);
-
-    // Calculate the total unit price based on task prices
+    const tasks = taskString?.split("+")?.map((task) => task?.trim().toLowerCase());
+  
     const unitPrice = tasks.reduce((totalPrice, task) => {
       const taskPrice = taskPrices[task];
       if (taskPrice !== undefined) {
         return totalPrice + taskPrice;
       } else {
-        // Debug: Log tasks with no defined price
         console.warn(`No price defined for task: ${task}`);
         return totalPrice;
       }
     }, 0);
-
+  
     return unitPrice;
-  };
+  }
+  
 
   async function createInvoice() {
 
@@ -234,7 +269,7 @@ console.log(prices)
     }
 
     // Extract taskPrices from invoiceCustomerData.price
-    const taskPrices = extractTaskPrices(invoiceCustomerData.price);
+    const taskPrices = extractTaskPrices(invoiceCustomerData.prices);
 
 
     try {
@@ -267,7 +302,6 @@ console.log(prices)
         setInvoiceCustomerData(prevData => ({
           ...prevData,
           invoice_number: prevData?.client_code?.split("_")?.[1] + "00XX",
-          currency: ""
         }));
       } else {
         console.warn("No orders found.");
@@ -278,8 +312,6 @@ console.log(prices)
 
 
   }
-
-
 
   function handlePrevious() {
     setPage((p) => {
@@ -296,20 +328,29 @@ console.log(prices)
   }
 
   useEffect(() => {
-    
-  }, []);
+    if (clients?.length) getClientDetails();
+  }, [selectedClientCode]);
 
   useEffect(() => {
+    if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
+  }, [clients]);
 
+
+
+  useEffect(() => {
+    getAllClients()
+  }, []);
+
+
+  useEffect(() => {
     if (client) {
-   
+      getAllOrdersOfClientPaginated();
       setPageCount(orders?.pagination?.pageCount);
     }
   }, [page, client, orders?.pagination?.pageCount]);
 
   return (
     <div>
-
       <div className="m-5">
 
         <div className="row align-items-start">
@@ -376,6 +417,28 @@ console.log(prices)
                 Search
               </button>
             </div>
+
+
+
+
+
+            <div className=" mx-2 form-floating">
+
+
+
+              <select required onChange={e => setSelectedClientCode(e.target.value)} className="form-select" id="floatingSelectGrid">
+
+                {clients?.map((client, index) => {
+                  return <>
+                    <option key={index} defaultValue={index == 0}>{client?.client_code}</option>
+                  </>
+                })}
+
+              </select>
+              <label htmlFor="floatingSelectGrid">Works with selects</label>
+            </div>
+
+
           </div>
           {orders?.items?.length !== 0 && (
             <div className="container mb-3">
@@ -415,6 +478,7 @@ console.log(prices)
 
             </div>
           )}
+
           <table
             style={{ overflow: "hidden" }}
             className="table table-bordered mb-5 table-hover"
@@ -436,8 +500,8 @@ console.log(prices)
               </tr>
             </thead>
             <tbody>
-              {orders?.items &&
-                orders?.items.map((order, index) => (
+              {orders?.items?.length ?
+                orders?.items?.map((order, index) => (
                   <tr key={order._id}>
                     <td>{index + 1}</td>
                     <td className="text-break">
@@ -462,7 +526,11 @@ console.log(prices)
                     <td className="text-break">{order.comment}</td>
                     <td className="text-break">{order.status}</td>
                   </tr>
-                ))}
+                )) : <tr>
+                  <td  colspan="12" className=" align-center text-center">
+                    No Orders To Show.
+                  </td>
+                </tr>}
             </tbody>
           </table>
           {orders?.items?.length !== 0 && <div className="col border rounded-0 p-3">
@@ -591,12 +659,12 @@ console.log(prices)
                   Prices
                 </label>
                 <textarea
-                  value={invoiceCustomerData?.price}
+                  value={invoiceCustomerData?.prices}
                   onChange={(e) =>
                     setInvoiceCustomerData((prevData) => ({
 
                       ...prevData,
-                      price: e.target.value,
+                      prices: e.target.value,
 
                     }))
                   }
@@ -755,12 +823,20 @@ console.log(prices)
               Create an Invoice
             </button>
           </div>}
+
         </div>
       </div>
 
 
 
-
+      <style jsx>
+        {`
+          .dropdown-menu {
+            max-height: 200px;
+            overflow-y: auto;
+          }
+        `}
+      </style>
 
     </div>
   );

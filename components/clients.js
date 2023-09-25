@@ -165,6 +165,7 @@ export default function Clients() {
       console.error("Error editing client:", error);
       toast.error("Error editing client");
     }
+    setManageData({})
   }
 
   useEffect(() => {
@@ -352,18 +353,18 @@ export default function Clients() {
                   <button
                     onClick={() =>
                       setManageData({
-                        _id: client._id,
-                        client_code: client.client_code,
-                        client_name: client.client_name,
-                        marketer: client.marketer,
-                        contact_person: client.contact_person,
-                        designation: client.designation,
-                        contact_number: client.contact_number,
-                        email: client.email,
-                        country: client.country,
-                        address: client.address,
-                        prices: client.prices,
-                        currency: client.currency,
+                        _id: client._id ?? "",
+                        client_code: client.client_code ?? "",
+                        client_name: client.client_name ?? "",
+                        marketer: client.marketer ?? "",
+                        contact_person: client.contact_person ?? "",
+                        designation: client.designation ?? "",
+                        contact_number: client.contact_number ?? "",
+                        email: client.email ?? "",
+                        country: client.country ?? "",
+                        address: client.address ?? "",
+                        prices: client.prices ?? "",
+                        currency: client.currency ?? "",
                       })
                     }
                     data-bs-toggle="modal"
