@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 
 
 import Approvals from "../components/approvals";
-import Clients from "../components/clients";
 import Invoice from "../components/invoice";
 
 import Link from "next/link";
@@ -62,17 +61,7 @@ export default function Admin() {
             Approvals
           </Link>
         </li>
-
-        <li className="nav-item" role="presentation">
-          <Link
-            className={component == "clients" ? "nav-link active" : "nav-link"}
-            href=""
-            onClick={() => setComponent("clients")}
-            role="tab"
-          >
-            Clients Database
-          </Link>
-        </li>
+        
         <li className="nav-item" role="presentation">
           <Link
             className={component == "invoice" ? "nav-link active" : "nav-link"}
@@ -86,7 +75,6 @@ export default function Admin() {
       </ul>
       {/* {component == "users" && <Users />} */}
       {component == "approvals" && <Approvals />}
-      {component == "clients" && <Clients />}
       {component == "invoice" && <Invoice />}
 
       <style jsx>
