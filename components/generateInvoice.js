@@ -2,8 +2,7 @@ import ExcelJS from "exceljs";
 
 const generateRandomNumberString = () => {
   const currentDate = new Date().getTime();
-  const randomNumber = Math.floor(Math.random() * 100000000000);
-  const randomString = `${currentDate}${randomNumber}`.substring(0, 10);
+  const randomString = `${currentDate}`;
   return randomString;
 };
 
@@ -31,7 +30,7 @@ async function addHeader(sheet, cell, value, font, alignment, borderStyle, fillT
   }
 }
 
-const exportExcelFile = async (invoiceData, billData) => {
+const exportExcelFile = async (invoiceData, billData, clcode) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("INVOICE", {
     properties: { tabColor: { argb: "FFC0000" } },
@@ -741,7 +740,7 @@ const exportExcelFile = async (invoiceData, billData) => {
   const url = window.URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `invoice_studioclickhouse_${generateRandomNumberString()}.xlsx`;
+  anchor.download = `invoice_studioclickhouse_${generateRandomNumberString()}_${clcode}.xlsx`;
   anchor.click();
   window.URL.revokeObjectURL(url);
 };

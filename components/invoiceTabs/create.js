@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
-import { getSession, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
-import Link from "next/link";
-import Navbar from "../navbar";
 
 import generateInvoice from "../generateInvoice"
 
 export default function ClientDetails() {
-  const { data: session } = useSession();
   const [client, setClient] = useState(null);
   const [orders, setOrders] = useState([])
   const [page, setPage] = useState(1);
@@ -31,9 +26,9 @@ export default function ClientDetails() {
 
   });
   const [invoiceVendorData, setInvoiceVendorData] = useState({
-    comapny_name: "Studio Click House",
-    contact_person: session?.user?.name,
-    street_address: "Ma Holycity Tower, Level 2",
+    comapny_name: "Studio Click House Ltd.",
+    contact_person: "Raiyan Abrar",
+    street_address: "Tengra Road, Ma Holycity Tower, Level 2",
     city: "Demra, Dhaka-1361, Bangladesh",
     contact_number: "+46855924212, +8801819727117",
     email: "info@studioclickhouse.com",
@@ -44,7 +39,6 @@ export default function ClientDetails() {
   const [toTime, setToTime] = useState("");
   const [foldetFilter, setFolderFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
-
 
 
 
@@ -221,43 +215,7 @@ export default function ClientDetails() {
   }
 
 
-  function extractTaskPrices(taskPriceString) {
-    const lines = taskPriceString?.trim()?.split('\n');
-    const prices = {};
-  
-    lines.forEach(line => {
-      const parts = line?.split(' - ');
-      if (parts.length === 2) {
-        const key = parts[0]?.trim()?.toLowerCase();
-        const value = parseFloat(parts[1]); // Use parseFloat instead of parseInt
-        prices[key] = value;
-      }
-    });
-  
-    return prices;
-  }
-  
-  const calculateUnitPrice = (taskString, taskPrices) => {
-    const tasks = taskString?.split("+")?.map((task) => task?.trim().toLowerCase());
-  
-    const unitPrice = tasks.reduce((totalPrice, task) => {
-      const taskPrice = taskPrices[task];
-      if (taskPrice !== undefined) {
-        return totalPrice + taskPrice;
-      } else {
-        console.warn(`No price defined for task: ${task}`);
-        return totalPrice;
-      }
-    }, 0);
-  
-    return unitPrice;
-  }
-  
-
   async function createInvoice() {
-
-
-
     if (!invoiceCustomerData.invoice_number) {
       toast.error("Please enter an Invoie Number")
       return
@@ -268,9 +226,6 @@ export default function ClientDetails() {
       return
     }
 
-    // Extract taskPrices from invoiceCustomerData.price
-    const taskPrices = extractTaskPrices(invoiceCustomerData.prices);
-
 
     try {
       // Fetch orders and wait for them to be retrieved
@@ -279,12 +234,11 @@ export default function ClientDetails() {
       // Check if orders is not undefined or empty before mapping
       if (orders && orders.length > 0) {
         const billData = orders.map((order, index) => {
-          const unitPrice = order.task ? calculateUnitPrice(order.task, taskPrices) : 0;
           return {
             date: order.date_today,
             job_name: order.folder,
             quantity: order.quantity,
-            unit_price: unitPrice,
+            unit_price: 0,
             total: function () {
               return this.quantity * this.unit_price;
             },
@@ -297,7 +251,7 @@ export default function ClientDetails() {
           vendor: invoiceVendorData,
         };
 
-        await generateInvoice(InvoiceData, billData);
+        await generateInvoice(InvoiceData, billData, InvoiceData.customer._id);
         console.log("Bill Data: ", billData);
         setInvoiceCustomerData(prevData => ({
           ...prevData,
