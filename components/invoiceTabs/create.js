@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-import generateInvoice from "../generateInvoice"
+import generateInvoice from "../generateInvoice";
 
 export default function ClientDetails() {
   const [client, setClient] = useState(null);
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [clients, setClients] = useState([])
-  const [selectedClientCode, setSelectedClientCode] = useState()
-
+  const [clients, setClients] = useState([]);
+  const [selectedClientCode, setSelectedClientCode] = useState();
 
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
     _id: "",
@@ -22,8 +21,7 @@ export default function ClientDetails() {
     email: "",
     prices: "",
     invoice_number: "",
-    currency: ""
-
+    currency: "",
   });
   const [invoiceVendorData, setInvoiceVendorData] = useState({
     comapny_name: "Studio Click House Ltd.",
@@ -34,14 +32,10 @@ export default function ClientDetails() {
     email: "info@studioclickhouse.com",
   });
 
-
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [foldetFilter, setFolderFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
-
-
-
 
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
@@ -53,13 +47,13 @@ export default function ClientDetails() {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
-  };
+  }
 
   async function getClientDetails() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
 
-      console.log(selectedClientCode)
+      console.log(selectedClientCode);
       const options = {
         method: "GET",
         headers: {
@@ -71,17 +65,13 @@ export default function ClientDetails() {
 
       const clientData = await fetchApi(url, options);
 
-
-      console.log(" CLIENTDATA: ", clientData)
-
+      console.log(" CLIENTDATA: ", clientData);
 
       if (!clientData.error) {
         setClient(clientData);
 
-
-        console.log(clientData.currency ?? "No currency")
+        console.log(clientData.currency ?? "No currency");
         setInvoiceCustomerData({
-
           _id: clientData._id,
           client_name: clientData.client_name ?? "",
           client_code: clientData.client_code ?? "",
@@ -91,11 +81,10 @@ export default function ClientDetails() {
           prices: clientData.prices ?? "",
           address: clientData.country ?? "",
           currency: clientData.currency ?? "",
-          invoice_number: clientData.client_code?.split("_")?.[1] + "00XX"
+          invoice_number: clientData.client_code?.split("_")?.[1] + "00XX",
         });
 
-
-        await getAllOrdersOfClientPaginated()
+        await getAllOrdersOfClientPaginated();
       } else {
         toast.error("Unable to retrieve client");
       }
@@ -103,7 +92,7 @@ export default function ClientDetails() {
       console.error("Error fetching client:", error);
       toast.error("Error retrieving client");
     }
-  };
+  }
 
   async function getAllOrdersOfClientInvoice() {
     let adjustedFromTime = fromTime;
@@ -127,7 +116,7 @@ export default function ClientDetails() {
         task: taskFilter,
         fromtime: adjustedFromTime,
         totime: adjustedToTime,
-        not_paginated: true // Include the current page in the request headers
+        not_paginated: true, // Include the current page in the request headers
       },
     };
 
@@ -135,14 +124,12 @@ export default function ClientDetails() {
       const orders = await fetchApi(url, options);
 
       if (!orders.error) {
-        return orders?.items
+        return orders?.items;
       }
-
     } catch (error) {
       console.error("Error fetching filtered orders:", error);
     }
-  };
-
+  }
 
   async function getAllOrdersOfClientPaginated() {
     let adjustedFromTime = fromTime;
@@ -174,18 +161,15 @@ export default function ClientDetails() {
     try {
       const orders = await fetchApi(url, options);
 
-
-      console.log(orders)
+      console.log(orders);
 
       if (!orders.error) {
         setOrders(orders);
       }
-
     } catch (error) {
       console.error("Error fetching filtered orders:", error);
     }
-  };
-
+  }
 
   async function getAllClients() {
     try {
@@ -201,17 +185,17 @@ export default function ClientDetails() {
       const clientsList = await fetchApi(url, options);
 
       if (!clientsList.error) {
-
-        let clientsCodeAndId = []
+        let clientsCodeAndId = [];
         clientsList.forEach((client, index) => {
-          clientsCodeAndId.push({ _id: client._id, client_code: client.client_code })
-        })
+          clientsCodeAndId.push({
+            _id: client._id,
+            client_code: client.client_code,
+          });
+        });
 
+        console.log(clientsCodeAndId);
 
-        console.log(clientsCodeAndId)
-
-        setClients(clientsCodeAndId)
-
+        setClients(clientsCodeAndId);
       } else {
         toast.error("Unable to retrieve clients list");
       }
@@ -221,18 +205,16 @@ export default function ClientDetails() {
     }
   }
 
-
   async function createInvoice() {
     if (!invoiceCustomerData.invoice_number) {
-      toast.error("Please enter an Invoie Number")
-      return
+      toast.error("Please enter an Invoie Number");
+      return;
     }
 
     if (!invoiceCustomerData.currency) {
-      toast.error("Please enter a currency symbol/code")
-      return
+      toast.error("Please enter a currency symbol/code");
+      return;
     }
-
 
     try {
       // Fetch orders and wait for them to be retrieved
@@ -260,7 +242,7 @@ export default function ClientDetails() {
 
         await generateInvoice(InvoiceData, billData, InvoiceData.customer._id);
         console.log("Bill Data: ", billData);
-        setInvoiceCustomerData(prevData => ({
+        setInvoiceCustomerData((prevData) => ({
           ...prevData,
           invoice_number: prevData?.client_code?.split("_")?.[1] + "00XX",
         }));
@@ -270,8 +252,6 @@ export default function ClientDetails() {
     } catch (error) {
       console.error("Error generating Invoice:", error);
     }
-
-
   }
 
   function handlePrevious() {
@@ -296,12 +276,9 @@ export default function ClientDetails() {
     if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
   }, [clients]);
 
-
-
   useEffect(() => {
-    getAllClients()
+    getAllClients();
   }, []);
-
 
   useEffect(() => {
     if (client) {
@@ -313,7 +290,6 @@ export default function ClientDetails() {
   return (
     <div>
       <div className="m-5">
-
         <div className="row align-items-start">
           <div
             style={{
@@ -323,17 +299,21 @@ export default function ClientDetails() {
             }}
           >
             <div className=" mx-2 form-floating">
-
-
-
-              <select required onChange={e => setSelectedClientCode(e.target.value)} className="form-select" id="floatingSelectGrid">
-
+              <select
+                required
+                onChange={(e) => setSelectedClientCode(e.target.value)}
+                className="form-select"
+                id="floatingSelectGrid"
+              >
                 {clients?.map((client, index) => {
-                  return <>
-                    <option key={index} defaultValue={index == 0}>{client?.client_code}</option>
-                  </>
+                  return (
+                    <>
+                      <option key={index} defaultValue={index == 0}>
+                        {client?.client_code}
+                      </option>
+                    </>
+                  );
                 })}
-
               </select>
               <label htmlFor="floatingSelectGrid">Works with selects</label>
             </div>
@@ -393,14 +373,6 @@ export default function ClientDetails() {
                 Search
               </button>
             </div>
-
-
-
-
-
-
-
-
           </div>
           {orders?.items?.length !== 0 && (
             <div className="container mb-3">
@@ -437,7 +409,6 @@ export default function ClientDetails() {
                   </button>
                 </div>
               </div>
-
             </div>
           )}
 
@@ -462,7 +433,7 @@ export default function ClientDetails() {
               </tr>
             </thead>
             <tbody>
-              {orders?.items?.length ?
+              {orders?.items?.length ? (
                 orders?.items?.map((order, index) => (
                   <tr key={order._id}>
                     <td>{index + 1}</td>
@@ -471,7 +442,6 @@ export default function ClientDetails() {
                       <span className="text-body-secondary"> | </span>
                       {order.time_now}
                     </td>
-
 
                     <td className="text-break">{order.folder}</td>
                     <td className="text-break">{order.quantity}</td>
@@ -488,308 +458,277 @@ export default function ClientDetails() {
                     <td className="text-break">{order.comment}</td>
                     <td className="text-break">{order.status}</td>
                   </tr>
-                )) : <tr>
+                ))
+              ) : (
+                <tr>
                   <td colspan="12" className=" align-center text-center">
                     No Orders To Show.
                   </td>
-                </tr>}
+                </tr>
+              )}
             </tbody>
           </table>
-          {orders?.items?.length !== 0 && <div className="col border rounded-0 p-3">
-            <h4 className="py-2 text-center">Create Invoice</h4>
+          {orders?.items?.length !== 0 && (
+            <div className="col border rounded-0 p-3">
+              <h4 className="py-2 text-center">Create Invoice</h4>
 
+              <h5>Customer details</h5>
+              <div className="row mb-4">
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Company Name
+                  </label>
+                  <input
+                    value={invoiceCustomerData?.client_name}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        client_name: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
 
-            <h5>Customer details</h5>
-            <div className="row mb-4">
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Company Name
-                </label>
-                <input
-                  value={invoiceCustomerData?.client_name}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Contact Person
+                  </label>
+                  <input
+                    value={invoiceCustomerData?.contact_person}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        contact_person: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
 
-                      ...prevData,
-                      client_name: e.target.value,
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Contact Number
+                  </label>
+                  <input
+                    value={invoiceCustomerData?.contact_number}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        contact_number: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
 
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Address
+                  </label>
+                  <input
+                    value={invoiceCustomerData?.address}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        address: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Email
+                  </label>
+                  <input
+                    value={invoiceCustomerData?.email}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        email: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Invoice Number
+                  </label>
+                  <input
+                    required
+                    value={invoiceCustomerData?.invoice_number}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        invoice_number: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Prices
+                  </label>
+                  <textarea
+                    value={invoiceCustomerData?.prices}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        prices: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Currency
+                  </label>
+                  <input
+                    required
+                    value={invoiceCustomerData?.currency}
+                    onChange={(e) =>
+                      setInvoiceCustomerData((prevData) => ({
+                        ...prevData,
+                        currency: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
               </div>
 
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Person
-                </label>
-                <input
-                  value={invoiceCustomerData?.contact_person}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
+              <h5 className="mt-4">Vendor details</h5>
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Company Name
+                  </label>
+                  <input
+                    value={invoiceVendorData?.comapny_name}
+                    onChange={(e) =>
+                      setInvoiceVendorData((prevData) => ({
+                        ...prevData,
+                        comapny_name: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
 
-                      ...prevData,
-                      contact_person: e.target.value,
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Contact Person
+                  </label>
+                  <input
+                    value={invoiceVendorData?.contact_person}
+                    onChange={(e) =>
+                      setInvoiceVendorData((prevData) => ({
+                        ...prevData,
+                        contact_person: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
 
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Contact Number
+                  </label>
+                  <input
+                    value={invoiceVendorData?.contact_number}
+                    onChange={(e) =>
+                      setInvoiceVendorData((prevData) => ({
+                        ...prevData,
+                        contact_number: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Street Address
+                  </label>
+                  <input
+                    value={invoiceVendorData?.street_address}
+                    onChange={(e) =>
+                      setInvoiceVendorData((prevData) => ({
+                        ...prevData,
+                        street_address: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    City
+                  </label>
+                  <input
+                    value={invoiceVendorData?.city}
+                    onChange={(e) =>
+                      setInvoiceVendorData((prevData) => ({
+                        ...prevData,
+                        city: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Email
+                  </label>
+                  <input
+                    value={invoiceVendorData?.email}
+                    onChange={(e) =>
+                      setInvoiceVendorData((prevData) => ({
+                        ...prevData,
+                        email: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
               </div>
 
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Number
-                </label>
-                <input
-                  value={invoiceCustomerData?.contact_number}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
-
-                      ...prevData,
-                      contact_number: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Address
-                </label>
-                <input
-                  value={invoiceCustomerData?.address}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
-
-                      ...prevData,
-                      address: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Email
-                </label>
-                <input
-                  value={invoiceCustomerData?.email}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
-
-                      ...prevData,
-                      email: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Invoice Number
-                </label>
-                <input
-                  required
-                  value={invoiceCustomerData?.invoice_number}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
-
-                      ...prevData,
-                      invoice_number: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Prices
-                </label>
-                <textarea
-                  value={invoiceCustomerData?.prices}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
-
-                      ...prevData,
-                      prices: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Currency
-                </label>
-                <input
-                  required
-                  value={invoiceCustomerData?.currency}
-                  onChange={(e) =>
-                    setInvoiceCustomerData((prevData) => ({
-
-                      ...prevData,
-                      currency: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-
+              <button
+                onClick={createInvoice}
+                type="button"
+                className="btn float-end btn-outline-success"
+              >
+                Create an Invoice
+              </button>
             </div>
-
-
-            <h5 className="mt-4">Vendor details</h5>
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Company Name
-                </label>
-                <input
-                  value={invoiceVendorData?.comapny_name}
-                  onChange={(e) =>
-                    setInvoiceVendorData((prevData) => ({
-
-                      ...prevData,
-                      comapny_name: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Person
-                </label>
-                <input
-                  value={invoiceVendorData?.contact_person}
-                  onChange={(e) =>
-                    setInvoiceVendorData((prevData) => ({
-
-                      ...prevData,
-                      contact_person: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Contact Number
-                </label>
-                <input
-                  value={invoiceVendorData?.contact_number}
-                  onChange={(e) =>
-                    setInvoiceVendorData((prevData) => ({
-
-                      ...prevData,
-                      contact_number: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Street Address
-                </label>
-                <input
-                  value={invoiceVendorData?.street_address}
-                  onChange={(e) =>
-                    setInvoiceVendorData((prevData) => ({
-
-                      ...prevData,
-                      street_address: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  City
-                </label>
-                <input
-                  value={invoiceVendorData?.city}
-                  onChange={(e) =>
-                    setInvoiceVendorData((prevData) => ({
-
-                      ...prevData,
-                      city: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date" className="form-label">
-                  Email
-                </label>
-                <input
-                  value={invoiceVendorData?.email}
-                  onChange={(e) =>
-                    setInvoiceVendorData((prevData) => ({
-
-                      ...prevData,
-                      email: e.target.value,
-
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-            </div>
-
-
-            <button
-              onClick={createInvoice}
-              type="button"
-              className="btn float-end btn-outline-success"
-            >
-              Create an Invoice
-            </button>
-          </div>}
-
+          )}
         </div>
       </div>
-
-
 
       <style jsx>
         {`
@@ -799,7 +738,6 @@ export default function ClientDetails() {
           }
         `}
       </style>
-
     </div>
   );
 }

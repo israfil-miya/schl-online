@@ -1,7 +1,7 @@
 import Approval from "../../db/Approvals";
 import User from "../../db/Users";
 import Order from "../../db/Orders";
-import Client from "../../db/Clients"
+import Client from "../../db/Clients";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -58,7 +58,7 @@ async function handleResponse(req, res) {
           checked_by: data.checked_by,
           is_rejected: false,
         },
-        { new: true }
+        { new: true },
       );
 
       if (resData) {
@@ -68,7 +68,6 @@ async function handleResponse(req, res) {
         sendError(res, 400, "Unable to send request");
       }
     }
-
 
     if (data.req_type == "User Create") {
       const resData = await User.findOneAndUpdate(
@@ -81,7 +80,7 @@ async function handleResponse(req, res) {
         {
           new: true,
           upsert: true,
-        }
+        },
       );
 
       const updateApprovaL = await Approval.findByIdAndUpdate(
@@ -90,7 +89,7 @@ async function handleResponse(req, res) {
           checked_by: data.checked_by,
           is_rejected: false,
         },
-        { new: true }
+        { new: true },
       );
 
       if (resData) {
@@ -110,7 +109,7 @@ async function handleResponse(req, res) {
           checked_by: data.checked_by,
           is_rejected: false,
         },
-        { new: true }
+        { new: true },
       );
 
       if (resData) {
@@ -129,7 +128,7 @@ async function handleResponse(req, res) {
           checked_by: data.checked_by,
           is_rejected: false,
         },
-        { new: true }
+        { new: true },
       );
 
       if (resData) {
@@ -155,9 +154,6 @@ async function handleResponse(req, res) {
   //   sendError(res, 500, "An error occurred");
   // }
 }
-
-
-
 
 async function handleGetAllOrdersForApproval(req, res) {
   try {
@@ -200,8 +196,6 @@ async function handleGetAllClientsForApproval(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 export default async function handle(req, res) {
   const { method } = req;

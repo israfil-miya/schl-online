@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 
-
-import Create from "./invoiceTabs/create"
-import Database  from "./invoiceTabs/database"
+import Create from "./invoiceTabs/create";
+import Database from "./invoiceTabs/database";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -50,9 +49,7 @@ export default function Invoice() {
 
         <li className="nav-item" role="presentation">
           <Link
-            className={
-              component == "create" ? "nav-link active" : "nav-link"
-            }
+            className={component == "create" ? "nav-link active" : "nav-link"}
             href=""
             onClick={() => setComponent("create")}
             role="tab"

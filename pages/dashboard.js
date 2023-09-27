@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 
-
 import Approvals from "../components/approvals";
 import Invoice from "../components/invoice";
 
@@ -61,7 +60,7 @@ export default function Admin() {
             Approvals
           </Link>
         </li>
-        
+
         <li className="nav-item" role="presentation">
           <Link
             className={component == "invoice" ? "nav-link active" : "nav-link"}

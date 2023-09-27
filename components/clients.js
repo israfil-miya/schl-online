@@ -10,16 +10,15 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [clientCode, setClientCode] = useState("");
   const [clientName, setClientName] = useState("");
-  const [marketer, setMarketer] = useState("")
-  const [contactPerson, setContactPerson] = useState("")
-  const [designation, setDesignation] = useState("")
-  const [contactNumber, setContactNumber] = useState("")
-  const [email, setEmail] = useState("")
-  const [country, setCountry] = useState("")
-  const [address, setAddress] = useState("")
-  const [prices, setPrices] = useState("")
-  const [currency, setCurrency] = useState("")
-
+  const [marketer, setMarketer] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [address, setAddress] = useState("");
+  const [prices, setPrices] = useState("");
+  const [currency, setCurrency] = useState("");
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -83,7 +82,7 @@ export default function Clients() {
         country,
         address,
         prices,
-        currency
+        currency,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -109,8 +108,6 @@ export default function Clients() {
   }
 
   async function deleteClient(deleteClientData) {
-
-
     let result;
 
     const res = await fetch(
@@ -125,7 +122,7 @@ export default function Clients() {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     result = await res.json();
     if (!result.error) {
@@ -165,7 +162,7 @@ export default function Clients() {
       console.error("Error editing client:", error);
       toast.error("Error editing client");
     }
-    setManageData({})
+    setManageData({});
   }
 
   useEffect(() => {
@@ -316,7 +313,6 @@ export default function Clients() {
         </form>
       </div>
       <div className="client-list my-5">
-
         <h5 className="text-center py-4">Clients List</h5>
         <table className="table p-3 table-hover">
           <thead>
@@ -415,8 +411,6 @@ export default function Clients() {
               ></button>
             </div>
             <div className="modal-body">
-
-
               <div className="m-3">
                 <label htmlFor="date" className="form-label">
                   Client Code
@@ -593,7 +587,6 @@ export default function Clients() {
                   className="form-control"
                 />
               </div>
-
             </div>
             <div className="modal-footer p-1">
               <button

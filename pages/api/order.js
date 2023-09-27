@@ -20,7 +20,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
   function getCurrentAsiaDhakaTime() {
     const now = new Date();
     const asiaDhakaTime = new Date(
-      now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" })
+      now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" }),
     );
     return asiaDhakaTime;
   }
@@ -36,7 +36,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
     adjustedHours,
     minutes,
     0,
-    0
+    0,
   );
 
   const timeDifferenceMs = deliveryDateTime - asiaDhakaTime;
@@ -80,7 +80,7 @@ async function handleGetOrdersUnFinished(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -103,7 +103,7 @@ async function handleGetOrdersRedo(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -150,9 +150,9 @@ async function handleGetAllOrderPaginated(req, res) {
           },
         },
       },
-      
+
       { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-      
+
       { $skip: skip }, // Skip items for pagination
       { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
     ];
@@ -190,7 +190,6 @@ async function handleGetOrdersById(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
 
 function ddMmYyyyToIsoDate(ddMmYyyy) {
   try {
@@ -230,7 +229,15 @@ async function handleGetOrdersByFilter(req, res) {
     const page = req.headers.page || 1;
     const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) ?? 20; // Number of items per page
 
-    console.log("Received request with parameters:", fromtime, totime, folder, client, task, page);
+    console.log(
+      "Received request with parameters:",
+      fromtime,
+      totime,
+      folder,
+      client,
+      task,
+      page,
+    );
 
     let query = {};
     if (folder) query.folder = folder;
@@ -294,10 +301,7 @@ async function handleGetOrdersByFilter(req, res) {
           { $limit: ITEMS_PER_PAGE },
         ];
       } else {
-        pipeline = [
-          ...pipeline,
-          { $sort: { createdAt: 1 } }
-        ];
+        pipeline = [...pipeline, { $sort: { createdAt: 1 } }];
       }
 
       console.log(pipeline);
@@ -328,14 +332,14 @@ async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
       { status: { $nin: ["Finished", "Correction", "Test"] } },
-      { delivery_date: 1, delivery_bd_time: 1 }
+      { delivery_date: 1, delivery_bd_time: 1 },
     ).lean();
 
     const sortedOrders = orders
       .map((order) => ({
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -396,7 +400,7 @@ async function handleFinishOrder(req, res) {
       { status: "Finished" },
       {
         new: true,
-      }
+      },
     );
 
     if (resData) {
@@ -420,7 +424,7 @@ async function handleRedoOrder(req, res) {
       { status: "Correction" },
       {
         new: true,
-      }
+      },
     );
 
     if (resData) {
@@ -441,7 +445,7 @@ async function handleGetAllOrdersOfClient(req, res) {
 
     const resData = await Order.find({ client_code: data.client_code });
 
-    console.log(resData)
+    console.log(resData);
 
     if (resData) {
       res.status(200).json(resData);
@@ -453,7 +457,6 @@ async function handleGetAllOrdersOfClient(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
 
 export default async function handle(req, res) {
   const { method } = req;

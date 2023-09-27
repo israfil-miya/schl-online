@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 
-
 import Tasks from "../components/tasks";
 import Users from "../components/users";
 import Statistics from "../components/statistics";
@@ -84,8 +83,6 @@ export default function Admin() {
             Statistics
           </Link>
         </li>
-
-
       </ul>
       {component == "users" && <Users />}
       {component == "tasks" && <Tasks />}
@@ -107,7 +104,11 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
 
   // code for redirect if not logged in
-  if (!session || session.user.role == "user" || session.user.role == "manager") {
+  if (
+    !session ||
+    session.user.role == "user" ||
+    session.user.role == "manager"
+  ) {
     return {
       redirect: {
         destination: "/?error=You need Admin/Super role to access the page",

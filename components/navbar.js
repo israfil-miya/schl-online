@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import TimeCard from "./timecard";
 import { useState, useEffect } from "react";
-import styles from '../styles/NavBar.module.css';
+import styles from "../styles/NavBar.module.css";
 
 const cities = [
   "Asia/Dhaka",
@@ -63,11 +63,7 @@ export default function Navbar({ navFor }) {
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
         <div className="container-fluid">
-
-          <Link
-            className="navbar-brand d-flex align-items-center"
-            href="/"
-          >
+          <Link className="navbar-brand d-flex align-items-center" href="/">
             <Image
               priority
               src="/images/NEW-SCH-logo-text-grey.png"
@@ -136,23 +132,42 @@ export default function Navbar({ navFor }) {
         </div>
       </nav>
 
-
       <div className={`${styles.nav}`}>
-        <Link className={`${styles.navitem} ${navFor === 'tasks' ? styles.active : ''}`} href="/">
+        <Link
+          className={`${styles.navitem} ${
+            navFor === "tasks" ? styles.active : ""
+          }`}
+          href="/"
+        >
           Tasks
         </Link>
         {session.user.role !== "user" ? (
-        <Link className={`${styles.navitem} ${navFor === 'browse' ? styles.active : ''}`} href="/browse">
-          Browse
-        </Link>
+          <Link
+            className={`${styles.navitem} ${
+              navFor === "browse" ? styles.active : ""
+            }`}
+            href="/browse"
+          >
+            Browse
+          </Link>
         ) : null}
-        {session.user.role === 'admin' || session.user.role === 'super' ? (
-          <Link className={`${styles.navitem} ${navFor === 'admin' ? styles.active : ''}`} href="/admin">
+        {session.user.role === "admin" || session.user.role === "super" ? (
+          <Link
+            className={`${styles.navitem} ${
+              navFor === "admin" ? styles.active : ""
+            }`}
+            href="/admin"
+          >
             Admin
           </Link>
         ) : null}
-        {session.user.role === 'super' ? (
-          <Link className={`${styles.navitem} ${navFor === 'dashboard' ? styles.active : ''}`} href="/dashboard">
+        {session.user.role === "super" ? (
+          <Link
+            className={`${styles.navitem} ${
+              navFor === "dashboard" ? styles.active : ""
+            }`}
+            href="/dashboard"
+          >
             Dashboard
           </Link>
         ) : null}

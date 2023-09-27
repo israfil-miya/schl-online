@@ -7,32 +7,32 @@ const ClientSchema = new mongoose.Schema({
     type: String,
   },
   marketer: {
-    type: String
+    type: String,
   },
   contact_person: {
-    type: String
+    type: String,
   },
   designation: {
-    type: String
+    type: String,
   },
   contact_number: {
-    type: String
+    type: String,
   },
   email: {
-    type: String
+    type: String,
   },
   country: {
-    type: String
+    type: String,
   },
   address: {
-    type: String
+    type: String,
   },
   prices: {
-    type: String
+    type: String,
   },
   currency: {
-    type: String
-  }
+    type: String,
+  },
 });
 
 module.exports =

@@ -1,5 +1,5 @@
-import jsftp from 'jsftp';
-import fs from 'fs';
+import jsftp from "jsftp";
+import fs from "fs";
 
 const ftp = new jsftp({
   host: process.env.NEXT_PUBLIC_HOST,
@@ -15,11 +15,11 @@ export const uploadInvoice = async (localFilePath, remoteFilePath) => {
 
     readStream.pipe(remoteWriteStream);
 
-    remoteWriteStream.on('close', () => {
-      resolve('Upload completed');
+    remoteWriteStream.on("close", () => {
+      resolve("Upload completed");
     });
 
-    remoteWriteStream.on('error', (err) => {
+    remoteWriteStream.on("error", (err) => {
       reject(err);
     });
   });

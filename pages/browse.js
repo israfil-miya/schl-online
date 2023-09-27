@@ -190,7 +190,7 @@ export default function Browse() {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     result = await res.json();
     if (!result.error) {
@@ -427,7 +427,7 @@ export default function Browse() {
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||
-                  session.user.role == "super" ? (
+                session.user.role == "super" ? (
                   <td className="text-break">{order.client_name}</td>
                 ) : (
                   <></>
@@ -448,7 +448,7 @@ export default function Browse() {
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
-                  session.user.role == "super" ? (
+                session.user.role == "super" ? (
                   // Default state
 
                   <td className="align-middle" style={{ textAlign: "center" }}>
@@ -491,10 +491,11 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${order.status === "Finished"
+                      className={`btn btn-sm ${
+                        order.status === "Finished"
                           ? "btn-outline-warning"
                           : "btn-outline-success"
-                        }`}
+                      }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>
@@ -957,7 +958,6 @@ export default function Browse() {
   );
 }
 
-
 export async function getServerSideProps(context) {
   const session = await getSession(context);
 
@@ -965,7 +965,8 @@ export async function getServerSideProps(context) {
   if (!session || session.user.role == "user") {
     return {
       redirect: {
-        destination: "/?error=You need Manager/Admin/Super role to access the page",
+        destination:
+          "/?error=You need Manager/Admin/Super role to access the page",
         permanent: true,
       },
     };

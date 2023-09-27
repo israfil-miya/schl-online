@@ -50,11 +50,11 @@ export default function Login() {
 
   return (
     <>
-      <div className="main-wrapper container">
-        <div className="card signin-form rounded border shadow-sm">
+      <div className="main-wrapper">
+        <div className="card signin-form rounded">
           <div className="card-header">
             <div className="text-center p-5">
-              <h4 className="fw-medium">Studio Click House Ltd.</h4>
+              <h4 className="fw-bold">Studio Click House Ltd.</h4>
             </div>
           </div>
 
@@ -84,12 +84,9 @@ export default function Login() {
                 />
                 <label htmlFor="floatingPassword">Password</label>
               </div>
-                <button
-                  type="submit"
-                  className="btn w-100 btn-outline-dark mb-4"
-                >
-                  Login
-                </button>
+              <button type="submit" className="btn w-100 btn-outline-dark mb-4">
+                Login
+              </button>
             </form>
           </div>
         </div>
@@ -105,11 +102,15 @@ export default function Login() {
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: linear-gradient(
+              to bottom,
+              #7ba541,
+              #fff
+            ); /* Define the gradient colors */
           }
           .signin-form {
             width: 60ex;
           }
-
           .form-outline {
             width: 100%; /* Make the form inputs take full width */
           }
@@ -117,14 +118,33 @@ export default function Login() {
           .card-header {
             text-align: center; /* Center-align the text */
             padding: 20px; /* Add some padding for spacing */
-            background-image: url("/images/NEW-SCH-logo-text-grey.png"), url("https://amymhaddad.s3.amazonaws.com/oriental-tiles.png");
+            background-image: url("https://amymhaddad.s3.amazonaws.com/oriental-tiles.png");
+            background-position: center center; /* Center the background image */
+            background-size: cover; /* Ensure the image covers the entire header */
+            position: relative; /* Make the header relative to add pseudo-element */
           }
-
-          .fw-medium {
+          .card-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(
+              0,
+              0,
+              0,
+              0.2
+            ); /* Dark overlay color with 50% opacity */
+          }
+          .fw-bold {
             font-size: 24px; /* Adjust font size for a proper heading title */
-            font-weight: bold; /* Make the text bold */
             text-transform: uppercase; /* Optionally, make the text uppercase */
             color: #fff; /* Set the text color to white for better visibility */
+          }
+          .card-header h4 {
+            position: relative; /* Make sure the name text stays above the overlay */
+            z-index: 1; /* Bring the name text to the front */
           }
         `}
       </style>

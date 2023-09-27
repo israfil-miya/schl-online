@@ -349,7 +349,7 @@ export default function Approvals() {
                           <span className="fw-medium">
                             {
                               formatTimestamp(
-                                approveReq.updatedAt.toLocaleString()
+                                approveReq.updatedAt.toLocaleString(),
                               ).date
                             }{" "}
                           </span>{" "}
@@ -357,7 +357,7 @@ export default function Approvals() {
                           <span className="fw-medium">
                             {
                               formatTimestamp(
-                                approveReq.updatedAt.toLocaleString()
+                                approveReq.updatedAt.toLocaleString(),
                               ).time
                             }
                           </span>
@@ -480,7 +480,7 @@ export default function Approvals() {
                           <span className="fw-medium">
                             {
                               formatTimestamp(
-                                approveReq.updatedAt.toLocaleString()
+                                approveReq.updatedAt.toLocaleString(),
                               ).date
                             }{" "}
                           </span>{" "}
@@ -488,7 +488,7 @@ export default function Approvals() {
                           <span className="fw-medium">
                             {
                               formatTimestamp(
-                                approveReq.updatedAt.toLocaleString()
+                                approveReq.updatedAt.toLocaleString(),
                               ).time
                             }
                           </span>
@@ -611,7 +611,7 @@ export default function Approvals() {
                           <span className="fw-medium">
                             {
                               formatTimestamp(
-                                approveReq.updatedAt.toLocaleString()
+                                approveReq.updatedAt.toLocaleString(),
                               ).date
                             }{" "}
                           </span>{" "}
@@ -619,7 +619,7 @@ export default function Approvals() {
                           <span className="fw-medium">
                             {
                               formatTimestamp(
-                                approveReq.updatedAt.toLocaleString()
+                                approveReq.updatedAt.toLocaleString(),
                               ).time
                             }
                           </span>

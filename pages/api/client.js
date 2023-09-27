@@ -64,18 +64,14 @@ async function handleEditClient(req, res) {
 
 async function handleGetClientsByCode(req, res) {
   try {
-    let data = req.headers
+    let data = req.headers;
 
-
-
-
-    const client = await Client.findOne({client_code: data.client_code}).lean();
-
+    const client = await Client.findOne({
+      client_code: data.client_code,
+    }).lean();
 
     if (!client) sendError(res, 400, "No client found with the id");
-    else
-      res.status(200).json(client);
-
+    else res.status(200).json(client);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
@@ -85,16 +81,14 @@ async function handleGetClientsByCode(req, res) {
 async function handleGetClientNameByCode(req, res) {
   try {
     let data = req.headers;
-    const resData = await Client.findOne({client_code: data.client_code});
-    if(!resData) sendError(res, 500, "No client found with the code");
+    const resData = await Client.findOne({ client_code: data.client_code });
+    if (!resData) sendError(res, 500, "No client found with the code");
     else res.status(200).json(resData);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 async function handleDeleteClient(req, res) {
   let data = req.headers;
@@ -107,7 +101,6 @@ async function handleDeleteClient(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
 
 export default async function handle(req, res) {
   const { method } = req;
