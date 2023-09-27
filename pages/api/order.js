@@ -116,7 +116,7 @@ async function handleGetOrdersRedo(req, res) {
 }
 
 async function handleGetAllOrderPaginated(req, res) {
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 50;
   const page = req.headers.page || 1;
 
   // Put all your query params in here
@@ -150,8 +150,9 @@ async function handleGetAllOrderPaginated(req, res) {
           },
         },
       },
+      
       { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-      { $sort: { updatedAt: -1 } },
+      
       { $skip: skip }, // Skip items for pagination
       { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
     ];
@@ -207,7 +208,7 @@ function ddMmYyyyToIsoDate(ddMmYyyy) {
     }
 
     // Months are 0-based in JavaScript, so subtract 1 from the month
-    const date = new Date(year, month - 1, day);
+    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)); // Set time to midnight in UTC
 
     if (isNaN(date.getTime())) {
       throw new Error("Invalid date: Resulting date is NaN");
@@ -223,22 +224,13 @@ function ddMmYyyyToIsoDate(ddMmYyyy) {
   }
 }
 
-
 async function handleGetOrdersByFilter(req, res) {
   try {
     const { fromtime, totime, folder, client, task } = req.headers;
     const page = req.headers.page || 1;
-    const ITEMS_PER_PAGE = 5; // Number of items per page
+    const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) ?? 20; // Number of items per page
 
-    console.log(
-      "Received request with parameters:",
-      fromtime,
-      totime,
-      folder,
-      client,
-      task,
-      page
-    );
+    console.log("Received request with parameters:", fromtime, totime, folder, client, task, page);
 
     let query = {};
     if (folder) query.folder = folder;
@@ -246,8 +238,16 @@ async function handleGetOrdersByFilter(req, res) {
     if (task) query.task = task;
     if (fromtime || totime) {
       query.createdAt = {};
-      if (fromtime) query.createdAt.$gte = ddMmYyyyToIsoDate(fromtime);
-      if (totime) query.createdAt.$lte = ddMmYyyyToIsoDate(totime);
+      if (fromtime) {
+        // Set the $gte filter for the start of the day
+        query.createdAt.$gte = new Date(ddMmYyyyToIsoDate(fromtime));
+      }
+      if (totime) {
+        // Set the $lte filter for the end of the day
+        const toTimeDate = new Date(ddMmYyyyToIsoDate(totime));
+        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
+        query.createdAt.$lte = toTimeDate;
+      }
     }
 
     console.log(query);
@@ -283,20 +283,24 @@ async function handleGetOrdersByFilter(req, res) {
           },
         },
         { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-        // Limit the number of items per page ];
+        // Limit the number of items per page
       ];
 
-      if (!req.headers.not_paginated) pipeline = [
-        ...pipeline, { $skip: skip }, // Skip items for pagination
-        { $limit: ITEMS_PER_PAGE },
-        { $sort: { updatedAt: -1 } }
-      ]
-      else  pipeline = [
-        ...pipeline,
-        { $sort: { createdAt: 1 } }
-      ]
+      if (!req.headers.not_paginated) {
+        pipeline = [
+          ...pipeline,
+          { $sort: { updatedAt: -1 } },
+          { $skip: skip }, // Skip items for pagination
+          { $limit: ITEMS_PER_PAGE },
+        ];
+      } else {
+        pipeline = [
+          ...pipeline,
+          { $sort: { createdAt: 1 } }
+        ];
+      }
 
-      console.log(pipeline)
+      console.log(pipeline);
 
       const count = await Order.countDocuments(query); // Count the total matching documents
 

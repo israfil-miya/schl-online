@@ -92,6 +92,7 @@ export default function Browse() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        ordersnumber: 50,
         getordersbyfilter: true,
         folder: foldetFilter,
         client: clientFilter,
@@ -954,4 +955,22 @@ export default function Browse() {
       </style>
     </>
   );
+}
+
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // code for redirect if not logged in
+  if (!session || session.user.role == "user") {
+    return {
+      redirect: {
+        destination: "/?error=You need Manager/Admin/Super role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }

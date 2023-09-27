@@ -77,19 +77,25 @@ export default function ClientDetails() {
 
       if (!clientData.error) {
         setClient(clientData);
+
+
+        console.log(clientData.currency ?? "No currency")
         setInvoiceCustomerData({
 
-          _id: clientData?._id,
-          client_name: clientData?.client_name,
-          client_code: clientData?.client_code,
-          contact_person: clientData?.contact_person,
-          contact_number: clientData?.contact_number,
-          email: clientData?.email,
-          prices: clientData?.prices,
-          address: clientData?.country,
-          currency: clientData?.currency,
-          invoice_number: clientData?.client_code?.split("_")?.[1] + "00XX"
+          _id: clientData._id,
+          client_name: clientData.client_name ?? "",
+          client_code: clientData.client_code ?? "",
+          contact_person: clientData.contact_person ?? "",
+          contact_number: clientData.contact_number ?? "",
+          email: clientData.email ?? "",
+          prices: clientData.prices ?? "",
+          address: clientData.country ?? "",
+          currency: clientData.currency ?? "",
+          invoice_number: clientData.client_code?.split("_")?.[1] + "00XX"
         });
+
+
+        await getAllOrdersOfClientPaginated()
       } else {
         toast.error("Unable to retrieve client");
       }
@@ -154,6 +160,7 @@ export default function ClientDetails() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        ordersnumber: 5,
         getordersbyfilter: true,
         folder: foldetFilter,
         client: selectedClientCode,
@@ -315,6 +322,21 @@ export default function ClientDetails() {
               alignItems: "center",
             }}
           >
+            <div className=" mx-2 form-floating">
+
+
+
+              <select required onChange={e => setSelectedClientCode(e.target.value)} className="form-select" id="floatingSelectGrid">
+
+                {clients?.map((client, index) => {
+                  return <>
+                    <option key={index} defaultValue={index == 0}>{client?.client_code}</option>
+                  </>
+                })}
+
+              </select>
+              <label htmlFor="floatingSelectGrid">Works with selects</label>
+            </div>
             <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
               <div
                 className="filter_time me-3"
@@ -376,21 +398,7 @@ export default function ClientDetails() {
 
 
 
-            <div className=" mx-2 form-floating">
 
-
-
-              <select required onChange={e => setSelectedClientCode(e.target.value)} className="form-select" id="floatingSelectGrid">
-
-                {clients?.map((client, index) => {
-                  return <>
-                    <option key={index} defaultValue={index == 0}>{client?.client_code}</option>
-                  </>
-                })}
-
-              </select>
-              <label htmlFor="floatingSelectGrid">Works with selects</label>
-            </div>
 
 
           </div>
@@ -481,7 +489,7 @@ export default function ClientDetails() {
                     <td className="text-break">{order.status}</td>
                   </tr>
                 )) : <tr>
-                  <td  colspan="12" className=" align-center text-center">
+                  <td colspan="12" className=" align-center text-center">
                     No Orders To Show.
                   </td>
                 </tr>}
@@ -785,8 +793,8 @@ export default function ClientDetails() {
 
       <style jsx>
         {`
-          .dropdown-menu {
-            max-height: 200px;
+          #floatingSelectGrid {
+            max-height: 150px;
             overflow-y: auto;
           }
         `}

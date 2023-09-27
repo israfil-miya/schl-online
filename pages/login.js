@@ -52,9 +52,9 @@ export default function Login() {
     <>
       <div className="main-wrapper container">
         <div className="card signin-form rounded border shadow-sm">
-          <div className="card-header bg-dark">
+          <div className="card-header">
             <div className="text-center p-5">
-              <h4 className="fw-medium">SCHL TASKS MANAGEMENT</h4>
+              <h4 className="fw-medium">Studio Click House Ltd.</h4>
             </div>
           </div>
 
@@ -117,6 +117,7 @@ export default function Login() {
           .card-header {
             text-align: center; /* Center-align the text */
             padding: 20px; /* Add some padding for spacing */
+            background-image: url("/images/NEW-SCH-logo-text-grey.png"), url("https://amymhaddad.s3.amazonaws.com/oriental-tiles.png");
           }
 
           .fw-medium {

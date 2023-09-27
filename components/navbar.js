@@ -141,9 +141,11 @@ export default function Navbar({ navFor }) {
         <Link className={`${styles.navitem} ${navFor === 'tasks' ? styles.active : ''}`} href="/">
           Tasks
         </Link>
+        {session.user.role !== "user" ? (
         <Link className={`${styles.navitem} ${navFor === 'browse' ? styles.active : ''}`} href="/browse">
           Browse
         </Link>
+        ) : null}
         {session.user.role === 'admin' || session.user.role === 'super' ? (
           <Link className={`${styles.navitem} ${navFor === 'admin' ? styles.active : ''}`} href="/admin">
             Admin
