@@ -79,7 +79,7 @@ export default function ClientDetails() {
           contact_number: clientData.contact_number ?? "",
           email: clientData.email ?? "",
           prices: clientData.prices ?? "",
-          address: clientData.country ?? "",
+          address: clientData.address ?? clientData.country ?? "",
           currency: clientData.currency ?? "",
           invoice_number: clientData.client_code?.split("_")?.[1] + "00XX",
         });
