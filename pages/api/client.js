@@ -43,7 +43,10 @@ async function handleGetAllClient(req, res) {
 }
 
 async function handleEditClient(req, res) {
-  const data = req.body;
+  let data = req.body;
+  const updated_by = req.headers.name
+  data = {...data, updated_by}
+
   // console.log("Received edit request with data:", data);
 
   try {

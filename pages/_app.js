@@ -32,7 +32,7 @@ function MyApp({ Component, pageProps }) {
       {/* Render NextNProgress only on the client side */}
       {typeof window !== "undefined" && (
         <DynamicNextNProgress
-          color="#4169e1"
+          color="#7aa73f"
           startPosition={0.3}
           stopDelayMs={200}
           height={1.5}

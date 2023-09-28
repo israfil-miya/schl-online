@@ -33,7 +33,12 @@ const ClientSchema = new mongoose.Schema({
   currency: {
     type: String,
   },
-});
+  updated_by: {
+    type: String,
+    default: null
+  }
+}, { timestamps: true }
+);
 
 module.exports =
   mongoose.models.Client || mongoose.model("Client", ClientSchema);

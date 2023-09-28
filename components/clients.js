@@ -20,6 +20,8 @@ export default function Clients() {
   const [prices, setPrices] = useState("");
   const [currency, setCurrency] = useState("");
 
+  const [editedBy, setEditedBy] = useState("")
+
   const [manageData, setManageData] = useState({
     _id: "",
     client_code: "",
@@ -144,6 +146,7 @@ export default function Clients() {
       headers: {
         "Content-Type": "application/json",
         editclient: true,
+        name: session.user?.name
       },
     };
 
@@ -347,7 +350,7 @@ export default function Clients() {
                 <td>{client.prices}</td>
                 <td>
                   <button
-                    onClick={() =>
+                    onClick={() => {
                       setManageData({
                         _id: client._id ?? "",
                         client_code: client.client_code ?? "",
@@ -362,6 +365,8 @@ export default function Clients() {
                         prices: client.prices ?? "",
                         currency: client.currency ?? "",
                       })
+                      setEditedBy(client.updated_by ?? "")
+                    }
                     }
                     data-bs-toggle="modal"
                     data-bs-target="#editModal"
@@ -589,6 +594,14 @@ export default function Clients() {
               </div>
             </div>
             <div className="modal-footer p-1">
+              {editedBy ? (
+                <div className="d-flex justify-content-start align-items-center me-auto text-body-secondary">
+
+                  <span className="me-1">Last updated by </span>
+
+                  <span className="fw-medium">{editedBy}</span>
+                </div>
+              ) : null}
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
@@ -600,9 +613,10 @@ export default function Clients() {
                 onClick={editClient}
                 type="button"
                 data-bs-dismiss="modal"
+                
                 className="btn btn-sm btn-outline-primary"
               >
-                Submit
+                Update
               </button>
             </div>
           </div>

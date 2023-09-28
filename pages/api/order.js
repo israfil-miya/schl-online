@@ -353,8 +353,12 @@ async function handleGetOnlyTime(req, res) {
 
 async function handleEditOrder(req, res) {
   try {
-    const data = req.body;
-    console.log("Received edit request with data:", data);
+    
+    let data = req.body;
+    const updated_by = req.headers.name
+    data = {...data, updated_by}
+
+
     const resData = await Order.findByIdAndUpdate(data._id, data, {
       new: true,
     });

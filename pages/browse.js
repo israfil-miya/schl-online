@@ -37,6 +37,8 @@ export default function Browse() {
     status: "",
   });
 
+  const [editedBy, setEditedBy] = useState("")
+
   async function fetchOrderData(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
@@ -213,6 +215,7 @@ export default function Browse() {
       headers: {
         "Content-Type": "application/json",
         editorder: true,
+        name: session.user?.name
       },
     };
 
@@ -249,15 +252,19 @@ export default function Browse() {
     });
   }
 
+
+
   useEffect(() => {
     if (!isFiltered) GetAllOrders();
-    if (orders) setPageCount(orders?.pagination?.pageCount);
+    if (orders) setPageCount(orders?.pagination?.pageCount)
+
   }, [orders?.pagination?.pageCount]);
 
   useEffect(() => {
     if (!isFiltered) GetAllOrders();
     else filteredData();
   }, [page]);
+
 
   return (
     <>
@@ -427,7 +434,7 @@ export default function Browse() {
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||
-                session.user.role == "super" ? (
+                  session.user.role == "super" ? (
                   <td className="text-break">{order.client_name}</td>
                 ) : (
                   <></>
@@ -448,12 +455,12 @@ export default function Browse() {
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
-                session.user.role == "super" ? (
+                  session.user.role == "super" ? (
                   // Default state
 
                   <td className="align-middle" style={{ textAlign: "center" }}>
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         setManageData({
                           _id: order._id ?? "",
                           client_code: order.client_code ?? "",
@@ -470,6 +477,8 @@ export default function Browse() {
                           comment: order.comment ?? "",
                           status: order.status ?? "",
                         })
+                        setEditedBy(order.updated_by ?? "")
+                      }
                       }
                       className="btn btn-sm btn-outline-primary me-1"
                       data-bs-toggle="modal"
@@ -491,11 +500,10 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${
-                        order.status === "Finished"
-                          ? "btn-outline-warning"
-                          : "btn-outline-success"
-                      }`}
+                      className={`btn btn-sm ${order.status === "Finished"
+                        ? "btn-outline-warning"
+                        : "btn-outline-success"
+                        }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>
@@ -785,6 +793,18 @@ export default function Browse() {
               </div>
             </div>
             <div className="modal-footer p-1">
+
+
+              {editedBy ? (
+                <div className="d-flex justify-content-start align-items-center me-auto text-body-secondary">
+
+                  <span className="me-1">Last updated by </span>
+
+                  <span className="fw-medium">{editedBy}</span>
+                </div>
+              ) : null}
+
+
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
@@ -795,9 +815,10 @@ export default function Browse() {
               <button
                 onClick={editOrder}
                 type="button"
+                data-bs-dismiss="modal"
                 className="btn btn-sm btn-outline-primary"
               >
-                Submit
+                Update
               </button>
             </div>
           </div>
@@ -841,101 +862,6 @@ export default function Browse() {
                 data-bs-dismiss="modal"
               >
                 Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="modal fade"
-        id="editModal0"
-        tabIndex="-1"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Edit task
-              </h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <div className="mb-3">
-                <label htmlFor="production" className="form-label">
-                  Production
-                </label>
-                <input
-                  value={manageData.production}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      production: e.target.value,
-                    }))
-                  }
-                  type="string"
-                  className="form-control"
-                  id="production"
-                  placeholder="Production"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="qc1" className="form-label">
-                  QC1
-                </label>
-                <input
-                  value={manageData.qc1}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      qc1: e.target.value,
-                    }))
-                  }
-                  type="number"
-                  className="form-control"
-                  id="qc1"
-                  placeholder="QC1"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="comments" className="form-label">
-                  Comment
-                </label>
-                <input
-                  value={manageData.comment}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      comment: e.target.value,
-                    }))
-                  }
-                  className="form-control"
-                  id="comment"
-                  rows="3"
-                  placeholder="Comment"
-                />
-              </div>
-            </div>
-            <div className="modal-footer p-1">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
-                onClick={editOrder}
-                type="button"
-                className="btn btn-sm btn-outline-primary"
-              >
-                Submit
               </button>
             </div>
           </div>

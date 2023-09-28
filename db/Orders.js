@@ -1,26 +1,5 @@
 import mongoose from "mongoose";
 
-function convertTo24HourFormat(time) {
-  const twelveHourRegex = /^(1[0-2]|0?[1-9]):([0-5][0-9]) (AM|PM)$/i;
-  const twentyFourHourRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
-
-  if (twelveHourRegex.test(time)) {
-    const [, hours, minutes, period] = twelveHourRegex.exec(time);
-    let hour = parseInt(hours, 10);
-
-    if (period.toLowerCase() === "pm" && hour !== 12) {
-      hour += 12;
-    } else if (period.toLowerCase() === "am" && hour === 12) {
-      hour = 0;
-    }
-
-    return `${hour.toString().padStart(2, "0")}:${minutes}`;
-  } else if (twentyFourHourRegex.test(time)) {
-    return time;
-  } else {
-    throw new Error("Invalid time format");
-  }
-}
 
 function dateToday() {
   const options = {
@@ -38,8 +17,6 @@ function dateToday() {
 
   return formattedDate;
 }
-
-console.log(dateToday());
 
 function timeNow() {
   const options = {
@@ -104,14 +81,11 @@ const OrderSchema = new mongoose.Schema({
   status: {
     type: String,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  updated_by: {
+    type: String,
+    default: null
+  }
+}, { timestamps: true }
+);
 
 export default mongoose.models.Order || mongoose.model("Order", OrderSchema);
