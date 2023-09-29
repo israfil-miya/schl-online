@@ -24,7 +24,7 @@ async function handleNewClient(req, res) {
     if (resData) {
       res.status(200).json(resData);
     } else {
-      sendError(res, 400, "No client found");
+      sendError(res, 400, "Unable to add new client");
     }
   } catch (e) {
     console.error(e);

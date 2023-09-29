@@ -88,7 +88,12 @@ export default function ClientDetails() {
           invoice_number: clientData.client_code?.split("_")?.[1] + "00XX",
         });
 
-        console.log(clientData.address, clientData.address.trim().charAt(clientData.address.length - 2), clientData.address.length, clientData.address.charAt(clientData.address.length - 2) == ",")
+        console.log(
+          clientData.address,
+          clientData.address.trim().charAt(clientData.address.length - 2),
+          clientData.address.length,
+          clientData.address.charAt(clientData.address.length - 2) == ","
+        );
 
         await getAllOrdersOfClientPaginated();
       } else {
@@ -246,7 +251,69 @@ export default function ClientDetails() {
           vendor: invoiceVendorData,
         };
 
-        await generateInvoice(InvoiceData, billData, InvoiceData.customer._id);
+        // insert client invoice details on mongodb
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invoice`;
+        const options = {
+          method: "POST",
+          body: JSON.stringify({
+            client_id: InvoiceData.customer._id,
+            created_by: InvoiceData.vendor.contact_person,
+            time_period: {
+              fromDate: fromTime,
+              toDate: toTime,
+            },
+            total_orders: orders.length,
+            invoice_number: InvoiceData.customer.invoice_number
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            storeinvoicedetails: true,
+          },
+        };
+
+        try {
+          const result = await fetchApi(url, options);
+
+          if (!result.error) {
+            let res = await generateInvoice(InvoiceData, billData, result._id);
+
+            if (res) {
+              console.log({
+                fileData: res.fileData,
+                fileName: res.fileName
+              })
+              let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
+              let options = {
+                method: "POST",
+                body: JSON.stringify({
+                  fileData: res.fileData,
+                  fileName: res.fileName
+                }),
+                headers: {
+                  "Content-Type": "application/json",
+                  insertfile: true,
+                },
+              };
+
+              let result1 = await fetchApi(url, options);
+
+              if (!result1.error) {
+                toast.success("Successfully created invoice");
+                await getAllClients();
+              } else {
+                toast.error("Unable to upload the invoice");
+              }
+            } else {
+              toast.error("Unable to generate invoice");
+            }
+          } else {
+            router.replace(`/dashboard?error=${result.message}`);
+          }
+        } catch (error) {
+          console.error("Error adding new client:", error);
+          toast.error("Error adding new client");
+        }
+
         console.log("Bill Data: ", billData);
         setInvoiceCustomerData((prevData) => ({
           ...prevData,
