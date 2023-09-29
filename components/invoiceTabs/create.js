@@ -79,10 +79,16 @@ export default function ClientDetails() {
           contact_number: clientData.contact_number ?? "",
           email: clientData.email ?? "",
           prices: clientData.prices ?? "",
-          address: clientData.address ?? clientData.country ?? "",
+          address: clientData.address
+            ? clientData.address.trim().endsWith(",")
+              ? `${clientData.address} ${clientData.country}`
+              : `${clientData.address}, ${clientData.country}`
+            : clientData.country ?? "",
           currency: clientData.currency ?? "",
           invoice_number: clientData.client_code?.split("_")?.[1] + "00XX",
         });
+
+        console.log(clientData.address, clientData.address.trim().charAt(clientData.address.length - 2), clientData.address.length, clientData.address.charAt(clientData.address.length - 2) == ",")
 
         await getAllOrdersOfClientPaginated();
       } else {
