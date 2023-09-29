@@ -263,7 +263,7 @@ export default function ClientDetails() {
               toDate: toTime,
             },
             total_orders: orders.length,
-            invoice_number: InvoiceData.customer.invoice_number
+            invoice_number: InvoiceData.customer.invoice_number,
           }),
           headers: {
             "Content-Type": "application/json",
@@ -278,19 +278,13 @@ export default function ClientDetails() {
             let res = await generateInvoice(InvoiceData, billData, result._id);
 
             if (res) {
-              console.log({
-                fileData: res.fileData,
-                fileName: res.fileName
-              })
+              const formData = new FormData();
+              formData.append("file", res);
               let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
               let options = {
                 method: "POST",
-                body: JSON.stringify({
-                  fileData: res.fileData,
-                  fileName: res.fileName
-                }),
+                body: formData,
                 headers: {
-                  "Content-Type": "application/json",
                   insertfile: true,
                 },
               };

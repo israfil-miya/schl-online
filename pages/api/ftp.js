@@ -1,6 +1,7 @@
 // pages/api/ftp.js
-import { getConnection, releaseConnection } from '../../lib/ftp';
-import streamifier from 'streamifier'; 
+import { getConnection, releaseConnection } from "../../lib/ftp";
+import streamifier from "streamifier";
+import formidable from 'formidable';
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,
@@ -14,21 +15,21 @@ async function handleGetFiles(req, res) {
   try {
     ftp = await getConnection();
 
-    const directoryList = await ftp.list('/');
+    const directoryList = await ftp.list("/");
 
     // Filter and exclude specific files
     const filteredList = directoryList.filter((file) => {
       const fileName = file.name;
 
       // Exclude files with names ".", "..", and ".ftpquota"
-      return fileName !== '.' && fileName !== '..' && fileName !== '.ftpquota';
+      return fileName !== "." && fileName !== ".." && fileName !== ".ftpquota";
     });
 
     console.log(filteredList);
     res.status(200).json(filteredList);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to connect to FTP server' });
+    res.status(500).json({ error: "Failed to connect to FTP server" });
   } finally {
     if (ftp) {
       releaseConnection(ftp);
@@ -36,32 +37,33 @@ async function handleGetFiles(req, res) {
   }
 }
 
-
-
-
-
-
-
-async function handleInsertFile(req, res) {
+ async function handleInsertFile(req, res) {
   let ftp;
-  let  fileData = req.body.fileData;
   let fileName = req.body.fileName;
 
   try {
     ftp = await getConnection();
+    const form = formidable({})
 
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        res.status(500).json({ error: 'Error parsing form data' });
+        return;
+      }
 
-    console.log("fileData", fileData)
+      // Access the uploaded file using the 'file' field name
+      const uploadedFile = files.file;
 
-    // Convert Blob to ArrayBuffer
-    const arrayBuffer = await new Response(fileData).arrayBuffer();
+      console.log("File data:", uploadedFile)
 
-    // Use streamifier to create a Readable Stream
-    const fileStream = streamifier.createReadStream(Buffer.from(arrayBuffer));
+      // Use the Readable Stream for ftp.put
+      uploadedFile.pipe(ftp.put(`./${fileName}`));
 
-    // Use the Readable Stream for ftp.put
-    await ftp.put(fileStream, `./${fileName}`);
-    console.log(`File uploaded successfully to ftp`);
+      uploadedFile.on('end', () => {
+        console.log(`File uploaded successfully to FTP`);
+        res.status(200).json({});
+      });
+    });
     res.status(200).json({});
   } catch (error) {
     console.error(error);
@@ -73,32 +75,27 @@ async function handleInsertFile(req, res) {
   }
 }
 
-
-
-
-
-
 export default async function handle(req, res) {
   const { method } = req;
 
   switch (method) {
-    case 'GET':
+    case "GET":
       if (req.headers.getfiles) {
         await handleGetFiles(req, res);
       } else {
-        sendError(res, 400, 'Not a valid GET request');
+        sendError(res, 400, "Not a valid GET request");
       }
       break;
 
-    case 'POST':
+    case "POST":
       if (req.headers.insertfile) {
         await handleInsertFile(req, res);
       } else {
-        sendError(res, 400, 'Not a valid POST request');
+        sendError(res, 400, "Not a valid POST request");
       }
       break;
 
     default:
-      sendError(res, 400, 'Unknown request');
+      sendError(res, 400, "Unknown request");
   }
 }

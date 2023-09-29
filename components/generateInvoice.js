@@ -1037,6 +1037,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     const data = await workbook.xlsx.writeBuffer();
     const blob = new Blob([data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      
     });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -1044,10 +1045,8 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     anchor.download = fileName;
     anchor.click();
     window.URL.revokeObjectURL(url);
-    return {
-      fileData: blob,
-      fileName
-    }
+    return new File([blob], fileName, { type: blob.type })
+    
   } catch {e => {
     return false
   }}
