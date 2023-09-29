@@ -1,9 +1,7 @@
 import React from "react";
 import { useEffect, useState } from 'react';
-import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 export default function Database() {
-  const router = useRouter();
   const [list, setList] = useState([]);
 
 
@@ -48,8 +46,8 @@ export default function Database() {
     <div>
       <h2>FTP Directory List</h2>
       <ul>
-        {list.map((item) => (
-          <li key={item.name}>{item.name}</li>
+        {list.map((item, index) => (
+          <li key={index}>{item.name}</li>
         ))}
       </ul>
     </div>

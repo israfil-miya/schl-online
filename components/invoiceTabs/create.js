@@ -467,7 +467,7 @@ export default function ClientDetails() {
                 ))
               ) : (
                 <tr>
-                  <td colspan="12" className=" align-center text-center">
+                  <td colSpan="12" className=" align-center text-center">
                     No Orders To Show.
                   </td>
                 </tr>
