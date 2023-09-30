@@ -382,7 +382,7 @@ export default function ClientDetails() {
                   );
                 })}
               </select>
-              <label htmlFor="floatingSelectGrid">Works with selects</label>
+              <label htmlFor="floatingSelectGrid">Select a client</label>
             </div>
             <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
               <div
