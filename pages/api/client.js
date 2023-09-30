@@ -73,6 +73,20 @@ async function handleGetClientsByCode(req, res) {
       client_code: data.client_code,
     }).lean();
 
+    if (!client) sendError(res, 400, "No client found with the code");
+    else res.status(200).json(client);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleGetClientsById(req, res) {
+  try {
+    let data = req.headers;
+
+    const client = await Client.findById(data.id).lean();
+
     if (!client) sendError(res, 400, "No client found with the id");
     else res.status(200).json(client);
   } catch (e) {
@@ -116,6 +130,8 @@ export default async function handle(req, res) {
         await handleDeleteClient(req, res);
       } else if (req.headers.getclientnamebycode) {
         await handleGetClientNameByCode(req, res);
+      } else if (req.headers.getclientsbyid) {
+        await handleGetClientsById(req, res);
       } else if (req.headers.getclientsbycode) {
         await handleGetClientsByCode(req, res);
       } else {
