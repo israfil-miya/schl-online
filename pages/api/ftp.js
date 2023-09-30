@@ -1,7 +1,8 @@
 // pages/api/ftp.js
 import { getConnection, releaseConnection } from "../../lib/ftp";
-import streamifier from "streamifier";
-import formidable from 'formidable';
+import formidable from "formidable-serverless-2";
+
+
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,
@@ -25,7 +26,7 @@ async function handleGetFiles(req, res) {
       return fileName !== "." && fileName !== ".." && fileName !== ".ftpquota";
     });
 
-    console.log(filteredList);
+    // console.log(filteredList);
     res.status(200).json(filteredList);
   } catch (error) {
     console.error(error);
@@ -37,37 +38,43 @@ async function handleGetFiles(req, res) {
   }
 }
 
- async function handleInsertFile(req, res) {
+async function handleInsertFile(req, res) {
   let ftp;
-  let fileName = req.body.fileName;
-
   try {
+    // console.log(req)
     ftp = await getConnection();
-    const form = formidable({})
+    const form = new formidable.IncomingForm({ keepExtensions: true });
 
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, async (err, fields, files) => {
       if (err) {
-        res.status(500).json({ error: 'Error parsing form data' });
+        console.error("Error parsing form data:", err);
+        res.status(500).json({ error: "Error parsing form data" });
         return;
       }
 
-      // Access the uploaded file using the 'file' field name
-      const uploadedFile = files.file;
+      // console.log(files);
 
-      console.log("File data:", uploadedFile)
+      const fileData = files.file;
 
-      // Use the Readable Stream for ftp.put
-      uploadedFile.pipe(ftp.put(`./${fileName}`));
+      if (!fileData) {
+        console.error("No file data received.");
+        res.status(400).json({ error: "No file data received" });
+        return;
+      }
 
-      uploadedFile.on('end', () => {
-        console.log(`File uploaded successfully to FTP`);
-        res.status(200).json({});
-      });
+      // Handle the file data
+      const fileName = fileData.originalFilename;
+      const filePath = fileData.filepath;
+      // console.log("Received file:", fileName);
+
+      await ftp.put(filePath, `./${fileName}`);
+
+      // console.log("File uploaded to FTP.");
+      res.status(200).json({ message: "File uploaded successfully" });
     });
-    res.status(200).json({});
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to connect to FTP server' });
+    console.error("Error in handleInsertFile:", error);
+    res.status(500).json({ error: "Failed to connect to FTP server" });
   } finally {
     if (ftp) {
       releaseConnection(ftp);
@@ -99,3 +106,9 @@ export default async function handle(req, res) {
       sendError(res, 400, "Unknown request");
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
