@@ -215,7 +215,14 @@ export default function ClientDetails() {
       toast.error("Error retrieving clients");
     }
   }
+  function getFormattedDate() {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Month is zero-based, so we add 1
+    const year = today.getFullYear();
 
+    return `${day}-${month}-${year}`;
+  }
   async function createInvoice() {
     if (!invoiceCustomerData.invoice_number) {
       toast.error("Please enter an Invoie Number");
@@ -257,10 +264,11 @@ export default function ClientDetails() {
           method: "POST",
           body: JSON.stringify({
             client_id: InvoiceData.customer._id,
+            client_code: InvoiceData.customer.client_code,
             created_by: InvoiceData.vendor.contact_person,
             time_period: {
               fromDate: fromTime,
-              toDate: toTime,
+              toDate: toTime || getFormattedDate(),
             },
             total_orders: orders.length,
             invoice_number: InvoiceData.customer.invoice_number,

@@ -8,6 +8,20 @@ function sendError(res, statusCode, message) {
   });
 }
 
+async function handleGetInvoiceDetails(req, res) {
+  try {
+    const resData = await Invoice.find({});
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "Unable to insert the invoice data");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 async function handleStoreInvoiceDetails(req, res) {
   const data = req.body;
 

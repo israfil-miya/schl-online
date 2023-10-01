@@ -2,13 +2,28 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 export default function Database() {
-  const [list, setList] = useState([]);
+  // const [list, setList] = useState([]);
+  const [files, setFiles] = useState([]);
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
   }
+
+  function isoDateToDdMmYyyy(isoDate) {
+    const date = new Date(isoDate);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
+    const year = date.getFullYear().toString();
+
+    return `${day}-${month}-${year}`;
+  }
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length != 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
 
   async function getFiles() {
     try {
@@ -21,16 +36,54 @@ export default function Database() {
         },
       };
 
-      const List = await fetchApi(url, options);
+      const list = await fetchApi(url, options);
 
-      if (!List.error) {
-        setList(List);
+      if (!list.error) {
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invoice`;
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            getinvoicedetails: true,
+          },
+        };
+
+        const listDetailed = await fetchApi(url, options);
+
+        if (!listDetailed.error) {
+          const mergedList = []; // Initialize a new array for merged items
+
+          list.forEach((item) => {
+            // Extract the ID from the name field
+            const idMatch = item.name.match(
+              /invoice_studioclickhouse_(.*?)\.xlsx/,
+            );
+            if (idMatch) {
+              const id = idMatch[1];
+              // Search for the matching object in listDetailed
+              const detailedItem = listDetailed.find((d) => d._id === id);
+              if (detailedItem) {
+                // Merge the two objects
+                const mergedItem = { ...item, ...detailedItem };
+                // Push the merged item into the new array
+                mergedList.push(mergedItem);
+              }
+            }
+          });
+
+          // Update the state with the new merged list
+          setFiles(mergedList);
+
+          console.log("Files", mergedList, "List", list);
+        } else {
+          toast.error("Unable to retrieve file list", { toastId: "error1" });
+        }
       } else {
-        toast.error("Unable to retrieve file list", { toastId: "error1" });
+        toast.error("Unable to retrieve file list", { toastId: "error2" });
       }
     } catch (error) {
       console.error("Error fetching file list:", error);
-      toast.error("Error retrieving file list", { toastId: "error2" });
+      toast.error("Error retrieving file list", { toastId: "error3" });
     }
   }
 
@@ -47,59 +100,67 @@ export default function Database() {
             <tr>
               <th>#</th>
               <th>Time</th>
+              <th>Invoice Number</th>
               <th>Client Code</th>
               <th>Created By</th>
               <th>Time Period</th>
+              <th>Size</th>
               <th>Manage</th>
             </tr>
           </thead>
           <tbody>
-            {list.map((file, index) => (
-              <tr key={file._id}>
-                <td>{index + 1}</td>
-                <td>{file.client_code}</td>
-                <td>{file.client_name}</td>
-                <td>{file.marketer}</td>
-                <td>{file.contact_person}</td>
-                <td>
-                  <button
-                    // onClick={() => {
-                    //   setManageData({
-                    //     _id: client._id ?? "",
-                    //     client_code: client.client_code ?? "",
-                    //     client_name: client.client_name ?? "",
-                    //     marketer: client.marketer ?? "",
-                    //     contact_person: client.contact_person ?? "",
-                    //     designation: client.designation ?? "",
-                    //     contact_number: client.contact_number ?? "",
-                    //     email: client.email ?? "",
-                    //     country: client.country ?? "",
-                    //     address: client.address ?? "",
-                    //     prices: client.prices ?? "",
-                    //     currency: client.currency ?? "",
-                    //   })
-                    //   setEditedBy(client.updated_by ?? "")
-                    // }
-                    // }
+            {files &&
+              files.map((file, index) => (
+                <tr key={file._id}>
+                  <td>{index + 1}</td>
+                  <td>{isoDateToDdMmYyyy(file.createdAt)}</td>
+                  <td>{file.invoice_number}</td>
+                  <td>{file.client_code}</td>
+                  <td>{file.created_by}</td>
+                  <td>
+                    {convertToDDMMYYYY(file.time_period.fromDate) || "x"} -{" "}
+                    {convertToDDMMYYYY(file.time_period.toDate)}
+                  </td>
+                  <td>{file.size}</td>
+                  <td>
+                    <button
+                      // onClick={() => {
+                      //   setManageData({
+                      //     _id: client._id ?? "",
+                      //     client_code: client.client_code ?? "",
+                      //     client_name: client.client_name ?? "",
+                      //     marketer: client.marketer ?? "",
+                      //     contact_person: client.contact_person ?? "",
+                      //     designation: client.designation ?? "",
+                      //     contact_number: client.contact_number ?? "",
+                      //     email: client.email ?? "",
+                      //     country: client.country ?? "",
+                      //     address: client.address ?? "",
+                      //     prices: client.prices ?? "",
+                      //     currency: client.currency ?? "",
+                      //   })
+                      //   setEditedBy(client.updated_by ?? "")
+                      // }
+                      // }
 
-                    type="button"
-                    onClick={() => null}
-                    className="btn me-2 btn-sm btn-outline-primary"
-                  >
-                    Download
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => null}
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteModal"
-                    className="btn me-2 btn-sm btn-outline-danger"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+                      type="button"
+                      onClick={() => null}
+                      className="btn me-2 btn-sm btn-outline-primary"
+                    >
+                      Download
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => null}
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      className="btn me-2 btn-sm btn-outline-danger"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

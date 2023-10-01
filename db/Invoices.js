@@ -4,6 +4,9 @@ const InvoiceSchema = new mongoose.Schema(
     client_id: {
       type: String,
     },
+    client_code: {
+      type: String,
+    },
     created_by: {
       type: String,
     },
