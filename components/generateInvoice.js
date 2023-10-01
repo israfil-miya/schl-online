@@ -1030,7 +1030,14 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     );
     sheet.getCell(
       `G${afterBillTableRowNumber + 4}:H${afterBillTableRowNumber + 4}`,
-    ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-"AUD"#,##0.00`;
+    ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-${'"' + currencySymbol + '"'}#,##0.00`;
+
+
+
+    // To visualize the toast.promise() function on generating the invoice
+    // await new Promise((resolve) => {
+    //   setTimeout(resolve, 5000);
+    // });
   
     // Write the workbook to a Blob and create a download link
     const fileName = `invoice_studioclickhouse_${invoice_db_id}.xlsx`
@@ -1045,9 +1052,10 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     anchor.download = fileName;
     anchor.click();
     window.URL.revokeObjectURL(url);
+
     return new File([blob], fileName, { type: blob.type })
-    
-  } catch {e => {
+  } catch {error => {
+    console.error("Error generating invoice: ",error )
     return false
   }}
 };

@@ -275,11 +275,10 @@ export default function ClientDetails() {
           const result = await fetchApi(url, options);
 
           if (!result.error) {
-            let res = await generateInvoice(InvoiceData, billData, result._id);
-
-            if (res) {
+            let res = generateInvoice(InvoiceData, billData, result._id);
+            res.then(file => {
               const formData = new FormData();
-              formData.append("file", res);
+              formData.append("file", file);
               let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
               let options = {
                 method: "POST",
@@ -289,17 +288,25 @@ export default function ClientDetails() {
                 },
               };
 
-              let result1 = await fetchApi(url, options);
 
-              if (!result1.error) {
-                toast.success("Successfully created invoice");
-                await getAllClients();
-              } else {
-                toast.error("Unable to upload the invoice");
-              }
-            } else {
-              toast.error("Unable to generate invoice");
-            }
+              toast.promise(
+                fetchApi(url, options),
+                 {
+                   loading: 'Uploading the invoice to ftp...',
+                   success: <span>Successfully uploaded the invoice</span>,
+                   error: <span>Unable to upload the invoice</span>,
+                 }
+               );
+            })
+
+            toast.promise(
+              res,
+               {
+                 loading: 'Creating invoice...',
+                 success: <span>Successfully created the invoice</span>,
+                 error: <span>Unable to create the invoice</span>,
+               }
+             );
           } else {
             router.replace(`/dashboard?error=${result.message}`);
           }
