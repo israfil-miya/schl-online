@@ -1,7 +1,5 @@
 import ExcelJS from "exceljs";
 
-
-
 async function getFileFromUrl(url, name, defaultType = "image/png") {
   const response = await fetch(url);
   const data = await response.blob();
@@ -51,7 +49,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
       { width: 7 },
       { width: 5 },
     ];
-  
+
     // VALUES
     const contactDetails = {
       vendor: [
@@ -69,7 +67,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         invoiceData.customer.contact_number,
         invoiceData.customer.email,
       ],
-  
+
       vendorConstants: [
         "Company Name: ",
         "Contact Person: ",
@@ -86,7 +84,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         "Email: ",
       ],
     };
-  
+
     let afterBillTableRowNumber = 21;
     let totalFiles = 0;
     let subtotal = 0;
@@ -99,9 +97,9 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
       year: "numeric",
     });
     const invoiceNo = invoiceData.customer.invoice_number;
-  
+
     /* START OF EXCEL FILE MAIN SHEET DESIGN */
-  
+
     // LOGO
     const logoCell = {
       tl: { col: 2, row: 0.5 },
@@ -122,7 +120,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
       extension: "png",
     });
     sheet.addImage(imageId2, logoCell);
-  
+
     // HEADING
     addHeader(
       sheet,
@@ -138,7 +136,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         horizontal: "center",
       },
     );
-  
+
     addHeader(
       sheet,
       "E6:H6",
@@ -153,7 +151,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         horizontal: "center",
       },
     );
-  
+
     addHeader(
       sheet,
       "E7:H7",
@@ -168,7 +166,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         horizontal: "center",
       },
     );
-  
+
     // CONTACT TABLE HEADING
     addHeader(
       sheet,
@@ -199,7 +197,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     addHeader(
       sheet,
       "E10:H10",
@@ -229,11 +227,11 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     // CONTACT TABLE
     for (let i = 11; i <= 16; i++) {
       let row = sheet.getRow(i);
-  
+
       if (contactDetails.vendor[i - 11])
         addHeader(
           sheet,
@@ -310,10 +308,10 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
             wrapText: true,
           },
         );
-  
+
       // if (contactDetails.customerConstants[i - 11]?.trim() === "Address:") row.height = 25
     }
-  
+
     sheet.addConditionalFormatting({
       ref: `A${16}:H${16}`,
       rules: [
@@ -362,7 +360,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         },
       ],
     });
-  
+
     addHeader(
       sheet,
       "A17:H17",
@@ -392,7 +390,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     // BILL TABLE HEADING
     addHeader(
       sheet,
@@ -423,7 +421,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     addHeader(
       sheet,
       "C19:D20",
@@ -453,7 +451,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     addHeader(
       sheet,
       "E19:E20",
@@ -483,7 +481,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     addHeader(
       sheet,
       "F19:F20",
@@ -513,7 +511,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     addHeader(
       sheet,
       "G19:H20",
@@ -543,12 +541,12 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     billData.forEach((data, index) => {
       index += 21;
       let row = sheet.getRow(index);
       row.height = 20;
-  
+
       addHeader(
         sheet,
         `A${index}:B${index}`,
@@ -645,7 +643,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
           right: { style: "thin", color: { argb: "000000" } },
         },
       );
-  
+
       sheet.getCell(`A${index}:B${index}`).numFmt = "dd/mm/yyyy";
       sheet.getCell(`F${index}`).numFmt = `${
         '"' + currencySymbol + '"'
@@ -653,12 +651,12 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
       sheet.getCell(`G${index}:H${index}`).numFmt = `${
         '"' + currencySymbol + '"'
       }#,##0.00;[Red]\-"AUD"#,##0.00`;
-  
+
       totalFiles += data.quantity;
       subtotal += data.total();
       afterBillTableRowNumber++;
     });
-  
+
     // Empty Bill Row
     addHeader(
       sheet,
@@ -810,7 +808,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         ],
       },
     );
-  
+
     addHeader(
       sheet,
       `A${afterBillTableRowNumber + 2}:D${afterBillTableRowNumber + 4}`,
@@ -825,7 +823,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
         wrapText: true,
       },
     );
-  
+
     addHeader(
       sheet,
       `F${afterBillTableRowNumber + 1}`,
@@ -876,7 +874,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     sheet.getCell(
       `G${afterBillTableRowNumber + 1}:H${afterBillTableRowNumber + 1}`,
     ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-"AUD"#,##0.00`;
-  
+
     addHeader(
       sheet,
       `F${afterBillTableRowNumber + 2}`,
@@ -927,7 +925,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     sheet.getCell(
       `G${afterBillTableRowNumber + 2}:H${afterBillTableRowNumber + 2}`,
     ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-"AUD"#,##0.00`;
-  
+
     addHeader(
       sheet,
       `F${afterBillTableRowNumber + 3}`,
@@ -978,7 +976,7 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     sheet.getCell(
       `G${afterBillTableRowNumber + 3}:H${afterBillTableRowNumber + 3}`,
     ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-"AUD"#,##0.00`;
-  
+
     addHeader(
       sheet,
       `F${afterBillTableRowNumber + 4}`,
@@ -1030,21 +1028,20 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     );
     sheet.getCell(
       `G${afterBillTableRowNumber + 4}:H${afterBillTableRowNumber + 4}`,
-    ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-${'"' + currencySymbol + '"'}#,##0.00`;
-
-
+    ).numFmt = `${'"' + currencySymbol + '"'}#,##0.00;[Red]\-${
+      '"' + currencySymbol + '"'
+    }#,##0.00`;
 
     // To visualize the toast.promise() function on generating the invoice
     // await new Promise((resolve) => {
     //   setTimeout(resolve, 5000);
     // });
-  
+
     // Write the workbook to a Blob and create a download link
-    const fileName = `invoice_studioclickhouse_${invoice_db_id}.xlsx`
+    const fileName = `invoice_studioclickhouse_${invoice_db_id}.xlsx`;
     const data = await workbook.xlsx.writeBuffer();
     const blob = new Blob([data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      
     });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -1053,11 +1050,13 @@ const exportExcelFile = async (invoiceData, billData, invoice_db_id) => {
     anchor.click();
     window.URL.revokeObjectURL(url);
 
-    return new File([blob], fileName, { type: blob.type })
-  } catch {error => {
-    console.error("Error generating invoice: ",error )
-    return false
-  }}
+    return new File([blob], fileName, { type: blob.type });
+  } catch {
+    (error) => {
+      console.error("Error generating invoice: ", error);
+      return false;
+    };
+  }
 };
 
 export default exportExcelFile;

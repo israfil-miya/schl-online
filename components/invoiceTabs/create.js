@@ -92,7 +92,7 @@ export default function ClientDetails() {
           clientData.address,
           clientData.address.trim().charAt(clientData.address.length - 2),
           clientData.address.length,
-          clientData.address.charAt(clientData.address.length - 2) == ","
+          clientData.address.charAt(clientData.address.length - 2) == ",",
         );
 
         await getAllOrdersOfClientPaginated();
@@ -276,7 +276,7 @@ export default function ClientDetails() {
 
           if (!result.error) {
             let res = generateInvoice(InvoiceData, billData, result._id);
-            res.then(file => {
+            res.then((file) => {
               const formData = new FormData();
               formData.append("file", file);
               let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
@@ -288,25 +288,18 @@ export default function ClientDetails() {
                 },
               };
 
+              toast.promise(fetchApi(url, options), {
+                loading: "Uploading the invoice to ftp...",
+                success: <span>Successfully uploaded the invoice</span>,
+                error: <span>Unable to upload the invoice</span>,
+              });
+            });
 
-              toast.promise(
-                fetchApi(url, options),
-                 {
-                   loading: 'Uploading the invoice to ftp...',
-                   success: <span>Successfully uploaded the invoice</span>,
-                   error: <span>Unable to upload the invoice</span>,
-                 }
-               );
-            })
-
-            toast.promise(
-              res,
-               {
-                 loading: 'Creating invoice...',
-                 success: <span>Successfully created the invoice</span>,
-                 error: <span>Unable to create the invoice</span>,
-               }
-             );
+            toast.promise(res, {
+              loading: "Creating invoice...",
+              success: <span>Successfully created the invoice</span>,
+              error: <span>Unable to create the invoice</span>,
+            });
           } else {
             router.replace(`/dashboard?error=${result.message}`);
           }

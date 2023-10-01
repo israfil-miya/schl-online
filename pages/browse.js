@@ -37,7 +37,7 @@ export default function Browse() {
     status: "",
   });
 
-  const [editedBy, setEditedBy] = useState("")
+  const [editedBy, setEditedBy] = useState("");
 
   async function fetchOrderData(url, options) {
     const res = await fetch(url, options);
@@ -215,7 +215,7 @@ export default function Browse() {
       headers: {
         "Content-Type": "application/json",
         editorder: true,
-        name: session.user?.name
+        name: session.user?.name,
       },
     };
 
@@ -252,19 +252,15 @@ export default function Browse() {
     });
   }
 
-
-
   useEffect(() => {
     if (!isFiltered) GetAllOrders();
-    if (orders) setPageCount(orders?.pagination?.pageCount)
-
+    if (orders) setPageCount(orders?.pagination?.pageCount);
   }, [orders?.pagination?.pageCount]);
 
   useEffect(() => {
     if (!isFiltered) GetAllOrders();
     else filteredData();
   }, [page]);
-
 
   return (
     <>
@@ -434,7 +430,7 @@ export default function Browse() {
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||
-                  session.user.role == "super" ? (
+                session.user.role == "super" ? (
                   <td className="text-break">{order.client_name}</td>
                 ) : (
                   <></>
@@ -455,7 +451,7 @@ export default function Browse() {
                 <td className="text-break">{order.comment}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
-                  session.user.role == "super" ? (
+                session.user.role == "super" ? (
                   // Default state
 
                   <td className="align-middle" style={{ textAlign: "center" }}>
@@ -476,10 +472,9 @@ export default function Browse() {
                           qc1: order.qc1 ?? "",
                           comment: order.comment ?? "",
                           status: order.status ?? "",
-                        })
-                        setEditedBy(order.updated_by ?? "")
-                      }
-                      }
+                        });
+                        setEditedBy(order.updated_by ?? "");
+                      }}
                       className="btn btn-sm btn-outline-primary me-1"
                       data-bs-toggle="modal"
                       data-bs-target="#editModal"
@@ -500,10 +495,11 @@ export default function Browse() {
                           ? () => RedoOrder(order)
                           : () => FinishOrder(order)
                       }
-                      className={`btn btn-sm ${order.status === "Finished"
-                        ? "btn-outline-warning"
-                        : "btn-outline-success"
-                        }`}
+                      className={`btn btn-sm ${
+                        order.status === "Finished"
+                          ? "btn-outline-warning"
+                          : "btn-outline-success"
+                      }`}
                     >
                       {order.status === "Finished" ? "Redo" : "Finish"}
                     </button>
@@ -793,17 +789,13 @@ export default function Browse() {
               </div>
             </div>
             <div className="modal-footer p-1">
-
-
               {editedBy ? (
                 <div className="d-flex justify-content-start align-items-center me-auto text-body-secondary">
-
                   <span className="me-1">Last updated by </span>
 
                   <span className="fw-medium">{editedBy}</span>
                 </div>
               ) : null}
-
 
               <button
                 type="button"

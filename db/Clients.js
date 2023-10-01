@@ -1,43 +1,45 @@
 import mongoose from "mongoose";
-const ClientSchema = new mongoose.Schema({
-  client_code: {
-    type: String,
+const ClientSchema = new mongoose.Schema(
+  {
+    client_code: {
+      type: String,
+    },
+    client_name: {
+      type: String,
+    },
+    marketer: {
+      type: String,
+    },
+    contact_person: {
+      type: String,
+    },
+    designation: {
+      type: String,
+    },
+    contact_number: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+    country: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    prices: {
+      type: String,
+    },
+    currency: {
+      type: String,
+    },
+    updated_by: {
+      type: String,
+      default: null,
+    },
   },
-  client_name: {
-    type: String,
-  },
-  marketer: {
-    type: String,
-  },
-  contact_person: {
-    type: String,
-  },
-  designation: {
-    type: String,
-  },
-  contact_number: {
-    type: String,
-  },
-  email: {
-    type: String,
-  },
-  country: {
-    type: String,
-  },
-  address: {
-    type: String,
-  },
-  prices: {
-    type: String,
-  },
-  currency: {
-    type: String,
-  },
-  updated_by: {
-    type: String,
-    default: null
-  }
-}, { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports =

@@ -11,13 +11,13 @@ const InvoiceSchema = new mongoose.Schema(
       type: { fromDate: String, toDate: String },
     },
     total_orders: {
-        type: Number
+      type: Number,
     },
     invoice_number: {
-      type: String
-    }
+      type: String,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports =
