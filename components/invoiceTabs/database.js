@@ -104,7 +104,7 @@ export default function Database() {
               <th>Client Code</th>
               <th>Created By</th>
               <th>Time Period</th>
-              <th>Size</th>
+              <th>Size (bytes)</th>
               <th>Manage</th>
             </tr>
           </thead>
