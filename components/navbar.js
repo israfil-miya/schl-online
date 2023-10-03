@@ -157,7 +157,7 @@ export default function Navbar({ navFor }) {
               navFor === "admin" ? styles.active : ""
             } `}
           >
-            <a
+            <Link
               href="/admin"
               className="nav-link dropdown-toggle"
               id="navbarDropdownMenuLink"
@@ -166,7 +166,7 @@ export default function Navbar({ navFor }) {
               aria-expanded="false"
             >
               Admin
-            </a>
+            </Link>
             <ul
               className="dropdown-menu"
               aria-labelledby="navbarDropdownMenuLink"
@@ -212,7 +212,7 @@ export default function Navbar({ navFor }) {
               navFor === "dashboard" ? styles.active : ""
             } `}
           >
-            <a
+            <Link
               href="/dashboard"
               className="nav-link dropdown-toggle"
               id="navbarDropdownMenuLink"
@@ -221,7 +221,7 @@ export default function Navbar({ navFor }) {
               aria-expanded="false"
             >
               Dashboard
-            </a>
+            </Link>
             <ul
               className="dropdown-menu"
               aria-labelledby="navbarDropdownMenuLink"
