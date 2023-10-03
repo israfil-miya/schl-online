@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 export default function Database() {
   // const [list, setList] = useState([]);
   const [files, setFiles] = useState([]);
+  const [selectedInvoiceData, setSelectedInvoiceData] = useState({});
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
@@ -73,8 +74,6 @@ export default function Database() {
 
           // Update the state with the new merged list
           setFiles(mergedList);
-
-          console.log("Files", mergedList, "List", list);
         } else {
           toast.error("Unable to retrieve file list", { toastId: "error1" });
         }
@@ -84,6 +83,32 @@ export default function Database() {
     } catch (error) {
       console.error("Error fetching file list:", error);
       toast.error("Error retrieving file list", { toastId: "error3" });
+    }
+  }
+
+  async function deleteFile(file_name) {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          deletefile: true,
+          filename: file_name,
+        },
+      };
+
+      const res = await fetchApi(url, options);
+
+      if (!res.error) {
+        toast.success("Successfully deleted the invoice", {
+          toastId: "success",
+        });
+        await getFiles();
+      } else toast.error("Unable to delete file", { toastId: "error2" });
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast.error("Error deleting file list", { toastId: "error3" });
     }
   }
 
@@ -105,6 +130,7 @@ export default function Database() {
               <th>Created By</th>
               <th>Time Period</th>
               <th>Size (bytes)</th>
+              <th>File Name</th>
               <th>Manage</th>
             </tr>
           </thead>
@@ -122,6 +148,7 @@ export default function Database() {
                     {convertToDDMMYYYY(file.time_period.toDate)}
                   </td>
                   <td>{file.size}</td>
+                  <td>{file.name}</td>
                   <td>
                     <button
                       // onClick={() => {
@@ -151,7 +178,7 @@ export default function Database() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => null}
+                      onClick={() => setSelectedInvoiceData(file)}
                       data-bs-toggle="modal"
                       data-bs-target="#deleteModal"
                       className="btn me-2 btn-sm btn-outline-danger"
@@ -196,7 +223,7 @@ export default function Database() {
                 No
               </button>
               <button
-                onClick={null}
+                onClick={() => deleteFile(selectedInvoiceData.name)}
                 type="button"
                 className="btn btn-sm btn-outline-danger"
                 data-bs-dismiss="modal"

@@ -132,7 +132,7 @@ export default function Navbar({ navFor }) {
         </div>
       </nav>
 
-      <div className={`${styles.nav}`}>
+      <div className={`px-5 ${styles.nav}`}>
         <Link
           className={`${styles.navitem} ${
             navFor === "tasks" ? styles.active : ""
@@ -152,24 +152,116 @@ export default function Navbar({ navFor }) {
           </Link>
         ) : null}
         {session.user.role === "admin" || session.user.role === "super" ? (
-          <Link
+          <li
             className={`${styles.navitem} ${
               navFor === "admin" ? styles.active : ""
-            }`}
-            href="/admin"
+            } `}
           >
-            Admin
-          </Link>
+            <a
+              href="/admin"
+              className="nav-link dropdown-toggle"
+              id="navbarDropdownMenuLink"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Admin
+            </a>
+            <ul
+              className="dropdown-menu"
+              aria-labelledby="navbarDropdownMenuLink"
+            >
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/users"
+                >
+                  Users
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/tasks"
+                >
+                  Tasks
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/clients"
+                >
+                  Clients
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/statistics"
+                >
+                  Statistics
+                </Link>
+              </li>
+            </ul>
+          </li>
         ) : null}
         {session.user.role === "super" ? (
-          <Link
+          <li
             className={`${styles.navitem} ${
               navFor === "dashboard" ? styles.active : ""
-            }`}
-            href="/dashboard"
+            } `}
           >
-            Dashboard
-          </Link>
+            <a
+              href="/dashboard"
+              className="nav-link dropdown-toggle"
+              id="navbarDropdownMenuLink"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Dashboard
+            </a>
+            <ul
+              className="dropdown-menu"
+              aria-labelledby="navbarDropdownMenuLink"
+            >
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/approvals"
+                >
+                  Approvals
+                </Link>
+              </li>
+              <li className="dropdown-submenu">
+                <Link
+                  className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+                  href="/invoice"
+                >
+                  Invoice
+                </Link>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/invoice#create"
+                    >
+                      Create
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/invoice#browse"
+                    >
+                      Browse
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
         ) : null}
       </div>
       <style jsx>
@@ -178,6 +270,27 @@ export default function Navbar({ navFor }) {
             .navbar-nav.time-cards-list {
               margin: none;
             }
+          }
+
+          li:hover > ul.dropdown-menu {
+            display: block;
+            color: white;
+          }
+          ul.dropdown-menu {
+            background-color: #343a40;
+          }
+          .dropdown-submenu {
+            position: relative;
+          }
+          .dropdown-submenu > .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -6px;
+          }
+
+          .dropdown-menu > li > a:hover:after {
+            text-decoration: underline;
+            transform: rotate(-90deg);
           }
         `}
       </style>

@@ -54,7 +54,7 @@ export default function Login() {
         <div className="card signin-form rounded">
           <div className="card-header">
             <div className="text-center p-5">
-              <h4 className="fw-bold">Studio Click House Ltd.</h4>
+              <h1 className="fw-bold">SCHL WEB PORTAL</h1>
             </div>
           </div>
 
@@ -138,11 +138,11 @@ export default function Login() {
             ); /* Dark overlay color with 50% opacity */
           }
           .fw-bold {
-            font-size: 24px; /* Adjust font size for a proper heading title */
+            font-size: 35px; /* Adjust font size for a proper heading title */
             text-transform: uppercase; /* Optionally, make the text uppercase */
             color: #fff; /* Set the text color to white for better visibility */
           }
-          .card-header h4 {
+          .card-header h1 {
             position: relative; /* Make sure the name text stays above the overlay */
             z-index: 1; /* Bring the name text to the front */
           }

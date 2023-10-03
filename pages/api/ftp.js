@@ -81,6 +81,31 @@ async function handleInsertFile(req, res) {
   }
 }
 
+async function handleDeleteFile(req, res) {
+  let ftp;
+
+  try {
+    ftp = await getConnection();
+
+    let data = req.headers;
+    console.log(req.headers);
+
+    let response = await ftp.delete(`./${data.filename}`);
+
+    console.log(response);
+
+    // console.log(filteredList);
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to connect to FTP server" });
+  } finally {
+    if (ftp) {
+      releaseConnection(ftp);
+    }
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -88,6 +113,8 @@ export default async function handle(req, res) {
     case "GET":
       if (req.headers.getfiles) {
         await handleGetFiles(req, res);
+      } else if (req.headers.deletefile) {
+        await handleDeleteFile(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
