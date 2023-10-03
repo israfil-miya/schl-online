@@ -1,7 +1,6 @@
 import Navbar from "../components/navbar";
 import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 
 import Approvals from "../components/approvals";
 import Invoice from "../components/invoice";
@@ -10,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 
-export default function Admin() {
+export default function Dashboard() {
   let [component, setComponent] = useState("approvals");
   const router = useRouter();
   let { error, success } = router.query;
@@ -36,17 +35,6 @@ export default function Admin() {
     <>
       <Navbar navFor="dashboard" />
       <ul className="nav nav-tabs nav-justified mt-3" role="tablist">
-        {/*         
-        <li className="nav-item" role="presentation">
-          <Link
-            className={component == "users" ? "nav-link active" : "nav-link"}
-            href=""
-            onClick={() => setComponent("users")}
-            role="tab"
-          >
-            Users
-          </Link>
-        </li> */}
 
         <li className="nav-item" role="presentation">
           <Link
@@ -72,7 +60,6 @@ export default function Admin() {
           </Link>
         </li>
       </ul>
-      {/* {component == "users" && <Users />} */}
       {component == "approvals" && <Approvals />}
       {component == "invoice" && <Invoice />}
 

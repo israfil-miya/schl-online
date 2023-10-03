@@ -1,10 +1,8 @@
-import Navbar from "../components/navbar";
 import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 
 import Create from "./invoiceTabs/create";
-import Database from "./invoiceTabs/database";
+import Browse from "./invoiceTabs/browse";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -34,19 +32,8 @@ export default function Invoice() {
 
   return (
     <>
+      
       <ul className="nav nav-tabs nav-justified mt-3" role="tablist">
-        {/*         
-        <li className="nav-item" role="presentation">
-          <Link
-            className={component == "users" ? "nav-link active" : "nav-link"}
-            href=""
-            onClick={() => setComponent("users")}
-            role="tab"
-          >
-            Users
-          </Link>
-        </li> */}
-
         <li className="nav-item" role="presentation">
           <Link
             className={component == "create" ? "nav-link active" : "nav-link"}
@@ -60,18 +47,19 @@ export default function Invoice() {
 
         <li className="nav-item" role="presentation">
           <Link
-            className={component == "database" ? "nav-link active" : "nav-link"}
+            className={component == "browse" ? "nav-link active" : "nav-link"}
             href=""
-            onClick={() => setComponent("database")}
+            onClick={() => setComponent("browse")}
             role="tab"
           >
-            Invoice Database
+            Invoice Browse
           </Link>
         </li>
       </ul>
-      {/* {component == "users" && <Users />} */}
+
       {component == "create" && <Create />}
-      {component == "database" && <Database />}
+      {component == "browse" && <Browse />} 
+    
 
       <style jsx>
         {`

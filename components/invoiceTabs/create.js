@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-import generateInvoice from "../generateInvoice";
+import generateInvoice from "../../lib/generateInvoice";
 
 export default function ClientDetails() {
   const [client, setClient] = useState(null);
