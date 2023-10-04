@@ -157,8 +157,7 @@ export default function Navbar({ navFor }) {
               navFor === "admin" ? styles.active : ""
             } `}
           >
-            <Link
-              href="/admin"
+            <li
               className="nav-link dropdown-toggle"
               id="navbarDropdownMenuLink"
               data-toggle="dropdown"
@@ -166,7 +165,7 @@ export default function Navbar({ navFor }) {
               aria-expanded="false"
             >
               Admin
-            </Link>
+            </li>
             <ul
               className="dropdown-menu"
               aria-labelledby="navbarDropdownMenuLink"
@@ -174,7 +173,7 @@ export default function Navbar({ navFor }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
-                  href="/users"
+                  href="/admin/users"
                 >
                   Users
                 </Link>
@@ -182,7 +181,7 @@ export default function Navbar({ navFor }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
-                  href="/tasks"
+                  href="/admin/tasks"
                 >
                   Tasks
                 </Link>
@@ -190,7 +189,7 @@ export default function Navbar({ navFor }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
-                  href="/clients"
+                  href="/admin/clients"
                 >
                   Clients
                 </Link>
@@ -198,7 +197,7 @@ export default function Navbar({ navFor }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
-                  href="/statistics"
+                  href="/admin/statistics"
                 >
                   Statistics
                 </Link>
@@ -212,8 +211,7 @@ export default function Navbar({ navFor }) {
               navFor === "dashboard" ? styles.active : ""
             } `}
           >
-            <Link
-              href="/dashboard"
+            <li
               className="nav-link dropdown-toggle"
               id="navbarDropdownMenuLink"
               data-toggle="dropdown"
@@ -221,7 +219,7 @@ export default function Navbar({ navFor }) {
               aria-expanded="false"
             >
               Dashboard
-            </Link>
+            </li>
             <ul
               className="dropdown-menu"
               aria-labelledby="navbarDropdownMenuLink"
@@ -229,23 +227,22 @@ export default function Navbar({ navFor }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
-                  href="/approvals"
+                  href="/dashboard/approvals"
                 >
                   Approvals
                 </Link>
               </li>
               <li className="dropdown-submenu">
-                <Link
+                <li
                   className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
-                  href="/invoice"
                 >
                   Invoice
-                </Link>
+                </li>
                 <ul className="dropdown-menu">
                   <li>
                     <Link
                       className={`dropdown-item ${styles.dropitem}`}
-                      href="/invoice#create"
+                      href="/dashboard/invoice/create"
                     >
                       Create
                     </Link>
@@ -253,7 +250,7 @@ export default function Navbar({ navFor }) {
                   <li>
                     <Link
                       className={`dropdown-item ${styles.dropitem}`}
-                      href="/invoice#browse"
+                      href="/dashboard/invoice/browse"
                     >
                       Browse
                     </Link>

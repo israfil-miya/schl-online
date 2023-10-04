@@ -2,6 +2,7 @@ import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
+import Navbar from "../../components/navbar";
 
 export default function Users() {
   const { data: session } = useSession();
@@ -200,6 +201,7 @@ export default function Users() {
 
   return (
     <>
+      <Navbar navFor="admin" />
       <div className="container my-5">
         <div className="add-user">
           <h5 className="py-3">Add New User</h5>
@@ -273,7 +275,7 @@ export default function Users() {
                       <td>{user.name}</td>
                       <td>
                         {(user.role == "super" || user.role == "admin") &&
-                        session.user.role != "super"
+                          session.user.role != "super"
                           ? "XXXXXX"
                           : user.password}
                       </td>
@@ -287,7 +289,7 @@ export default function Users() {
                               password:
                                 (user.role == "super" ||
                                   user.role == "admin") &&
-                                session.user.role != "super"
+                                  session.user.role != "super"
                                   ? "XXXXXX"
                                   : user.password,
                               role: user.role ?? "",
@@ -298,7 +300,7 @@ export default function Users() {
                               password:
                                 (user.role == "super" ||
                                   user.role == "admin") &&
-                                session.user.role != "super"
+                                  session.user.role != "super"
                                   ? "XXXXXX"
                                   : user.password,
                               role: user.role ?? "",

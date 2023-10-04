@@ -3,6 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import Navbar from "../../components/navbar";
 
 export default function Approvals() {
   const { data: session } = useSession();
@@ -226,6 +227,7 @@ export default function Approvals() {
 
   return (
     <>
+      <Navbar navFor="dashboard" />
       <div className="container my-5">
         <div className="waiting-list">
           <div className="d-flex py-3">
@@ -261,13 +263,13 @@ export default function Approvals() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -404,13 +406,13 @@ export default function Approvals() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -535,13 +537,13 @@ export default function Approvals() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                        approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>

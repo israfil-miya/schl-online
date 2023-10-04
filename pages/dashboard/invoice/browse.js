@@ -1,6 +1,8 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import Navbar from "../../../components/navbar";
+
 export default function Database() {
   // const [list, setList] = useState([]);
   const [files, setFiles] = useState([]);
@@ -117,6 +119,8 @@ export default function Database() {
   }, []);
 
   return (
+    <>
+    <Navbar navFor="dashboard" />
     <div className="my-5">
       <div className="client-list my-5">
         <h5 className="text-center py-4">Invoices List</h5>
@@ -235,5 +239,6 @@ export default function Database() {
         </div>
       </div>
     </div>
+    </>
   );
 }

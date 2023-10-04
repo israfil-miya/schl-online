@@ -3,6 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import Navbar from "../../components/navbar";
 
 export default function Clients() {
   const router = useRouter();
@@ -173,6 +174,8 @@ export default function Clients() {
   }, []);
 
   return (
+    <>
+    <Navbar navFor="admin" />
     <div className="my-5">
       <div className="container add-client">
         <h5 className="py-3">Add New Client</h5>
@@ -620,5 +623,6 @@ export default function Clients() {
         </div>
       </div>
     </div>
+    </>
   );
 }

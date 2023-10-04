@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-
-import generateInvoice from "../../lib/generateInvoice";
+import generateInvoice from "../../../lib/generateInvoice";
+import Navbar from "../../../components/navbar";
 
 export default function ClientDetails() {
   const [client, setClient] = useState(null);
@@ -363,6 +363,8 @@ export default function ClientDetails() {
   }, [page, client, orders?.pagination?.pageCount]);
 
   return (
+    <>
+    <Navbar navFor="dashboard" />
     <div>
       <div className="m-5">
         <div className="row align-items-start">
@@ -814,5 +816,6 @@ export default function ClientDetails() {
         `}
       </style>
     </div>
+    </>
   );
 }

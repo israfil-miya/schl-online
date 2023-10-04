@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
+import Navbar from "../../components/navbar";
 
 export default function Tasks() {
   const router = useRouter();
@@ -200,6 +201,7 @@ export default function Tasks() {
 
   return (
     <>
+      <Navbar navFor="admin" />
       <div className="container my-5">
         <div className="add-order">
           <h5 className="py-3">Add New Tasks</h5>

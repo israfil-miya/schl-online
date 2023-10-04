@@ -106,22 +106,22 @@ export default function Login() {
               to bottom,
               #7ba541,
               #fff
-            ); /* Define the gradient colors */
+            );
           }
           .signin-form {
             width: 60ex;
           }
           .form-outline {
-            width: 100%; /* Make the form inputs take full width */
+            width: 100%;
           }
 
           .card-header {
-            text-align: center; /* Center-align the text */
-            padding: 20px; /* Add some padding for spacing */
+            text-align: center;
+            padding: 20px;
             background-image: url("https://amymhaddad.s3.amazonaws.com/oriental-tiles.png");
-            background-position: center center; /* Center the background image */
-            background-size: cover; /* Ensure the image covers the entire header */
-            position: relative; /* Make the header relative to add pseudo-element */
+            background-position: center center;
+            background-size: cover;
+            position: relative;
           }
           .card-header::before {
             content: "";
@@ -135,16 +135,16 @@ export default function Login() {
               0,
               0,
               0.2
-            ); /* Dark overlay color with 50% opacity */
+            );
           }
           .fw-bold {
-            font-size: 35px; /* Adjust font size for a proper heading title */
-            text-transform: uppercase; /* Optionally, make the text uppercase */
-            color: #fff; /* Set the text color to white for better visibility */
+            font-size: 35px;
+            text-transform: uppercase;
+            color: #fff;
           }
           .card-header h1 {
-            position: relative; /* Make sure the name text stays above the overlay */
-            z-index: 1; /* Bring the name text to the front */
+            position: relative;
+            z-index: 1;
           }
         `}
       </style>
