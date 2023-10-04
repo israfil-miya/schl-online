@@ -132,7 +132,7 @@ export default function Navbar({ navFor }) {
         </div>
       </nav>
 
-      <div className={`px-5 ${styles.nav}`}>
+      <div className={`px-5 navigation ${styles.nav}`}>
         <Link
           className={`${styles.navitem} ${
             navFor === "tasks" ? styles.active : ""
@@ -273,7 +273,7 @@ export default function Navbar({ navFor }) {
             display: block;
             color: white;
           }
-          ul.dropdown-menu {
+          div.navigation ul.dropdown-menu {
             background-color: #343a40;
           }
           .dropdown-submenu {
