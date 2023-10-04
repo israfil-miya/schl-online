@@ -1,6 +1,8 @@
 // pages/api/ftp.js
 import { getConnection, releaseConnection } from "../../lib/ftp";
 import formidable from "formidable-serverless-2";
+import fs from 'fs';
+import path from 'path';
 
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -106,6 +108,51 @@ async function handleDeleteFile(req, res) {
   }
 }
 
+async function handleDownloadFile(req, res) {
+  let ftp;
+
+  try {
+    ftp = await getConnection();
+
+    let data = req.headers;
+    console.log(req.headers);
+
+    const localFilePath = path.join('../../lib/invoice_file_temp_store', filename);
+
+
+    const stream = await ftp.get(`./${data.filename}`);
+
+    stream.once('close', () => {
+      // Set response headers for the file download
+      res.setHeader('Content-Disposition', `attachment; filename=${data.filename}`);
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Length', fs.statSync(localFilePath).size.toString());
+
+      // Send the file as a response
+      const fileStream = fs.createReadStream(localFilePath);
+      fileStream.pipe(res);
+    });
+
+    stream.once('error', (err) => {
+      console.error('Error:', err);
+      res.status(500).send('Error downloading the file.');
+    });
+
+    stream.pipe(fs.createWriteStream(localFilePath));
+
+
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to connect to FTP server" });
+  } finally {
+    if (ftp) {
+      releaseConnection(ftp);
+    }
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -115,6 +162,8 @@ export default async function handle(req, res) {
         await handleGetFiles(req, res);
       } else if (req.headers.deletefile) {
         await handleDeleteFile(req, res);
+      } else if (req.headers.downloadfile) {
+        await handleDownloadFile(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

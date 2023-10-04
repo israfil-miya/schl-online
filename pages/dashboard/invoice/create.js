@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import generateInvoice from "../../../lib/generateInvoice";
 import Navbar from "../../../components/navbar";
+import { useSession, getSession } from "next-auth/react";
 
 export default function ClientDetails() {
   const [client, setClient] = useState(null);
@@ -10,6 +11,7 @@ export default function ClientDetails() {
   const [pageCount, setPageCount] = useState(0);
   const [clients, setClients] = useState([]);
   const [selectedClientCode, setSelectedClientCode] = useState();
+  const { data: session } = useSession();
 
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
     _id: "",
@@ -265,7 +267,7 @@ export default function ClientDetails() {
           body: JSON.stringify({
             client_id: InvoiceData.customer._id,
             client_code: InvoiceData.customer.client_code,
-            created_by: InvoiceData.vendor.contact_person,
+            created_by: session.user.name,
             time_period: {
               fromDate: fromTime,
               toDate: toTime || getFormattedDate(),
