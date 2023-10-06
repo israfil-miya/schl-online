@@ -1,11 +1,11 @@
 export default function Admin() {
-    return
+  return;
 }
 export async function getServerSideProps() {
-    return {
-        redirect: {
-            destination: "/",
-            permanent: true,
-        },
-    };
+  return {
+    redirect: {
+      destination: "/",
+      permanent: true,
+    },
+  };
 }

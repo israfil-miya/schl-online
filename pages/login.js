@@ -102,11 +102,7 @@ export default function Login() {
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(
-              to bottom,
-              #7ba541,
-              #fff
-            );
+            background: linear-gradient(to bottom, #7ba541, #fff);
           }
           .signin-form {
             width: 60ex;
@@ -130,12 +126,7 @@ export default function Login() {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(
-              0,
-              0,
-              0,
-              0.2
-            );
+            background: rgba(0, 0, 0, 0.2);
           }
           .fw-bold {
             font-size: 35px;

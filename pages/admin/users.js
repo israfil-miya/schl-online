@@ -275,7 +275,7 @@ export default function Users() {
                       <td>{user.name}</td>
                       <td>
                         {(user.role == "super" || user.role == "admin") &&
-                          session.user.role != "super"
+                        session.user.role != "super"
                           ? "XXXXXX"
                           : user.password}
                       </td>
@@ -289,7 +289,7 @@ export default function Users() {
                               password:
                                 (user.role == "super" ||
                                   user.role == "admin") &&
-                                  session.user.role != "super"
+                                session.user.role != "super"
                                   ? "XXXXXX"
                                   : user.password,
                               role: user.role ?? "",
@@ -300,7 +300,7 @@ export default function Users() {
                               password:
                                 (user.role == "super" ||
                                   user.role == "admin") &&
-                                  session.user.role != "super"
+                                session.user.role != "super"
                                   ? "XXXXXX"
                                   : user.password,
                               role: user.role ?? "",
@@ -427,4 +427,25 @@ export default function Users() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // code for redirect if not logged in
+  if (
+    !session ||
+    session.user.role == "user" ||
+    session.user.role == "manager"
+  ) {
+    return {
+      redirect: {
+        destination: "/?error=You need Admin/Super role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }

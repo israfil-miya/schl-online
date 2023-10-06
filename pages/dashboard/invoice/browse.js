@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import Navbar from "../../../components/navbar";
+import { getSession, useSession } from "next-auth/react";
 
 export default function Database() {
   // const [list, setList] = useState([]);
@@ -114,7 +115,6 @@ export default function Database() {
     }
   }
 
-
   async function downloadFile(file_name) {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
@@ -126,26 +126,25 @@ export default function Database() {
         },
       };
 
-      const response = await fetchApi(url, options);
+      const response = await fetch(url, options);
 
       if (response.ok) {
-        // Trigger the download when the response is successful
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = filename;
+        a.download = file_name;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
-        console.error('Error downloading the file.');
-        toast.error('Error downloading the file.');
+        console.error("Error downloading the file.");
+        toast.error("Error downloading the file.");
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
-  };
+  }
 
   useEffect(() => {
     getFiles();
@@ -274,4 +273,21 @@ export default function Database() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // code for redirect if not logged in
+  if (!session || session.user.role != "super") {
+    return {
+      redirect: {
+        destination: "/?error=You need Super role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }

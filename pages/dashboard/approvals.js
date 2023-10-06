@@ -263,13 +263,13 @@ export default function Approvals() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                        approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                        approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -406,13 +406,13 @@ export default function Approvals() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                        approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                        approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -537,13 +537,13 @@ export default function Approvals() {
                     <td>{approveReq.req_type}</td>
                     <td>
                       {!approveReq.is_rejected &&
-                        approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                         "Approved"
                       ) : (
                         <></>
                       )}
                       {approveReq.is_rejected &&
-                        approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                         "Rejected"
                       ) : (
                         <></>
@@ -1133,4 +1133,21 @@ export default function Approvals() {
       </style>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // code for redirect if not logged in
+  if (!session || session.user.role != "super") {
+    return {
+      redirect: {
+        destination: "/?error=You need Super role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }

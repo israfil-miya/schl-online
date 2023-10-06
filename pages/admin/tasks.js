@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import Navbar from "../../components/navbar";
+import { getSession, useSession } from "next-auth/react";
 
 export default function Tasks() {
   const router = useRouter();
@@ -514,4 +515,25 @@ export default function Tasks() {
       </style>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // code for redirect if not logged in
+  if (
+    !session ||
+    session.user.role == "user" ||
+    session.user.role == "manager"
+  ) {
+    return {
+      redirect: {
+        destination: "/?error=You need Admin/Super role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }
