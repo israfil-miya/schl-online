@@ -47,9 +47,11 @@ export default function ClientDetails() {
 
   Number.prototype.pad = function (size) {
     var s = String(this);
-    while (s.length < (size || 2)) { s = "0" + s; }
+    while (s.length < (size || 2)) {
+      s = "0" + s;
+    }
     return s;
-  }
+  };
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
@@ -93,7 +95,12 @@ export default function ClientDetails() {
               : `${clientData.address}, ${clientData.country}`
             : clientData.country ?? "",
           currency: clientData.currency ?? "",
-          invoice_number: !clientData.last_invoice_number ? clientData.client_code?.split("_")?.[1] + "00XX" : clientData.client_code?.split("_")?.[1] + `${(parseInt(clientData.last_invoice_number?.match(/\d+/g)[0]) + 1).pad(4)}`,
+          invoice_number: !clientData.last_invoice_number
+            ? clientData.client_code?.split("_")?.[1] + "00XX"
+            : clientData.client_code?.split("_")?.[1] +
+              `${(
+                parseInt(clientData.last_invoice_number?.match(/\d+/g)[0]) + 1
+              ).pad(4)}`,
         });
 
         await getAllOrdersOfClientPaginated();
@@ -321,7 +328,12 @@ export default function ClientDetails() {
         setInvoiceCustomerData((prevData) => ({
           ...prevData,
           invoice_number: prevData?.client_code?.split("_")?.[1] + "00XX",
-          invoice_number: !prevData?.invoice_number.match(/\d+/g)[0] ? prevData?.client_code?.split("_")?.[1] + "0001" : prevData?.client_code?.split("_")?.[1] + `${(parseInt(prevData?.invoice_number.match(/\d+/g)[0]) + 1).pad(4)}`,
+          invoice_number: !prevData?.invoice_number.match(/\d+/g)[0]
+            ? prevData?.client_code?.split("_")?.[1] + "0001"
+            : prevData?.client_code?.split("_")?.[1] +
+              `${(parseInt(prevData?.invoice_number.match(/\d+/g)[0]) + 1).pad(
+                4,
+              )}`,
         }));
       } else {
         console.warn("No orders found.");

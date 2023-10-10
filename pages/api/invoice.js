@@ -1,6 +1,6 @@
 import Invoice from "../../db/Invoices";
 import dbConnect from "../../db/dbConnect";
-import Client from "../../db/Clients"
+import Client from "../../db/Clients";
 dbConnect();
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -28,7 +28,9 @@ async function handleStoreInvoiceDetails(req, res) {
 
   try {
     const resData = await Invoice.create(data);
-    const resData2 = await Client.findByIdAndUpdate(data.client_id, {last_invoice_number: data.invoice_number})
+    const resData2 = await Client.findByIdAndUpdate(data.client_id, {
+      last_invoice_number: data.invoice_number,
+    });
 
     if (resData && resData2) {
       res.status(200).json(resData);

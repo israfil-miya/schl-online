@@ -165,7 +165,7 @@ export default function Database() {
                 <th>Client Code</th>
                 <th>Created By</th>
                 <th>Time Period</th>
-                <th>Size (kb)</th>
+                <th>Size (kB)</th>
                 <th>File Name</th>
                 <th>Manage</th>
               </tr>
@@ -183,7 +183,7 @@ export default function Database() {
                       {convertToDDMMYYYY(file.time_period.fromDate) || "x"} -{" "}
                       {convertToDDMMYYYY(file.time_period.toDate)}
                     </td>
-                    <td>{file.size*0.001}</td>
+                    <td>{Math.round(file.size * 0.001)}</td>
                     <td>{file.name}</td>
                     <td>
                       <button
