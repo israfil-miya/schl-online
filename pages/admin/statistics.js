@@ -6,7 +6,7 @@ export default function Statistics() {
   return (
     <>
       <Navbar navFor="admin" />
-      <div className="text-center my-5 fw-bold">Under development</div>;
+      <div className="text-center my-5 fw-bold">Under development</div>
     </>
   );
 }

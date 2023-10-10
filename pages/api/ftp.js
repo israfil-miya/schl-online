@@ -1,8 +1,6 @@
 // pages/api/ftp.js
 import { getConnection, releaseConnection } from "../../lib/ftp";
 import formidable from "formidable-serverless-2";
-import fs from "fs";
-import path from "path";
 
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({

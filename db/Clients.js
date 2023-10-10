@@ -34,6 +34,10 @@ const ClientSchema = new mongoose.Schema(
     currency: {
       type: String,
     },
+    last_invoice_number: {
+      type: String,
+      default: null
+    },
     updated_by: {
       type: String,
       default: null,

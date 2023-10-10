@@ -45,6 +45,12 @@ export default function ClientDetails() {
     return `${day}-${month}-${year}`;
   };
 
+  Number.prototype.pad = function (size) {
+    var s = String(this);
+    while (s.length < (size || 2)) { s = "0" + s; }
+    return s;
+  }
+
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
@@ -87,15 +93,8 @@ export default function ClientDetails() {
               : `${clientData.address}, ${clientData.country}`
             : clientData.country ?? "",
           currency: clientData.currency ?? "",
-          invoice_number: clientData.client_code?.split("_")?.[1] + "00XX",
+          invoice_number: !clientData.last_invoice_number ? clientData.client_code?.split("_")?.[1] + "00XX" : clientData.client_code?.split("_")?.[1] + `${(parseInt(clientData.last_invoice_number?.match(/\d+/g)[0]) + 1).pad(4)}`,
         });
-
-        console.log(
-          clientData.address,
-          clientData.address.trim().charAt(clientData.address.length - 2),
-          clientData.address.length,
-          clientData.address.charAt(clientData.address.length - 2) == ",",
-        );
 
         await getAllOrdersOfClientPaginated();
       } else {
@@ -322,6 +321,7 @@ export default function ClientDetails() {
         setInvoiceCustomerData((prevData) => ({
           ...prevData,
           invoice_number: prevData?.client_code?.split("_")?.[1] + "00XX",
+          invoice_number: !prevData?.invoice_number.match(/\d+/g)[0] ? prevData?.client_code?.split("_")?.[1] + "0001" : prevData?.client_code?.split("_")?.[1] + `${(parseInt(prevData?.invoice_number.match(/\d+/g)[0]) + 1).pad(4)}`,
         }));
       } else {
         console.warn("No orders found.");
@@ -514,7 +514,7 @@ export default function ClientDetails() {
               <tbody>
                 {orders?.items?.length ? (
                   orders?.items?.map((order, index) => (
-                    <tr key={order._id}>
+                    <tr key={index}>
                       <td>{index + 1}</td>
                       <td className="text-break">
                         {order.date_today}
@@ -539,7 +539,7 @@ export default function ClientDetails() {
                     </tr>
                   ))
                 ) : (
-                  <tr>
+                  <tr key={0}>
                     <td colSpan="12" className=" align-center text-center">
                       No Orders To Show.
                     </td>
