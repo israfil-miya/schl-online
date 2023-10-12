@@ -291,7 +291,7 @@ export default function ClientDetails() {
           const result = await fetchApi(url, options);
 
           if (!result.error) {
-            let res = generateInvoice(InvoiceData, billData, result._id);
+            let res = generateInvoice(InvoiceData, billData);
             res.then((file) => {
               const formData = new FormData();
               formData.append("file", file);

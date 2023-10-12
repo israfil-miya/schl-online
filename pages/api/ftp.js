@@ -9,34 +9,6 @@ function sendError(res, statusCode, message) {
   });
 }
 
-async function handleGetFiles(req, res) {
-  let ftp;
-
-  try {
-    ftp = await getConnection();
-
-    const directoryList = await ftp.list("/");
-
-    // Filter and exclude specific files
-    const filteredList = directoryList.filter((file) => {
-      const fileName = file.name;
-
-      // Exclude files with names ".", "..", and ".ftpquota"
-      return fileName !== "." && fileName !== ".." && fileName !== ".ftpquota";
-    });
-
-    // console.log(filteredList);
-    res.status(200).json(filteredList);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to connect to FTP server" });
-  } finally {
-    if (ftp) {
-      releaseConnection(ftp);
-    }
-  }
-}
-
 async function handleInsertFile(req, res) {
   let ftp;
   try {
@@ -148,9 +120,7 @@ export default async function handle(req, res) {
 
   switch (method) {
     case "GET":
-      if (req.headers.getfiles) {
-        await handleGetFiles(req, res);
-      } else if (req.headers.deletefile) {
+      if (req.headers.deletefile) {
         await handleDeleteFile(req, res);
       } else if (req.headers.downloadfile) {
         await handleDownloadFile(req, res);
