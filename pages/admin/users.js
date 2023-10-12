@@ -258,7 +258,7 @@ export default function Users() {
           <h5 className="py-3">List of User</h5>
           <table className="table p-3 table-hover">
             <thead>
-              <tr>
+              <tr className="table-dark">
                 <th>#</th>
                 <th>Name</th>
                 <th>Password</th>
@@ -425,6 +425,19 @@ export default function Users() {
           </div>
         </div>
       </div>
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            text-align: center;
+            padding: 10px 5px;
+          }
+        `}
+      </style>
     </>
   );
 }

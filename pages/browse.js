@@ -406,7 +406,7 @@ export default function Browse() {
             )}
             <th>Folder</th>
             <th>Quantity</th>
-            <th>Down. Date</th>
+            <th>Download Date</th>
             <th>Delivery Time</th>
             <th>Task</th>
             <th>E.T.</th>
@@ -869,7 +869,7 @@ export default function Browse() {
           th,
           td {
             text-align: center;
-            padding: 3px 6px;
+            padding: 5px 2.5px;
           }
         `}
       </style>

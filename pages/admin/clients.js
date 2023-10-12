@@ -322,7 +322,7 @@ export default function Clients() {
           <h5 className="text-center py-4">Clients List</h5>
           <table className="table p-3 table-hover">
             <thead>
-              <tr>
+              <tr className="table-dark">
                 <th>#</th>
                 <th>Client Code</th>
                 <th>Client Name</th>
@@ -623,6 +623,19 @@ export default function Clients() {
           </div>
         </div>
       </div>
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            text-align: center;
+            padding: 5px 2.5px;
+          }
+        `}
+      </style>
     </>
   );
 }
