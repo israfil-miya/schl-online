@@ -331,7 +331,7 @@ export default function Database() {
 
       <table className="table p-3 table-hover">
         <thead>
-          <tr>
+          <tr className="table-dark">
             <th>#</th>
             <th>Time</th>
             <th>Invoice Number</th>
@@ -454,6 +454,20 @@ export default function Database() {
           </div>
         </div>
       </div>
+
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            text-align: center;
+            padding: 10px 5px;
+          }
+        `}
+      </style>
     </>
   );
 }

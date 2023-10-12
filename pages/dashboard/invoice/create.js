@@ -508,7 +508,7 @@ export default function ClientDetails() {
               className="table table-bordered mb-5 table-hover"
             >
               <thead>
-                <tr>
+                <tr className="table-dark">
                   <th>#</th>
                   <th>Added Time</th>
                   <th>Folder</th>
@@ -826,6 +826,16 @@ export default function ClientDetails() {
             #floatingSelectGrid {
               max-height: 150px;
               overflow-y: auto;
+            }
+
+            .table {
+              font-size: 15px;
+            }
+
+            th,
+            td {
+              text-align: center;
+              padding: 10px 5px;
             }
           `}
         </style>

@@ -395,9 +395,9 @@ export default function Browse() {
         className="table table-bordered py-3 table-hover"
       >
         <thead>
-          <tr>
+          <tr className="table-dark">
             <th>#</th>
-            <th>Added Time</th>
+            <th>Add Time</th>
             <th>Client Code</th>
             {session.user.role == "admin" || session.user.role == "super" ? (
               <th>Client Name</th>
@@ -406,7 +406,7 @@ export default function Browse() {
             )}
             <th>Folder</th>
             <th>Quantity</th>
-            <th>Download Date</th>
+            <th>Down. Date</th>
             <th>Delivery Time</th>
             <th>Task</th>
             <th>E.T.</th>
@@ -511,7 +511,7 @@ export default function Browse() {
                 {session.user.role == "manager" ? (
                   // Default state
 
-                  <td className="align-middle" style={{ textAlign: "center" }}>
+                  <td>
                     <button
                       onClick={() =>
                         setManageData({
@@ -868,6 +868,7 @@ export default function Browse() {
 
           th,
           td {
+            text-align: center;
             padding: 3px 6px;
           }
         `}

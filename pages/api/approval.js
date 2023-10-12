@@ -155,41 +155,12 @@ async function handleResponse(req, res) {
   // }
 }
 
-async function handleGetAllOrdersForApproval(req, res) {
+async function handleGetAllApprovals(req, res) {
   try {
-    const resData = await Approval.find({
-      req_type: {
-        $regex: /^Task/i, // (case-insensitive)
-      },
-    }).sort({ checked_by: 1, _id: 1 }); // Sort by "checked_by" ascending, "_id" as tiebreaker
-    res.status(200).json(resData);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetAllUsersForApproval(req, res) {
-  try {
-    const resData = await Approval.find({
-      req_type: {
-        $regex: /^User/i, // (case-insensitive)
-      },
-    }).sort({ checked_by: 1, _id: 1 }); // Sort by "checked_by" ascending, "_id" as tiebreaker
-    res.status(200).json(resData);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetAllClientsForApproval(req, res) {
-  try {
-    const resData = await Approval.find({
-      req_type: {
-        $regex: /^Client/i, // (case-insensitive)
-      },
-    }).sort({ checked_by: 1, _id: 1 }); // Sort by "checked_by" ascending, "_id" as tiebreaker
+    const resData = await Approval.find({}).sort({
+      updatedAt: -1,
+      checked_by: 1,
+    }); // Sort by "checked_by" ascending, "_id" as tiebreaker
     res.status(200).json(resData);
   } catch (e) {
     console.error(e);
@@ -202,12 +173,8 @@ export default async function handle(req, res) {
 
   switch (method) {
     case "GET":
-      if (req.headers.getallordersforapproval) {
-        await handleGetAllOrdersForApproval(req, res);
-      } else if (req.headers.getallusersforapproval) {
-        await handleGetAllUsersForApproval(req, res);
-      } else if (req.headers.getallclientsforapproval) {
-        await handleGetAllClientsForApproval(req, res);
+      if (req.headers.getallapprovals) {
+        await handleGetAllApprovals(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

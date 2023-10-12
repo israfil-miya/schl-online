@@ -11,6 +11,9 @@ export default function Approvals() {
   const [usersApprovals, setUsersApprovals] = useState([]);
   const [ordersApprovals, setOrdersApprovals] = useState([]);
   const [clientsApprovals, setClientsApprovals] = useState([]);
+
+  const [approvals, setApprovals] = useState([]);
+
   const [orderInfo, setOrderInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
   const [clientInfo, setClientInfo] = useState({});
@@ -23,27 +26,27 @@ export default function Approvals() {
     return data;
   }
 
-  async function GetAllOrdersForApproval() {
+  async function GetAllApprovals() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
       const options = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          getallordersforapproval: true,
+          getallapprovals: true,
         },
       };
 
-      const ordersList = await fetchApi(url, options);
+      const list = await fetchApi(url, options);
 
-      if (!ordersList.error) {
-        setOrdersApprovals(ordersList);
+      if (!list.error) {
+        setApprovals(list);
       } else {
-        toast.error("Unable to retrieve orders waiting list");
+        toast.error("Unable to retrieve waiting list");
       }
     } catch (error) {
-      console.error("Error fetching orders waiting list:", error);
-      toast.error("Error retrieving orders waiting list");
+      console.error("Error fetching waiting list:", error);
+      toast.error("Error retrieving waiting list");
     }
   }
 
@@ -122,53 +125,6 @@ export default function Approvals() {
     }
   }
 
-  async function GetAllClientsForApproval() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getallclientsforapproval: true,
-        },
-      };
-
-      const clientsList = await fetchApi(url, options);
-
-      if (!clientsList.error) {
-        setClientsApprovals(clientsList);
-      } else {
-        toast.error("Unable to retrieve clients waiting list");
-      }
-    } catch (error) {
-      console.error("Error fetching clients waiting list:", error);
-      toast.error("Error retrieving clients waiting list");
-    }
-  }
-  async function GetAllUsersForApproval() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getallusersforapproval: true,
-        },
-      };
-
-      const usersList = await fetchApi(url, options);
-
-      if (!usersList.error) {
-        setUsersApprovals(usersList);
-      } else {
-        toast.error("Unable to retrieve users waiting list");
-      }
-    } catch (error) {
-      console.error("Error fetching users waiting list:", error);
-      toast.error("Error retrieving users waiting list");
-    }
-  }
-
   async function handleResponse(data) {
     try {
       console.log("THIS DATA BEFORE RESPONSE: ", data);
@@ -188,13 +144,7 @@ export default function Approvals() {
       const resData = await fetchApi(url, options);
 
       if (!resData.error) {
-        if (resData.req_type.split(" ")[0] == "User") {
-          await GetAllUsersForApproval();
-        } else if (resData.req_type.split(" ")[0] == "Task") {
-          await GetAllOrdersForApproval();
-        } else if (resData.req_type.split(" ")[0] == "Client") {
-          await GetAllClientsForApproval();
-        } else return;
+        await GetAllApprovals();
       } else {
         toast.error("Unable to handle response");
       }
@@ -220,419 +170,172 @@ export default function Approvals() {
   }
 
   useEffect(() => {
-    GetAllOrdersForApproval();
-    GetAllUsersForApproval();
-    GetAllClientsForApproval();
+    GetAllApprovals();
   }, []);
 
   return (
     <>
       <Navbar navFor="dashboard" />
       <div className="container my-5">
-        <div className="waiting-list">
-          <div className="d-flex py-3">
-            <h5>Users Approvals</h5>
-            <span className="text-body-secondary ms-2">
-              (
-              {
-                usersApprovals.filter((user) => user.checked_by == "None")
-                  .length
-              }
-              )
-            </span>
-          </div>
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
-          >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Request Type</th>
-                <th>Request Status</th>
-                <th>Request By</th>
-                <th>Request Timestamp</th>
-                <th>Manage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usersApprovals &&
-                usersApprovals.map((approveReq, index) => (
-                  <tr key={approveReq._id}>
-                    <td>{index + 1}</td>
-                    <td>{approveReq.req_type}</td>
-                    <td>
-                      {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
-                        "Approved"
-                      ) : (
-                        <></>
-                      )}
-                      {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
-                        "Rejected"
-                      ) : (
-                        <></>
-                      )}
-                      {approveReq.checked_by == "None" ? "Waiting" : <></>}
-                    </td>
-                    <td>{approveReq.req_by}</td>
-                    <td>
-                      {
-                        formatTimestamp(approveReq.createdAt.toLocaleString())
-                          .date
-                      }{" "}
-                      <span className="text-body-secondary"> | </span>
-                      {
-                        formatTimestamp(approveReq.createdAt.toLocaleString())
-                          .time
-                      }
-                    </td>
-                    <td
-                      className="align-middle"
-                      style={{ textAlign: "center" }}
-                    >
-                      {approveReq.checked_by == "None" ? (
-                        <>
-                          <button
-                            onClick={() =>
-                              setModalTempStore({
-                                ...approveReq,
-                                response: "approve",
-                              })
-                            }
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmModal"
-                            className="btn btn-sm btn-outline-success me-1"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger me-1"
-                            onClick={() =>
-                              setModalTempStore({
-                                ...approveReq,
-                                response: "reject",
-                              })
-                            }
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmModal"
-                          >
-                            Reject
-                          </button>
-
-                          {approveReq.req_type.split(" ")[1] == "Delete" ? (
-                            <button
-                              onClick={() => GetUsersById(approveReq.id)}
-                              className="btn btn-sm btn-outline-primary"
-                              data-bs-toggle="modal"
-                              data-bs-target="#editModal1"
-                            >
-                              View
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setManageData(approveReq)}
-                              className="btn btn-sm btn-outline-primary"
-                              data-bs-toggle="modal"
-                              data-bs-target="#editModal2"
-                            >
-                              View
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <p>
-                          Checked by{" "}
-                          <span className="fw-medium">
-                            {approveReq.checked_by}
-                          </span>{" "}
-                          on{" "}
-                          <span className="fw-medium">
-                            {
-                              formatTimestamp(
-                                approveReq.updatedAt.toLocaleString(),
-                              ).date
-                            }{" "}
-                          </span>{" "}
-                          at{" "}
-                          <span className="fw-medium">
-                            {
-                              formatTimestamp(
-                                approveReq.updatedAt.toLocaleString(),
-                              ).time
-                            }
-                          </span>
-                        </p>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+        <div className="d-flex py-3">
+          <h5>Approval requests</h5>
+          <span className="text-body-secondary ms-2">
+            (
+            {
+              approvals.filter((approveReq) => approveReq.checked_by == "None")
+                .length
+            }
+            )
+          </span>
         </div>
+        <table
+          style={{ overflow: "hidden" }}
+          className="table table-bordered py-3 table-hover"
+        >
+          <thead>
+            <tr className="table-dark">
+              <th>#</th>
+              <th>Request Type</th>
+              <th>Request Status</th>
+              <th>Request By</th>
+              <th>Request Timestamp</th>
+              <th>Manage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {approvals &&
+              approvals.map((approveReq, index) => (
+                <tr key={approveReq._id}>
+                  <td>{index + 1}</td>
+                  <td>{approveReq.req_type}</td>
+                  <td>
+                    {!approveReq.is_rejected &&
+                    approveReq.checked_by != "None" ? (
+                      "Approved"
+                    ) : (
+                      <></>
+                    )}
+                    {approveReq.is_rejected &&
+                    approveReq.checked_by != "None" ? (
+                      "Rejected"
+                    ) : (
+                      <></>
+                    )}
+                    {approveReq.checked_by == "None" ? "Waiting" : <></>}
+                  </td>
+                  <td>{approveReq.req_by}</td>
+                  <td>
+                    {
+                      formatTimestamp(approveReq.createdAt.toLocaleString())
+                        .date
+                    }{" "}
+                    <span className="text-body-secondary"> | </span>
+                    {
+                      formatTimestamp(approveReq.createdAt.toLocaleString())
+                        .time
+                    }
+                  </td>
+                  <td>
+                    {approveReq.checked_by == "None" ? (
+                      <>
+                        <button
+                          onClick={() =>
+                            setModalTempStore({
+                              ...approveReq,
+                              response: "approve",
+                            })
+                          }
+                          data-bs-toggle="modal"
+                          data-bs-target="#confirmModal"
+                          className="btn btn-sm btn-outline-success me-1"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger me-1"
+                          onClick={() =>
+                            setModalTempStore({
+                              ...approveReq,
+                              response: "reject",
+                            })
+                          }
+                          data-bs-toggle="modal"
+                          data-bs-target="#confirmModal"
+                        >
+                          Reject
+                        </button>
 
-        <div className="waiting-list">
-          <div className="d-flex py-3">
-            <h5>Tasks Approvals</h5>
-            <span className="text-body-secondary ms-2">
-              (
-              {
-                ordersApprovals.filter((order) => order.checked_by == "None")
-                  .length
-              }
-              )
-            </span>
-          </div>
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
-          >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Request Type</th>
-                <th>Request Status</th>
-                <th>Request By</th>
-                <th>Request Timestamp</th>
-                <th>Manage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ordersApprovals &&
-                ordersApprovals.map((approveReq, index) => (
-                  <tr key={approveReq._id}>
-                    <td>{index + 1}</td>
-                    <td>{approveReq.req_type}</td>
-                    <td>
-                      {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
-                        "Approved"
-                      ) : (
-                        <></>
-                      )}
-                      {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
-                        "Rejected"
-                      ) : (
-                        <></>
-                      )}
-                      {approveReq.checked_by == "None" ? "Waiting" : <></>}
-                    </td>
-                    <td>{approveReq.req_by}</td>
-                    <td>
-                      {
-                        formatTimestamp(approveReq.createdAt.toLocaleString())
-                          .date
-                      }{" "}
-                      <span className="text-body-secondary"> | </span>
-                      {
-                        formatTimestamp(approveReq.createdAt.toLocaleString())
-                          .time
-                      }
-                    </td>
-                    <td
-                      className="align-middle"
-                      style={{ textAlign: "center" }}
-                    >
-                      {approveReq.checked_by == "None" ? (
-                        <>
+                        {approveReq.req_type.split(" ")[1] == "Delete" ? (
                           <button
-                            onClick={() =>
-                              setModalTempStore({
-                                ...approveReq,
-                                response: "approve",
-                              })
-                            }
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmModal"
-                            className="btn btn-sm btn-outline-success me-1"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger me-1"
-                            onClick={() =>
-                              setModalTempStore({
-                                ...approveReq,
-                                response: "reject",
-                              })
-                            }
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmModal"
-                          >
-                            Reject
-                          </button>
-                          <button
-                            onClick={() => GetOrdersById(approveReq.id)}
+                            onClick={() => {
+                              approveReq.req_type.split(" ")[0] == "Client"
+                                ? GetClientsById(approveReq.id)
+                                : approveReq.req_type.split(" ")[0] == "Task"
+                                ? GetOrdersById(approveReq.id)
+                                : approveReq.req_type.split(" ")[0] == "User"
+                                ? GetUsersById(approveReq.id)
+                                : null;
+                            }}
                             className="btn btn-sm btn-outline-primary"
                             data-bs-toggle="modal"
-                            data-bs-target="#editModal"
+                            data-bs-target={
+                              approveReq.req_type.split(" ")[0] == "Client"
+                                ? "#editModal0"
+                                : approveReq.req_type.split(" ")[0] == "Task"
+                                ? "#editModal"
+                                : approveReq.req_type.split(" ")[0] == "User"
+                                ? "#editModal1"
+                                : null
+                            }
                           >
                             View
                           </button>
-                        </>
-                      ) : (
-                        <p>
-                          Checked by{" "}
-                          <span className="fw-medium">
-                            {approveReq.checked_by}
-                          </span>{" "}
-                          on{" "}
-                          <span className="fw-medium">
-                            {
-                              formatTimestamp(
-                                approveReq.updatedAt.toLocaleString(),
-                              ).date
-                            }{" "}
-                          </span>{" "}
-                          at{" "}
-                          <span className="fw-medium">
-                            {
-                              formatTimestamp(
-                                approveReq.updatedAt.toLocaleString(),
-                              ).time
-                            }
-                          </span>
-                        </p>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+                        ) : null}
 
-        <div className="waiting-list">
-          <div className="d-flex py-3">
-            <h5>Clients Approvals</h5>
-            <span className="text-body-secondary ms-2">
-              (
-              {
-                clientsApprovals.filter((client) => client.checked_by == "None")
-                  .length
-              }
-              )
-            </span>
-          </div>
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
-          >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Request Type</th>
-                <th>Request Status</th>
-                <th>Request By</th>
-                <th>Request Timestamp</th>
-                <th>Manage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientsApprovals &&
-                clientsApprovals.map((approveReq, index) => (
-                  <tr key={approveReq._id}>
-                    <td>{index + 1}</td>
-                    <td>{approveReq.req_type}</td>
-                    <td>
-                      {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
-                        "Approved"
-                      ) : (
-                        <></>
-                      )}
-                      {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
-                        "Rejected"
-                      ) : (
-                        <></>
-                      )}
-                      {approveReq.checked_by == "None" ? "Waiting" : <></>}
-                    </td>
-                    <td>{approveReq.req_by}</td>
-                    <td>
-                      {
-                        formatTimestamp(approveReq.createdAt.toLocaleString())
-                          .date
-                      }{" "}
-                      <span className="text-body-secondary"> | </span>
-                      {
-                        formatTimestamp(approveReq.createdAt.toLocaleString())
-                          .time
-                      }
-                    </td>
-                    <td
-                      className="align-middle"
-                      style={{ textAlign: "center" }}
-                    >
-                      {approveReq.checked_by == "None" ? (
-                        <>
+                        {approveReq.req_type.split(" ")[1] == "Edit" ? (
                           <button
-                            onClick={() =>
-                              setModalTempStore({
-                                ...approveReq,
-                                response: "approve",
-                              })
-                            }
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmModal"
-                            className="btn btn-sm btn-outline-success me-1"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger me-1"
-                            onClick={() =>
-                              setModalTempStore({
-                                ...approveReq,
-                                response: "reject",
-                              })
-                            }
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmModal"
-                          >
-                            Reject
-                          </button>
-                          <button
-                            onClick={() => GetClientsById(approveReq.id)}
+                            onClick={() => setManageData(approveReq)}
                             className="btn btn-sm btn-outline-primary"
                             data-bs-toggle="modal"
-                            data-bs-target="#editModal0"
+                            data-bs-target={
+                              approveReq.req_type.split(" ")[0] == "User"
+                                ? "#editModal2"
+                                : null
+                            }
                           >
                             View
                           </button>
-                        </>
-                      ) : (
-                        <p>
-                          Checked by{" "}
-                          <span className="fw-medium">
-                            {approveReq.checked_by}
-                          </span>{" "}
-                          on{" "}
-                          <span className="fw-medium">
-                            {
-                              formatTimestamp(
-                                approveReq.updatedAt.toLocaleString(),
-                              ).date
-                            }{" "}
-                          </span>{" "}
-                          at{" "}
-                          <span className="fw-medium">
-                            {
-                              formatTimestamp(
-                                approveReq.updatedAt.toLocaleString(),
-                              ).time
-                            }
-                          </span>
-                        </p>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+                        ) : null}
+                      </>
+                    ) : (
+                      <>
+                        Checked by{" "}
+                        <span className="fw-semibold">
+                          {approveReq.checked_by}
+                        </span>{" "}
+                        on{" "}
+                        <span className="fw-semibold">
+                          {
+                            formatTimestamp(
+                              approveReq.updatedAt.toLocaleString(),
+                            ).date
+                          }{" "}
+                        </span>{" "}
+                        at{" "}
+                        <span className="fw-semibold">
+                          {
+                            formatTimestamp(
+                              approveReq.updatedAt.toLocaleString(),
+                            ).time
+                          }
+                        </span>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
 
       <div
@@ -1127,7 +830,8 @@ export default function Approvals() {
 
           th,
           td {
-            padding: 3px 6px;
+            text-align: center;
+            padding: 10px 5px;
           }
         `}
       </style>
