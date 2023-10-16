@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import generateInvoice from "../../../lib/generateInvoice";
+import generateInvoice from "../../../lib/invoice";
 import Navbar from "../../../components/navbar";
 import { useSession, getSession } from "next-auth/react";
 
