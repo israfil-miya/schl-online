@@ -460,16 +460,11 @@ async function handleGetAllOrdersOfClient(req, res) {
   }
 }
 
-
 async function handleGetOrdersByFilterStat(req, res) {
   try {
     const { fromtime, totime } = req.headers;
 
-    console.log(
-      "Received request with parameters:",
-      fromtime,
-      totime,
-    );
+    console.log("Received request with parameters:", fromtime, totime);
 
     let query = {};
     if (fromtime || totime) {
@@ -486,17 +481,29 @@ async function handleGetOrdersByFilterStat(req, res) {
       }
     }
 
-
     const orders = await Order.find(query, { createdAt: 1, quantity: 1 });
 
     const monthNames = [
-      "January", "February", "March", "April", "May", "June", "July",
-      "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
 
     const mergedOrders = orders.reduce((merged, order) => {
-      const date = (order.createdAt instanceof Date) ? order.createdAt.toISOString().split('T')[0] : order.createdAt.split('T')[0];
-      const [year, month, day] = date.split('-');
+      const date =
+        order.createdAt instanceof Date
+          ? order.createdAt.toISOString().split("T")[0]
+          : order.createdAt.split("T")[0];
+      const [year, month, day] = date.split("-");
       const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
 
       if (!merged[formattedDate]) {
@@ -517,7 +524,6 @@ async function handleGetOrdersByFilterStat(req, res) {
     } else {
       sendError(res, 400, "No order found");
     }
-
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");

@@ -141,7 +141,16 @@ export default function Statistics() {
         </div>
       </div>
       <div className="container">
-        {orders?.length !== 0 ? <BarChart title={`Number of Files: ${orders[0].date} - ${orders[orders.length - 1].date}`} chartData={userData} /> : <p className="text-center my-3">No Tasks found</p>}
+        {orders?.length !== 0 ? (
+          <BarChart
+            title={`Number of Files: ${orders[0].date} - ${
+              orders[orders.length - 1].date
+            }`}
+            chartData={userData}
+          />
+        ) : (
+          <p className="text-center my-3">No Tasks found</p>
+        )}
       </div>
     </>
   );
