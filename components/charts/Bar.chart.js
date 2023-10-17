@@ -19,7 +19,7 @@ function BarChart({ chartData, title }) {
     },
     layout: {
       padding: {
-        top: 5
+        top: 50
       }
     },
     plugins: {
@@ -31,19 +31,25 @@ function BarChart({ chartData, title }) {
           weight: 'bold',
         },
       },
-      tooltip: {
-        enabled: false
-      },
       legend: {
         display: false,
       },
     },
   };
 
-  return <div className="p-3 bg-light shadow-sm border">
-    <p className="fw-bold text-center">{title}</p>
+  return (<>
+  <div className="p-3 bg-light chart-container shadow-sm border">
+    {title &&  <p className="fw-bold text-center">{title}</p>}
     <Bar options={options} data={chartData} />
   </div>
+  <style jsx>
+    {`
+      .chart-container canvas {
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.8);
+      }
+    `}
+  </style>
+  </>)
 }
 
 export default BarChart;

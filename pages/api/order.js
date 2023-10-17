@@ -460,6 +460,70 @@ async function handleGetAllOrdersOfClient(req, res) {
   }
 }
 
+
+async function handleGetOrdersByFilterStat(req, res) {
+  try {
+    const { fromtime, totime } = req.headers;
+
+    console.log(
+      "Received request with parameters:",
+      fromtime,
+      totime,
+    );
+
+    let query = {};
+    if (fromtime || totime) {
+      query.createdAt = {};
+      if (fromtime) {
+        // Set the $gte filter for the start of the day
+        query.createdAt.$gte = new Date(ddMmYyyyToIsoDate(fromtime));
+      }
+      if (totime) {
+        // Set the $lte filter for the end of the day
+        const toTimeDate = new Date(ddMmYyyyToIsoDate(totime));
+        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
+        query.createdAt.$lte = toTimeDate;
+      }
+    }
+
+
+    const orders = await Order.find(query, { createdAt: 1, quantity: 1 });
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June", "July",
+      "August", "September", "October", "November", "December"
+    ];
+
+    const mergedOrders = orders.reduce((merged, order) => {
+      const date = (order.createdAt instanceof Date) ? order.createdAt.toISOString().split('T')[0] : order.createdAt.split('T')[0];
+      const [year, month, day] = date.split('-');
+      const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
+
+      if (!merged[formattedDate]) {
+        merged[formattedDate] = { date: formattedDate, quantity: 0 };
+      }
+
+      merged[formattedDate].quantity += order.quantity;
+
+      return merged;
+    }, {});
+
+    const formattedOrders = Object.values(mergedOrders);
+
+    console.log("FILTERED ORDERS: ", orders.length);
+
+    if (formattedOrders) {
+      res.status(200).json(formattedOrders);
+    } else {
+      sendError(res, 400, "No order found");
+    }
+
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -487,6 +551,8 @@ export default async function handle(req, res) {
         await handleGetTimePeriods(req, res);
       } else if (req.headers.getallordersofclient) {
         await handleGetAllOrdersOfClient(req, res);
+      } else if (req.headers.getordersbyfilterstat) {
+        await handleGetOrdersByFilterStat(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
