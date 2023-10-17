@@ -16,7 +16,7 @@ export default function Statistics() {
     return `${day}-${month}-${year}`;
   };
 
-  function getDateRange(numberOfDays) {
+  function getDateRange() {
     const today = new Date();
     const fifteenDaysAgo = new Date();
     fifteenDaysAgo.setDate(today.getDate() - 15);
