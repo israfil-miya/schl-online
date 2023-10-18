@@ -19,6 +19,7 @@ export default function Browse() {
   const [foldetFilter, setFolderFilter] = useState("");
   const [clientFilter, setClientFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [isFiltered, setIsFiltered] = useState(0);
   const [manageData, setManageData] = useState({
     _id: "",
@@ -90,6 +91,7 @@ export default function Browse() {
     }
 
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+
     const options = {
       method: "GET",
       headers: {
@@ -101,6 +103,7 @@ export default function Browse() {
         task: taskFilter,
         fromtime: adjustedFromTime,
         totime: adjustedToTime,
+        typefilter: typeFilter,
         page, // Include the current page in the request headers
       },
     };
@@ -335,6 +338,20 @@ export default function Browse() {
             />
           </div>
 
+          <div
+            style={{ display: "flex", alignItems: "center" }}
+            className="filter_type me-3"
+          >
+            <strong>Type: </strong>
+            <input
+              type="text"
+              placeholder="Task Type"
+              className="form-control ms-2 custom-input"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            />
+          </div>
+
           <button
             onClick={filteredData}
             className="btn ms-4 btn-sm btn-outline-primary"
@@ -413,6 +430,7 @@ export default function Browse() {
             <th>Production</th>
             <th>QC1</th>
             <th>Comment</th>
+            <th>Type</th>
             <th>Status</th>
             {session.user.role != "user" ? <th>Manage</th> : <></>}
           </tr>
@@ -449,6 +467,7 @@ export default function Browse() {
                 <td className="text-break">{order.production}</td>
                 <td className="text-break">{order.qc1}</td>
                 <td className="text-break">{order.comment}</td>
+                <td className="text-break">{order.type}</td>
                 <td className="text-break">{order.status}</td>
                 {session.user.role == "admin" ||
                 session.user.role == "super" ? (
@@ -472,6 +491,7 @@ export default function Browse() {
                           qc1: order.qc1 ?? "",
                           comment: order.comment ?? "",
                           status: order.status ?? "",
+                          type: order.type ?? "",
                         });
                         setEditedBy(order.updated_by ?? "");
                       }}
@@ -767,6 +787,24 @@ export default function Browse() {
                   id="comment"
                   rows="3"
                   placeholder="Comment"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="type" className="form-label">
+                  Task Type
+                </label>
+                <input
+                  value={manageData.type}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      type: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="type"
+                  placeholder="Task Type"
                 />
               </div>
               <div className="mb-3">

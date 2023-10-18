@@ -129,6 +129,7 @@ export default function ClientDetails() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        forinvoice: true,
         getordersbyfilter: true,
         folder: foldetFilter,
         client: client.client_code,
@@ -166,6 +167,7 @@ export default function ClientDetails() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        forinvoice: true,
         ordersnumber: 5,
         getordersbyfilter: true,
         folder: foldetFilter,

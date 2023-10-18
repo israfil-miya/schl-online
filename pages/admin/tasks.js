@@ -17,6 +17,8 @@ export default function Tasks() {
   const [production, setProduction] = useState("");
   const [qc1, setQc1] = useState(false);
   const [status, setStatus] = useState("Running");
+  const [tasktype, setTaskType] = useState("General");
+
   const [comment, setComment] = useState("");
 
   const [optionsCode, setOptionsCode] = useState([]);
@@ -49,13 +51,9 @@ export default function Tasks() {
     "Symmetry liquify",
   ];
 
-  const optionsStatus = [
-    "Uploaded",
-    "Client hold",
-    "Paused",
-    "Running",
-    "Test",
-  ];
+  const optionsStatus = ["Uploaded", "Client hold", "Paused", "Running"];
+
+  const optionsTaskType = ["General", "Test"];
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   const handleTaskCheckboxChange = (task) => {
@@ -66,12 +64,20 @@ export default function Tasks() {
     }
   };
 
-  const handleStatusRadioChange = (radio_status) => {
+  const handleStatusRadioChangeStatus = (radio_status) => {
     if (status == radio_status) {
       console.log(radio_status);
       return;
     } else {
       setStatus(radio_status);
+    }
+  };
+  const handleStatusRadioChangeType = (radio_type) => {
+    if (tasktype == radio_type) {
+      console.log(radio_type);
+      return;
+    } else {
+      setTaskType(radio_type);
     }
   };
 
@@ -166,6 +172,7 @@ export default function Tasks() {
         qc1,
         comment,
         status,
+        type: tasktype,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -193,7 +200,8 @@ export default function Tasks() {
     setProduction("");
     setQc1(false);
     setComment("");
-    setStatus("");
+    setStatus("Running");
+    setTaskType("General");
   };
 
   useEffect(() => {
@@ -477,7 +485,9 @@ export default function Tasks() {
                         value={radio_status}
                         id={`radio${index}`}
                         checked={status == radio_status}
-                        onChange={() => handleStatusRadioChange(radio_status)}
+                        onChange={() =>
+                          handleStatusRadioChangeStatus(radio_status)
+                        }
                       />
                       <label
                         className="form-check-label"
@@ -496,6 +506,54 @@ export default function Tasks() {
                 placeholder="Client Name"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
+              />
+            </div>
+
+            <label htmlFor="type" className="form-label">
+              Task Type
+            </label>
+            <div id="type" className="input-group mb-3">
+              <div className="input-group-prepend">
+                <button
+                  className="btn btn-light dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  data-bs-target="#formDropdown4"
+                  aria-expanded="false"
+                >
+                  Select type
+                </button>
+                <ul
+                  className="dropdown-menu dropdown-scroll list-unstyled"
+                  aria-labelledby="formDropdown4"
+                >
+                  {optionsTaskType.map((radio_type, index) => (
+                    <div key={index} className="m-2 form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        value={radio_type}
+                        id={`radio${index}`}
+                        checked={tasktype == radio_type}
+                        onChange={() => handleStatusRadioChangeType(radio_type)}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`radio${index}`}
+                      >
+                        {radio_type}
+                      </label>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Client Name"
+                value={tasktype}
+                onChange={(e) => setTaskType(e.target.value)}
               />
             </div>
 

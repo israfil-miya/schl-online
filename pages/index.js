@@ -107,6 +107,7 @@ export default function Home({ orders, ordersRedo }) {
                 <th>Production</th>
                 <th>QC1</th>
                 <th>Comments</th>
+                <th>Type</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -135,6 +136,7 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.production}</td>
                       <td className="text-break">{order.qc1}</td>
                       <td className="text-break">{order.comment}</td>
+                      <td className="text-break">{order.type}</td>
                       <td className="text-break">{order.status}</td>
                     </tr>
                   );
@@ -164,6 +166,7 @@ export default function Home({ orders, ordersRedo }) {
                 <th>Production</th>
                 <th>QC1</th>
                 <th>Comments</th>
+                <th>Type</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -213,6 +216,7 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.production}</td>
                       <td className="text-break">{order.qc1}</td>
                       <td className="text-break">{order.comment}</td>
+                      <td className="text-break">{order.type}</td>
                       <td className="text-break">{order.status}</td>
                     </tr>
                   );

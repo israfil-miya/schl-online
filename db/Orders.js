@@ -78,6 +78,9 @@ const OrderSchema = new mongoose.Schema(
     comment: {
       type: String,
     },
+    type: {
+      type: String,
+    },
     status: {
       type: String,
     },

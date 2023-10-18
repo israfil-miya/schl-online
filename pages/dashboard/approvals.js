@@ -572,6 +572,19 @@ export default function Approvals() {
                 />
               </div>
               <div className="mb-3">
+                <label htmlFor="type" className="form-label">
+                  Task Type
+                </label>
+                <input
+                  value={orderInfo.type}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="type"
+                  placeholder="Task Type"
+                />
+              </div>
+              <div className="mb-3">
                 <label htmlFor="status" className="form-label">
                   Status
                 </label>

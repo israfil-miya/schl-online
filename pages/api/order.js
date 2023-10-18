@@ -70,7 +70,8 @@ async function handleNewOrder(req, res) {
 async function handleGetOrdersUnFinished(req, res) {
   try {
     const orders = await Order.find({
-      status: { $nin: ["Finished", "Correction", "Test"] },
+      status: { $nin: ["Finished", "Correction"] },
+      type: { $ne: "Test" },
     }).lean();
 
     if (!orders) res.status(200).json([]);
@@ -95,7 +96,8 @@ async function handleGetOrdersUnFinished(req, res) {
 async function handleGetOrdersRedo(req, res) {
   try {
     const orders = await Order.find({
-      status: { $in: ["Correction", "Test"], $ne: "Finished" },
+      $or: [{ type: "Test" }, { status: "Correction" }],
+      status: { $ne: "Finished" },
     }).lean();
 
     const sortedOrders = orders
@@ -134,8 +136,18 @@ async function handleGetAllOrderPaginated(req, res) {
             $cond: {
               if: {
                 $or: [
-                  { $eq: ["$status", "Correction"] },
-                  { $eq: ["$status", "Test"] },
+                  {
+                    $and: [
+                      { $eq: ["$status", "Correction"] },
+                      { $ne: ["$status", "Finished"] },
+                    ],
+                  },
+                  {
+                    $and: [
+                      { $eq: ["$type", "Test"] },
+                      { $ne: ["$status", "Finished"] },
+                    ],
+                  },
                 ],
               },
               then: 0,
@@ -143,16 +155,25 @@ async function handleGetAllOrderPaginated(req, res) {
                 $cond: {
                   if: { $ne: ["$status", "Finished"] },
                   then: 1,
-                  else: 2,
+                  else: {
+                    $cond: {
+                      if: {
+                        $and: [
+                          { $eq: ["$status", "Finished"] },
+                          { $eq: ["$type", "Test"] },
+                        ],
+                      },
+                      then: 2,
+                      else: 3,
+                    },
+                  },
                 },
               },
             },
           },
         },
       },
-
-      { $sort: { customSortField: 1 } }, // Sort the documents based on "customSortField"
-
+      { $sort: { customSortField: 1, createdAt: -1 } }, // Sort the documents based on "customSortField"
       { $skip: skip }, // Skip items for pagination
       { $limit: ITEMS_PER_PAGE }, // Limit the number of items per page
     ];
@@ -225,7 +246,8 @@ function ddMmYyyyToIsoDate(ddMmYyyy) {
 
 async function handleGetOrdersByFilter(req, res) {
   try {
-    const { fromtime, totime, folder, client, task } = req.headers;
+    const { fromtime, totime, folder, client, task, typefilter, forinvoice } =
+      req.headers;
     const page = req.headers.page || 1;
     const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) ?? 20; // Number of items per page
 
@@ -236,13 +258,17 @@ async function handleGetOrdersByFilter(req, res) {
       folder,
       client,
       task,
+      typefilter,
+      forinvoice,
       page,
     );
 
     let query = {};
+    if (forinvoice) query.status = "Finished";
     if (folder) query.folder = folder;
     if (client) query.client_code = client;
     if (task) query.task = task;
+    if (typefilter) query.type = typefilter;
     if (fromtime || totime) {
       query.createdAt = {};
       if (fromtime) {
@@ -273,8 +299,18 @@ async function handleGetOrdersByFilter(req, res) {
               $cond: {
                 if: {
                   $or: [
-                    { $eq: ["$status", "Correction"] },
-                    { $eq: ["$status", "Test"] },
+                    {
+                      $and: [
+                        { $eq: ["$status", "Correction"] },
+                        { $ne: ["$status", "Finished"] },
+                      ],
+                    },
+                    {
+                      $and: [
+                        { $eq: ["$type", "Test"] },
+                        { $ne: ["$status", "Finished"] },
+                      ],
+                    },
                   ],
                 },
                 then: 0,
@@ -282,7 +318,18 @@ async function handleGetOrdersByFilter(req, res) {
                   $cond: {
                     if: { $ne: ["$status", "Finished"] },
                     then: 1,
-                    else: 2,
+                    else: {
+                      $cond: {
+                        if: {
+                          $and: [
+                            { $eq: ["$status", "Finished"] },
+                            { $eq: ["$type", "Test"] },
+                          ],
+                        },
+                        then: 2,
+                        else: 3,
+                      },
+                    },
                   },
                 },
               },
@@ -296,7 +343,7 @@ async function handleGetOrdersByFilter(req, res) {
       if (!req.headers.not_paginated) {
         pipeline = [
           ...pipeline,
-          { $sort: { updatedAt: -1 } },
+          { $sort: { createdAt: -1 } },
           { $skip: skip }, // Skip items for pagination
           { $limit: ITEMS_PER_PAGE },
         ];
@@ -331,7 +378,7 @@ async function handleGetOrdersByFilter(req, res) {
 async function handleGetOnlyTime(req, res) {
   try {
     const orders = await Order.find(
-      { status: { $nin: ["Finished", "Correction", "Test"] } },
+      { status: { $nin: ["Finished", "Correction"] }, type: { $ne: "Test" } },
       { delivery_date: 1, delivery_bd_time: 1 },
     ).lean();
 
@@ -466,7 +513,7 @@ async function handleGetOrdersByFilterStat(req, res) {
 
     console.log("Received request with parameters:", fromtime, totime);
 
-    let query = {};
+    let query = { type: { $ne: "Test" } };
     if (fromtime || totime) {
       query.createdAt = {};
       if (fromtime) {
