@@ -414,7 +414,6 @@ export default function Browse() {
         <thead>
           <tr className="table-dark">
             <th>#</th>
-            <th>Add Time</th>
             <th>Client Code</th>
             {session.user.role == "admin" || session.user.role == "super" ? (
               <th>Client Name</th>
@@ -440,11 +439,6 @@ export default function Browse() {
             orders?.items.map((order, index) => (
               <tr key={order._id}>
                 <td>{index + 1}</td>
-                <td className="text-break">
-                  {order.date_today}
-                  <span className="text-body-secondary"> | </span>
-                  {order.time_now}
-                </td>
                 <td className="text-break">{order.client_code}</td>
 
                 {session.user.role == "admin" ||

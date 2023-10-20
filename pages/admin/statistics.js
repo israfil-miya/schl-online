@@ -9,6 +9,7 @@ export default function Statistics() {
   const [orders, setOrders] = useState([]);
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
+  const [statsOf, setStatsOf] = useState("Files");
 
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
@@ -19,7 +20,7 @@ export default function Statistics() {
   function getDateRange() {
     const today = new Date();
     const fifteenDaysAgo = new Date();
-    fifteenDaysAgo.setDate(today.getDate() - 15);
+    fifteenDaysAgo.setDate(today.getDate() - 30);
 
     const formatDate = (date) => {
       const year = date.getFullYear();
@@ -52,6 +53,7 @@ export default function Statistics() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        statsfor: statsOf,
         getordersbyfilterstat: true,
         fromtime: adjustedFromTime,
         totime: adjustedToTime,
@@ -63,7 +65,9 @@ export default function Statistics() {
       const data = await res.json();
 
       if (!data.error) {
-        setOrders(data);
+        setOrders(data.ordersQP);
+
+        console.log(data)
       } else {
         toast.error("Unable to retrieve orders list");
       }
@@ -77,11 +81,11 @@ export default function Statistics() {
   }, []);
 
   useEffect(() => {
-    setUserData({
+    setStatData({
       labels: orders.map((data) => data.date),
       datasets: [
         {
-          data: orders.map((data) => data.quantity),
+          data: orders.map((data) => data.fileQuantity),
           backgroundColor: "#EEDC82",
           borderColor: "black",
           borderWidth: 2,
@@ -90,7 +94,7 @@ export default function Statistics() {
     });
   }, [orders]);
 
-  const [userData, setUserData] = useState({
+  const [statData, setStatData] = useState({
     labels: [],
     datasets: [
       {
@@ -113,6 +117,42 @@ export default function Statistics() {
         }}
       >
         <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
+        <div
+            style={{ display: "flex", alignItems: "center" }}
+            className="filter_stats_of me-3"
+          >
+            <input
+              className="form-check-input"
+              type="radio"
+              value="Files"
+              id="radio1"
+              checked={statsOf == "Files"}
+              onChange={(e) => setStatsOf(e.target.value)}
+            />
+            <label
+              className="form-check-label ms-2"
+              htmlFor="radio1"
+            >
+              Files Flow
+            </label>
+
+            <input
+              className="form-check-input"
+              type="radio"
+              value={`Orders`}
+              id={`radio2`}
+              checked={statsOf == "Orders"}
+              onChange={(e) => setStatsOf(e.target.value)}
+            />
+            <label
+              className="form-check-label ms-2"
+              htmlFor="radio2"
+            >
+              Orders Flow
+            </label>
+          </div>
+
+  
           <div
             className="filter_time me-3"
             style={{ display: "flex", alignItems: "center" }}
@@ -132,6 +172,7 @@ export default function Statistics() {
               onChange={(e) => setToTime(e.target.value)}
             />
           </div>
+
           <button
             onClick={filteredData}
             className="btn ms-4 btn-sm btn-outline-primary"
@@ -143,10 +184,9 @@ export default function Statistics() {
       <div className="container">
         {orders?.length !== 0 ? (
           <BarChart
-            title={`Number of Files: ${orders[0].date} - ${
-              orders[orders.length - 1].date
-            }`}
-            chartData={userData}
+            title={`File Flow Period: ${orders[0].date} - ${orders[orders.length - 1].date
+              }`}
+            chartData={statData}
           />
         ) : (
           <p className="text-center my-3">No Tasks found</p>

@@ -1,4 +1,5 @@
 import Order from "../../db/Orders";
+import Client from "../../db/Clients";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 
@@ -509,7 +510,7 @@ async function handleGetAllOrdersOfClient(req, res) {
 
 async function handleGetOrdersByFilterStat(req, res) {
   try {
-    const { fromtime, totime } = req.headers;
+    const { fromtime, totime, statsfor } = req.headers;
 
     console.log("Received request with parameters:", fromtime, totime);
 
@@ -528,46 +529,160 @@ async function handleGetOrdersByFilterStat(req, res) {
       }
     }
 
-    const orders = await Order.find(query, { createdAt: 1, quantity: 1 });
 
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+    let returnData;
 
-    const mergedOrders = orders.reduce((merged, order) => {
-      const date =
-        order.createdAt instanceof Date
-          ? order.createdAt.toISOString().split("T")[0]
-          : order.createdAt.split("T")[0];
-      const [year, month, day] = date.split("-");
-      const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
+    if (statsfor == "Files") {
 
-      if (!merged[formattedDate]) {
-        merged[formattedDate] = { date: formattedDate, quantity: 0 };
+      const orders = await Order.find(query);
+
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      
+      const mergedOrders = orders.reduce((merged, order) => {
+        const date =
+          order.createdAt instanceof Date
+            ? order.createdAt.toISOString().split("T")[0]
+            : order.createdAt.split("T")[0];
+        const [year, month, day] = date.split("-");
+        const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
+      
+        if (!merged[formattedDate]) {
+          merged[formattedDate] = {
+            date: formattedDate,
+            orderQuantity: 0,
+            orderPending: 0,
+            fileQuantity: 0,
+            filePending: 0,
+          };
+        }
+      
+        // Update fileQuantity and filePending based on the order status and quantity
+        merged[formattedDate].fileQuantity += order.quantity;
+        merged[formattedDate].orderQuantity++;
+        if (order.status !== "Finished") {
+          merged[formattedDate].filePending += order.quantity;
+          merged[formattedDate].orderPending++;
+        }
+      
+        return merged;
+      }, {});
+      
+      
+      const ordersQP = Object.values(mergedOrders);
+      
+
+
+
+
+
+      const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
+      const countries = { "Australia": [], "Denmark": [], "Finland": [], "Norway": [], "Sweden": [], "Others": [] };
+
+      let ordersDetails = countries; // Initialize ordersDetails with the countries object
+
+      // Create an array of promises
+      const orderPromises = clientsAll.map(async (clientData, index) => {
+        console.log({ ...query, client_code: clientData.client_code })
+        return Order.find({ ...query, client_code: clientData.client_code }, { folder: 1, client_name: 1 });
+      });
+
+      // Use Promise.all to wait for all asynchronous calls to complete
+      const ordersAll = await Promise.all(orderPromises);
+
+      ordersAll.forEach((clientOrders, index) => {
+        const clientData = clientsAll[index];
+        const country = (ordersDetails[clientData.country]) ? clientData.country : "Others";
+        if (!ordersDetails[country]) {
+          ordersDetails[country] = []; // Create an empty array if it doesn't exist
+        }
+        ordersDetails[country].push(...clientOrders); // Use spread operator to push the client orders
+      });
+
+      // Remove empty categories
+      for (const country in ordersDetails) {
+        if (ordersDetails[country].length === 0) {
+          delete ordersDetails[country];
+        }
       }
 
-      merged[formattedDate].quantity += order.quantity;
 
-      return merged;
-    }, {});
 
-    const formattedOrders = Object.values(mergedOrders);
 
-    console.log("FILTERED ORDERS: ", orders.length);
+      returnData = { ordersQP, ordersC: ordersDetails } // QP = Quantity & Pending, C = Country
 
-    if (formattedOrders) {
-      res.status(200).json(formattedOrders);
+    } else if (statsfor == "Orders") {
+
+      return
+
+    } else {
+      sendError(res, 400, "Invalid request type for stats");
+    }
+
+
+
+    console.log("FILTERED ORDERS STATS: ", returnData.length);
+
+    if (returnData) {
+      res.status(200).json(returnData);
+    } else {
+      sendError(res, 400, "Something went wrong");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+
+
+async function handleGetOrdersOfCountries(req, res) {
+  try {
+    const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
+    const countries = { "Australia": [], "Denmark": [], "Finland": [], "Norway": [], "Sweden": [], "Others": [] };
+
+    let ordersDetails = countries; // Initialize ordersDetails with the countries object
+
+    // Create an array of promises
+    const orderPromises = clientsAll.map(async (clientData, index) => {
+      return Order.find({ client_code: clientData.client_code }, { folder: 1, client_name: 1 });
+    });
+
+    // Use Promise.all to wait for all asynchronous calls to complete
+    const orders = await Promise.all(orderPromises);
+
+    orders.forEach((clientOrders, index) => {
+      const clientData = clientsAll[index];
+      const country = (ordersDetails[clientData.country]) ? clientData.country : "Others";
+      if (!ordersDetails[country]) {
+        ordersDetails[country] = []; // Create an empty array if it doesn't exist
+      }
+      ordersDetails[country].push(...clientOrders); // Use spread operator to push the client orders
+    });
+
+    // Remove empty categories
+    for (const country in ordersDetails) {
+      if (ordersDetails[country].length === 0) {
+        delete ordersDetails[country];
+      }
+    }
+
+    console.log("FILTERED ORDERS: ", ordersDetails);
+
+    if (Object.keys(ordersDetails).length > 0) {
+      res.status(200).json(ordersDetails);
     } else {
       sendError(res, 400, "No order found");
     }
@@ -576,6 +691,8 @@ async function handleGetOrdersByFilterStat(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
+
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -606,6 +723,8 @@ export default async function handle(req, res) {
         await handleGetAllOrdersOfClient(req, res);
       } else if (req.headers.getordersbyfilterstat) {
         await handleGetOrdersByFilterStat(req, res);
+      } else if (req.headers.getordersofcountries) {
+        await handleGetOrdersOfCountries(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

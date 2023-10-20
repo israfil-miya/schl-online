@@ -96,7 +96,6 @@ export default function Home({ orders, ordersRedo }) {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Added Time</th>
                 <th>Client Code</th>
                 <th>Folder</th>
                 <th>Quantity</th>
@@ -117,11 +116,6 @@ export default function Home({ orders, ordersRedo }) {
                   return (
                     <tr key={order._id}>
                       <td>{index + 1}</td>
-                      <td className="text-break">
-                        {isoDateToDdMmYyyy(order.createdAt)}
-                        <span className="text-body-secondary"> | </span>
-                        {order.time_now}
-                      </td>
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.folder}</td>
                       <td className="text-break">{order.quantity}</td>
@@ -154,7 +148,6 @@ export default function Home({ orders, ordersRedo }) {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Added Time</th>
                 <th>Client Code</th>
                 <th>Folder</th>
                 <th>Quantity</th>
@@ -196,11 +189,6 @@ export default function Home({ orders, ordersRedo }) {
                       className={priorityColor ? priorityColor : ""}
                     >
                       <td>{index + 1}</td>
-                      <td className="text-break">
-                        {isoDateToDdMmYyyy(order.createdAt)}
-                        <span className="text-body-secondary"> | </span>
-                        {order.time_now}
-                      </td>
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.folder}</td>
                       <td className="text-break">{order.quantity}</td>
