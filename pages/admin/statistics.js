@@ -53,7 +53,6 @@ export default function Statistics() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        statsfor: statsOf,
         getordersbyfilterstat: true,
         fromtime: adjustedFromTime,
         totime: adjustedToTime,
@@ -67,7 +66,7 @@ export default function Statistics() {
       if (!data.error) {
         setOrders(data.ordersQP);
 
-        console.log(data)
+        console.log(data);
       } else {
         toast.error("Unable to retrieve orders list");
       }
@@ -81,29 +80,27 @@ export default function Statistics() {
   }, []);
 
   useEffect(() => {
-    setStatData({
+    setStatDataFlow({
       labels: orders.map((data) => data.date),
       datasets: [
         {
-          data: orders.map((data) => data.fileQuantity),
+          data: orders.map((data) =>
+            statsOf == "Files"
+              ? data.fileQuantity
+              : statsOf == "Orders"
+              ? data.orderQuantity
+              : null,
+          ),
           backgroundColor: "#EEDC82",
           borderColor: "black",
           borderWidth: 2,
         },
       ],
     });
-  }, [orders]);
+  }, [orders, statsOf]);
 
-  const [statData, setStatData] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: "#EEDC82",
-        borderColor: "black",
-        borderWidth: 2,
-      },
-    ],
+  const [statDataFlow, setStatDataFlow] = useState({
+    datasets: [],
   });
 
   return (
@@ -117,7 +114,7 @@ export default function Statistics() {
         }}
       >
         <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
-        <div
+          <div
             style={{ display: "flex", alignItems: "center" }}
             className="filter_stats_of me-3"
           >
@@ -129,10 +126,7 @@ export default function Statistics() {
               checked={statsOf == "Files"}
               onChange={(e) => setStatsOf(e.target.value)}
             />
-            <label
-              className="form-check-label ms-2"
-              htmlFor="radio1"
-            >
+            <label className="form-check-label ms-2" htmlFor="radio1">
               Files Flow
             </label>
 
@@ -144,15 +138,11 @@ export default function Statistics() {
               checked={statsOf == "Orders"}
               onChange={(e) => setStatsOf(e.target.value)}
             />
-            <label
-              className="form-check-label ms-2"
-              htmlFor="radio2"
-            >
+            <label className="form-check-label ms-2" htmlFor="radio2">
               Orders Flow
             </label>
           </div>
 
-  
           <div
             className="filter_time me-3"
             style={{ display: "flex", alignItems: "center" }}
@@ -181,12 +171,13 @@ export default function Statistics() {
           </button>
         </div>
       </div>
-      <div className="container">
+      <div>
         {orders?.length !== 0 ? (
           <BarChart
-            title={`File Flow Period: ${orders[0].date} - ${orders[orders.length - 1].date
-              }`}
-            chartData={statData}
+            title={`File Flow Period: ${orders[0].date} - ${
+              orders[orders.length - 1].date
+            }`}
+            chartData={statDataFlow}
           />
         ) : (
           <p className="text-center my-3">No Tasks found</p>

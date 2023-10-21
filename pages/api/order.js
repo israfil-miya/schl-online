@@ -510,7 +510,7 @@ async function handleGetAllOrdersOfClient(req, res) {
 
 async function handleGetOrdersByFilterStat(req, res) {
   try {
-    const { fromtime, totime, statsfor } = req.headers;
+    const { fromtime, totime } = req.headers;
 
     console.log("Received request with parameters:", fromtime, totime);
 
@@ -529,111 +529,141 @@ async function handleGetOrdersByFilterStat(req, res) {
       }
     }
 
+    const orders = await Order.find(query);
 
-    let returnData;
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
 
-    if (statsfor == "Files") {
+    const mergedOrders = orders.reduce((merged, order) => {
+      const date =
+        order.createdAt instanceof Date
+          ? order.createdAt.toISOString().split("T")[0]
+          : order.createdAt.split("T")[0];
+      const [year, month, day] = date.split("-");
+      const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
 
-      const orders = await Order.find(query);
+      if (!merged[formattedDate]) {
+        merged[formattedDate] = {
+          date: formattedDate,
+          orderQuantity: 0,
+          orderPending: 0,
+          fileQuantity: 0,
+          filePending: 0,
+        };
+      }
 
-      const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-      
-      const mergedOrders = orders.reduce((merged, order) => {
+      // Update fileQuantity and filePending based on the order status and quantity
+      merged[formattedDate].fileQuantity += order.quantity;
+      merged[formattedDate].orderQuantity++;
+      if (order.status !== "Finished") {
+        merged[formattedDate].filePending += order.quantity;
+        merged[formattedDate].orderPending++;
+      }
+
+      return merged;
+    }, {});
+
+    const ordersQP = Object.values(mergedOrders);
+
+    const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
+
+    let ordersDetails = {
+      Australia: [],
+      Denmark: [],
+      Finland: [],
+      Norway: [],
+      Sweden: [],
+      Others: [],
+    }; // Initialize ordersDetails with the countries object
+
+    // Create an array of promises
+    const orderPromises = clientsAll.map(async (clientData, index) => {
+      console.log({ ...query, client_code: clientData.client_code });
+      return Order.find(
+        { ...query, client_code: clientData.client_code },
+        { createdAt: 1, quantity: 1 },
+      );
+    });
+
+    // Use Promise.all to wait for all asynchronous calls to complete
+    const ordersAll = await Promise.all(orderPromises);
+
+    ordersAll.forEach((clientOrders, index) => {
+      const clientData = clientsAll[index];
+      const country = ordersDetails[clientData.country]
+        ? clientData.country
+        : "Others";
+      if (!ordersDetails[country]) {
+        ordersDetails[country] = []; // Create an empty array if it doesn't exist
+      }
+      ordersDetails[country].push(...clientOrders); // Use spread operator to push the client orders
+    });
+
+    // Remove empty categories
+    for (const country in ordersDetails) {
+      if (ordersDetails[country].length === 0) {
+        delete ordersDetails[country];
+      }
+    }
+
+    let ordersCD = {
+      Australia: [],
+      Denmark: [],
+      Finland: [],
+      Norway: [],
+      Sweden: [],
+      Others: [],
+    };
+
+    for (const [countryName, ordersArr] of Object.entries(ordersDetails)) {
+      const merged = {}; // Reset merged object for each country
+
+      const sortedDates = ordersArr.reduce((merged, order) => {
         const date =
           order.createdAt instanceof Date
             ? order.createdAt.toISOString().split("T")[0]
             : order.createdAt.split("T")[0];
         const [year, month, day] = date.split("-");
         const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
-      
+
         if (!merged[formattedDate]) {
           merged[formattedDate] = {
             date: formattedDate,
             orderQuantity: 0,
-            orderPending: 0,
             fileQuantity: 0,
-            filePending: 0,
           };
         }
-      
-        // Update fileQuantity and filePending based on the order status and quantity
+
         merged[formattedDate].fileQuantity += order.quantity;
         merged[formattedDate].orderQuantity++;
-        if (order.status !== "Finished") {
-          merged[formattedDate].filePending += order.quantity;
-          merged[formattedDate].orderPending++;
-        }
-      
+
         return merged;
       }, {});
-      
-      
-      const ordersQP = Object.values(mergedOrders);
-      
 
-
-
-
-
-      const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
-      const countries = { "Australia": [], "Denmark": [], "Finland": [], "Norway": [], "Sweden": [], "Others": [] };
-
-      let ordersDetails = countries; // Initialize ordersDetails with the countries object
-
-      // Create an array of promises
-      const orderPromises = clientsAll.map(async (clientData, index) => {
-        console.log({ ...query, client_code: clientData.client_code })
-        return Order.find({ ...query, client_code: clientData.client_code }, { folder: 1, client_name: 1 });
+      const sortedDatesArray = Object.values(sortedDates).sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA - dateB;
       });
 
-      // Use Promise.all to wait for all asynchronous calls to complete
-      const ordersAll = await Promise.all(orderPromises);
-
-      ordersAll.forEach((clientOrders, index) => {
-        const clientData = clientsAll[index];
-        const country = (ordersDetails[clientData.country]) ? clientData.country : "Others";
-        if (!ordersDetails[country]) {
-          ordersDetails[country] = []; // Create an empty array if it doesn't exist
-        }
-        ordersDetails[country].push(...clientOrders); // Use spread operator to push the client orders
-      });
-
-      // Remove empty categories
-      for (const country in ordersDetails) {
-        if (ordersDetails[country].length === 0) {
-          delete ordersDetails[country];
-        }
-      }
-
-
-
-
-      returnData = { ordersQP, ordersC: ordersDetails } // QP = Quantity & Pending, C = Country
-
-    } else if (statsfor == "Orders") {
-
-      return
-
-    } else {
-      sendError(res, 400, "Invalid request type for stats");
+      ordersCD[countryName].push(...sortedDatesArray);
     }
 
+    console.log(ordersCD); // Your final output
 
-
-    console.log("FILTERED ORDERS STATS: ", returnData.length);
+    const returnData = { ordersQP, ordersCD }; // QP = Quantity & Pending, CD = Country & Date
 
     if (returnData) {
       res.status(200).json(returnData);
@@ -646,18 +676,26 @@ async function handleGetOrdersByFilterStat(req, res) {
   }
 }
 
-
-
 async function handleGetOrdersOfCountries(req, res) {
   try {
     const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
-    const countries = { "Australia": [], "Denmark": [], "Finland": [], "Norway": [], "Sweden": [], "Others": [] };
+    const countries = {
+      Australia: [],
+      Denmark: [],
+      Finland: [],
+      Norway: [],
+      Sweden: [],
+      Others: [],
+    };
 
     let ordersDetails = countries; // Initialize ordersDetails with the countries object
 
     // Create an array of promises
     const orderPromises = clientsAll.map(async (clientData, index) => {
-      return Order.find({ client_code: clientData.client_code }, { folder: 1, client_name: 1 });
+      return Order.find(
+        { client_code: clientData.client_code },
+        { folder: 1, client_name: 1 },
+      );
     });
 
     // Use Promise.all to wait for all asynchronous calls to complete
@@ -665,7 +703,9 @@ async function handleGetOrdersOfCountries(req, res) {
 
     orders.forEach((clientOrders, index) => {
       const clientData = clientsAll[index];
-      const country = (ordersDetails[clientData.country]) ? clientData.country : "Others";
+      const country = ordersDetails[clientData.country]
+        ? clientData.country
+        : "Others";
       if (!ordersDetails[country]) {
         ordersDetails[country] = []; // Create an empty array if it doesn't exist
       }
@@ -691,8 +731,6 @@ async function handleGetOrdersOfCountries(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 export default async function handle(req, res) {
   const { method } = req;

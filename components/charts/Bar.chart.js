@@ -7,11 +7,11 @@ ChartJS.register(ChartDataLabels);
 function BarChart({ chartData, title }) {
   const options = {
     clip: false,
-    maintainAspectRatio: true,
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       y: {
-        beginAtZero: true,
+        beginAtZero: false,
         ticks: {
           callback: (value) => Math.round(value),
         },
@@ -39,7 +39,7 @@ function BarChart({ chartData, title }) {
 
   return (
     <>
-      <div className="p-3 bg-light chart-container shadow-sm border">
+      <div className="p-3 pb-5 bg-light chart-container shadow-sm border">
         {title && <p className="fw-bold text-center">{title}</p>}
         <Bar options={options} data={chartData} />
       </div>
@@ -47,6 +47,9 @@ function BarChart({ chartData, title }) {
         {`
           .chart-container canvas {
             box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.8);
+          }
+          .chart-container {
+            height: 600px !important;
           }
         `}
       </style>
