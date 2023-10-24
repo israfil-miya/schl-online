@@ -318,7 +318,10 @@ export default function Clients() {
             </button>
           </form>
         </div>
-        <div className="client-list my-5">
+        <div
+          style={{ overflowX: "auto" }}
+          className="text-nowrap client-list my-5"
+        >
           <h5 className="text-center py-4">Clients List</h5>
           <table className="table p-3 table-hover">
             <thead>
@@ -631,7 +634,6 @@ export default function Clients() {
 
           th,
           td {
-            text-align: center;
             padding: 5px 2.5px;
           }
         `}

@@ -39,7 +39,7 @@ function BarChart({ chartData, title }) {
 
   return (
     <>
-      <div className="p-3 pb-5 bg-light chart-container shadow-sm border">
+      <div className="pb-5 chart-container  p-3 bg-light shadow-sm rounded border justify-content-center">
         {title && <p className="fw-bold text-center">{title}</p>}
         <Bar options={options} data={chartData} />
       </div>

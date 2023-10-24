@@ -508,6 +508,23 @@ async function handleGetAllOrdersOfClient(req, res) {
   }
 }
 
+function getDatesInRange(fromTime, toTime) {
+  const dates = [];
+  let currentDate = new Date(ddMmYyyyToIsoDate(fromTime));
+  const endDate = new Date(ddMmYyyyToIsoDate(toTime));
+
+  while (currentDate <= endDate) {
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const day = String(currentDate.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+    dates.push(formattedDate);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
+}
+
 async function handleGetOrdersByFilterStat(req, res) {
   try {
     const { fromtime, totime } = req.headers;
@@ -661,70 +678,58 @@ async function handleGetOrdersByFilterStat(req, res) {
       ordersCD[countryName].push(...sortedDatesArray);
     }
 
-    console.log(ordersCD); // Your final output
+    const dateRange = getDatesInRange(fromtime, totime).map((date) => {
+      const [year, month, day] = date.split("-");
+      return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}`;
+    });
 
-    const returnData = { ordersQP, ordersCD }; // QP = Quantity & Pending, CD = Country & Date
+    // Initialize data with all values set to 0
+    const zeroDataQP = {
+      orderQuantity: 0,
+      orderPending: 0,
+      fileQuantity: 0,
+      filePending: 0,
+    };
+    const zeroDataCD = {
+      orderQuantity: 0,
+      fileQuantity: 0,
+    };
+
+    // Add missing dates to ordersQP
+    const ordersQPWithMissingDates = dateRange.map((date) => {
+      const existingData = ordersQP.find((item) => item.date === date);
+      if (existingData) {
+        return existingData;
+      } else {
+        return { date, ...zeroDataQP };
+      }
+    });
+
+    // Add missing dates to ordersCD for each country
+    const ordersCDWithMissingDates = {};
+    for (const [country, ordersArr] of Object.entries(ordersCD)) {
+      ordersCDWithMissingDates[country] = dateRange.map((date) => {
+        const existingData = ordersArr.find((item) => item.date === date);
+        if (existingData) {
+          return existingData;
+        } else {
+          return { date, ...zeroDataCD };
+        }
+      });
+    }
+
+    const returnData = {
+      ordersQP: ordersQPWithMissingDates,
+      ordersCD: ordersCDWithMissingDates,
+    };
+
+    console.log(returnData);
+    console.log("Date Range: ", dateRange);
 
     if (returnData) {
       res.status(200).json(returnData);
     } else {
       sendError(res, 400, "Something went wrong");
-    }
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetOrdersOfCountries(req, res) {
-  try {
-    const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
-    const countries = {
-      Australia: [],
-      Denmark: [],
-      Finland: [],
-      Norway: [],
-      Sweden: [],
-      Others: [],
-    };
-
-    let ordersDetails = countries; // Initialize ordersDetails with the countries object
-
-    // Create an array of promises
-    const orderPromises = clientsAll.map(async (clientData, index) => {
-      return Order.find(
-        { client_code: clientData.client_code },
-        { folder: 1, client_name: 1 },
-      );
-    });
-
-    // Use Promise.all to wait for all asynchronous calls to complete
-    const orders = await Promise.all(orderPromises);
-
-    orders.forEach((clientOrders, index) => {
-      const clientData = clientsAll[index];
-      const country = ordersDetails[clientData.country]
-        ? clientData.country
-        : "Others";
-      if (!ordersDetails[country]) {
-        ordersDetails[country] = []; // Create an empty array if it doesn't exist
-      }
-      ordersDetails[country].push(...clientOrders); // Use spread operator to push the client orders
-    });
-
-    // Remove empty categories
-    for (const country in ordersDetails) {
-      if (ordersDetails[country].length === 0) {
-        delete ordersDetails[country];
-      }
-    }
-
-    console.log("FILTERED ORDERS: ", ordersDetails);
-
-    if (Object.keys(ordersDetails).length > 0) {
-      res.status(200).json(ordersDetails);
-    } else {
-      sendError(res, 400, "No order found");
     }
   } catch (e) {
     console.error(e);
@@ -761,8 +766,6 @@ export default async function handle(req, res) {
         await handleGetAllOrdersOfClient(req, res);
       } else if (req.headers.getordersbyfilterstat) {
         await handleGetOrdersByFilterStat(req, res);
-      } else if (req.headers.getordersofcountries) {
-        await handleGetOrdersOfCountries(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

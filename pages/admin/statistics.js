@@ -6,10 +6,13 @@ import { toast } from "react-hot-toast";
 import Orders from "../../db/Orders";
 
 export default function Statistics() {
-  const [orders, setOrders] = useState([]);
+  const [ordersQP, setOrdersQP] = useState([]);
+  const [ordersCD, setOrdersCD] = useState([]);
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [statsOf, setStatsOf] = useState("Files");
+  const [dateArray, setDateArray] = useState([]);
+  const [CDParsedHtml, setCDParsedHtml] = useState([]);
 
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
@@ -26,20 +29,16 @@ export default function Statistics() {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-      return `${day}-${month}-${year}`;
+      return `${year}-${month}-${day}`;
     };
 
-    const dateRange = {
-      from: formatDate(fifteenDaysAgo),
-      to: formatDate(today),
-    };
-
-    return dateRange;
+    setFromTime(formatDate(fifteenDaysAgo));
+    setToTime(formatDate(today));
   }
 
   async function filteredData() {
-    let adjustedFromTime = fromTime || getDateRange().from;
-    let adjustedToTime = toTime || getDateRange().to;
+    let adjustedFromTime = fromTime;
+    let adjustedToTime = toTime;
 
     if (fromTime) {
       adjustedFromTime = convertToDDMMYYYY(fromTime);
@@ -64,8 +63,8 @@ export default function Statistics() {
       const data = await res.json();
 
       if (!data.error) {
-        setOrders(data.ordersQP);
-
+        setOrdersQP(data.ordersQP);
+        setOrdersCD(data.ordersCD);
         console.log(data);
       } else {
         toast.error("Unable to retrieve orders list");
@@ -75,16 +74,61 @@ export default function Statistics() {
     }
   }
 
+  function getDatesInRange() {
+    const dates = [];
+
+    let currentDate = new Date(fromTime);
+    let endDate = new Date(toTime);
+
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    console.log("Dates: ", dates);
+    console.log("From Date: ", fromTime);
+    console.log("To Date: ", toTime);
+
+    setDateArray(dates);
+  }
+
+  function parseCDHtml() {
+    let parsed = [];
+    for (const country in ordersCD) {
+      parsed.push(
+        <tr key={country}>
+          <th>{country}</th>
+          {ordersCD[country].map((data, index) => (
+            <td key={index}>{data.fileQuantity}</td>
+          ))}
+        </tr>,
+      );
+    }
+    setCDParsedHtml(parsed);
+  }
+
   useEffect(() => {
-    filteredData();
+    getDateRange();
   }, []);
 
   useEffect(() => {
+    parseCDHtml();
+  }, [ordersCD]);
+
+  useEffect(() => {
+    if (fromTime && toTime) {
+      filteredData();
+      getDatesInRange();
+      parseCDHtml();
+    }
+  }, [fromTime, toTime]);
+
+  useEffect(() => {
     setStatDataFlow({
-      labels: orders.map((data) => data.date),
+      labels: ordersQP.map((data) => data.date),
       datasets: [
         {
-          data: orders.map((data) =>
+          data: ordersQP.map((data) =>
             statsOf == "Files"
               ? data.fileQuantity
               : statsOf == "Orders"
@@ -94,10 +138,11 @@ export default function Statistics() {
           backgroundColor: "#EEDC82",
           borderColor: "black",
           borderWidth: 2,
+          minBarLength: 1,
         },
       ],
     });
-  }, [orders, statsOf]);
+  }, [ordersQP, statsOf]);
 
   const [statDataFlow, setStatDataFlow] = useState({
     datasets: [],
@@ -106,82 +151,107 @@ export default function Statistics() {
   return (
     <>
       <Navbar navFor="admin" />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
-          <div
-            style={{ display: "flex", alignItems: "center" }}
-            className="filter_stats_of me-3"
-          >
-            <input
-              className="form-check-input"
-              type="radio"
-              value="Files"
-              id="radio1"
-              checked={statsOf == "Files"}
-              onChange={(e) => setStatsOf(e.target.value)}
-            />
-            <label className="form-check-label ms-2" htmlFor="radio1">
-              Files Flow
-            </label>
+      <div className="m-3">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
+            <div
+              style={{ display: "flex", alignItems: "center" }}
+              className="filter_stats_of me-3"
+            >
+              <input
+                className="form-check-input"
+                type="radio"
+                value="Files"
+                id="radio1"
+                checked={statsOf == "Files"}
+                onChange={(e) => setStatsOf(e.target.value)}
+              />
+              <label className="form-check-label ms-2" htmlFor="radio1">
+                Files Flow
+              </label>
 
-            <input
-              className="form-check-input"
-              type="radio"
-              value={`Orders`}
-              id={`radio2`}
-              checked={statsOf == "Orders"}
-              onChange={(e) => setStatsOf(e.target.value)}
-            />
-            <label className="form-check-label ms-2" htmlFor="radio2">
-              Orders Flow
-            </label>
+              <input
+                className="form-check-input"
+                type="radio"
+                value={`Orders`}
+                id={`radio2`}
+                checked={statsOf == "Orders"}
+                onChange={(e) => setStatsOf(e.target.value)}
+              />
+              <label className="form-check-label ms-2" htmlFor="radio2">
+                Orders Flow
+              </label>
+            </div>
+
+            <div
+              className="filter_time me-3"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <strong>Date: </strong>
+              <input
+                type="date"
+                className="form-control mx-2 custom-input"
+                value={fromTime}
+                onChange={(e) => setFromTime(e.target.value)}
+              />
+              <span> To </span>
+              <input
+                type="date"
+                className="form-control ms-2 custom-input"
+                value={toTime}
+                onChange={(e) => setToTime(e.target.value)}
+              />
+            </div>
+
+            <button
+              onClick={filteredData}
+              className="btn ms-4 btn-sm btn-outline-primary"
+            >
+              Search
+            </button>
           </div>
-
-          <div
-            className="filter_time me-3"
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            <strong>Date: </strong>
-            <input
-              type="date"
-              className="form-control mx-2 custom-input"
-              value={fromTime}
-              onChange={(e) => setFromTime(e.target.value)}
-            />
-            <span> To </span>
-            <input
-              type="date"
-              className="form-control ms-2 custom-input"
-              value={toTime}
-              onChange={(e) => setToTime(e.target.value)}
-            />
-          </div>
-
-          <button
-            onClick={filteredData}
-            className="btn ms-4 btn-sm btn-outline-primary"
-          >
-            Search
-          </button>
         </div>
-      </div>
-      <div>
-        {orders?.length !== 0 ? (
-          <BarChart
-            title={`File Flow Period: ${orders[0].date} - ${
-              orders[orders.length - 1].date
-            }`}
-            chartData={statDataFlow}
-          />
-        ) : (
-          <p className="text-center my-3">No Tasks found</p>
-        )}
+        <div className="FlowChart my-3">
+          {ordersQP?.length !== 0 ? (
+            <BarChart
+              title={`File Flow Period: ${ordersQP[0].date} - ${
+                ordersQP[ordersQP.length - 1].date
+              }`}
+              chartData={statDataFlow}
+            />
+          ) : (
+            <p className="text-center my-3">No Tasks found</p>
+          )}
+        </div>
+        <div
+          style={{ overflowX: "auto" }}
+          className="CountryFlowTable my-3 p-3 bg-light shadow-sm rounded border justify-content-center"
+        >
+          {ordersQP?.length !== 0 ? (
+            <p className="fw-bold text-center">{`File Flow Period: ${
+              ordersQP[0].date
+            } - ${ordersQP[ordersQP.length - 1].date}`}</p>
+          ) : null}
+          {dateArray.length !== 0 && CDParsedHtml.length !== 0 && (
+            <table className="table text-center table-bordered">
+              <thead>
+                <tr>
+                  <th></th>
+                  {dateArray.map((date, index) => (
+                    <th key={index}>{date.getDate()}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>{CDParsedHtml.map((tableRow, index) => tableRow)}</tbody>
+            </table>
+          )}
+        </div>
       </div>
     </>
   );

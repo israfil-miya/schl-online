@@ -87,12 +87,9 @@ export default function Home({ orders, ordersRedo }) {
     <>
       <Navbar navFor="tasks" />
       <div className="mb-5">
-        <div className="my-2">
+        <div style={{ overflowX: "auto" }} className="text-nowrap my-2">
           <h5 className="text-center py-4">Test & Correction</h5>
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
-          >
+          <table className="table table-bordered py-3 table-hover">
             <thead>
               <tr>
                 <th>#</th>
@@ -139,12 +136,9 @@ export default function Home({ orders, ordersRedo }) {
           </table>
         </div>
 
-        <div className="my-2">
+        <div style={{ overflowX: "auto" }} className="text-nowrap my-2">
           <h5 className="text-center py-4">Running Task List</h5>
-          <table
-            style={{ overflow: "hidden" }}
-            className="table table-bordered py-3 table-hover"
-          >
+          <table className="table table-bordered py-3 table-hover">
             <thead>
               <tr>
                 <th>#</th>

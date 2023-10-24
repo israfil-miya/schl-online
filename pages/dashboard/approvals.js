@@ -843,7 +843,6 @@ export default function Approvals() {
 
           th,
           td {
-            text-align: center;
             padding: 10px 5px;
           }
         `}
