@@ -11,8 +11,11 @@ export default function Statistics() {
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [statsOf, setStatsOf] = useState("Files");
-  const [dateArray, setDateArray] = useState([]);
   const [CDParsedHtml, setCDParsedHtml] = useState([]);
+  const [statDataFlow, setStatDataFlow] = useState({ datasets: [] });
+  const [statDataFlowStatus, setStatDataFlowStatus] = useState({
+    datasets: [],
+  });
 
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
@@ -74,36 +77,23 @@ export default function Statistics() {
     }
   }
 
-  function getDatesInRange() {
-    const dates = [];
-
-    let currentDate = new Date(fromTime);
-    let endDate = new Date(toTime);
-
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    console.log("Dates: ", dates);
-    console.log("From Date: ", fromTime);
-    console.log("To Date: ", toTime);
-
-    setDateArray(dates);
-  }
-
-  function parseCDHtml() {
+  function parseCDHtml(statof) {
     let parsed = [];
+    console.log("Stats", statof);
+    console.log(ordersCD);
     for (const country in ordersCD) {
       parsed.push(
         <tr key={country}>
           <th>{country}</th>
           {ordersCD[country].map((data, index) => (
-            <td key={index}>{data.fileQuantity}</td>
+            <td key={index}>
+              {statsOf == "Files" ? data.fileQuantity : data.orderQuantity}
+            </td>
           ))}
         </tr>,
       );
     }
+    console.log(parsed);
     setCDParsedHtml(parsed);
   }
 
@@ -112,16 +102,15 @@ export default function Statistics() {
   }, []);
 
   useEffect(() => {
-    parseCDHtml();
-  }, [ordersCD]);
-
-  useEffect(() => {
     if (fromTime && toTime) {
       filteredData();
-      getDatesInRange();
-      parseCDHtml();
+      parseCDHtml(statsOf);
     }
   }, [fromTime, toTime]);
+
+  useEffect(() => {
+    parseCDHtml(statsOf); // Move this useEffect to ensure it's called after statsOf is updated
+  }, [ordersCD, statsOf]);
 
   useEffect(() => {
     setStatDataFlow({
@@ -135,7 +124,38 @@ export default function Statistics() {
               ? data.orderQuantity
               : null,
           ),
-          backgroundColor: "#EEDC82",
+          backgroundColor: "#efa438",
+          borderColor: "black",
+          borderWidth: 2,
+          minBarLength: 1,
+        },
+      ],
+    });
+    setStatDataFlowStatus({
+      labels: ordersQP.map((data) => data.date),
+      datasets: [
+        {
+          data: ordersQP.map((data) =>
+            statsOf == "Files"
+              ? data.fileQuantity
+              : statsOf == "Orders"
+              ? data.orderQuantity
+              : null,
+          ),
+          backgroundColor: "#efa438",
+          borderColor: "black",
+          borderWidth: 2,
+          minBarLength: 1,
+        },
+        {
+          data: ordersQP.map((data) =>
+            statsOf == "Files"
+              ? data.filePending
+              : statsOf == "Orders"
+              ? data.orderPending
+              : null,
+          ),
+          backgroundColor: "#466cdb",
           borderColor: "black",
           borderWidth: 2,
           minBarLength: 1,
@@ -143,10 +163,6 @@ export default function Statistics() {
       ],
     });
   }, [ordersQP, statsOf]);
-
-  const [statDataFlow, setStatDataFlow] = useState({
-    datasets: [],
-  });
 
   return (
     <>
@@ -213,7 +229,7 @@ export default function Statistics() {
               onClick={filteredData}
               className="btn ms-4 btn-sm btn-outline-primary"
             >
-              Search
+              Refresh
             </button>
           </div>
         </div>
@@ -226,31 +242,43 @@ export default function Statistics() {
               chartData={statDataFlow}
             />
           ) : (
-            <p className="text-center my-3">No Tasks found</p>
+            <p className="text-center my-3">Loading...</p>
           )}
         </div>
-        <div
-          style={{ overflowX: "auto" }}
-          className="CountryFlowTable my-3 p-3 bg-light shadow-sm rounded border justify-content-center"
-        >
-          {ordersQP?.length !== 0 ? (
-            <p className="fw-bold text-center">{`File Flow Period: ${
-              ordersQP[0].date
-            } - ${ordersQP[ordersQP.length - 1].date}`}</p>
-          ) : null}
-          {dateArray.length !== 0 && CDParsedHtml.length !== 0 && (
+        {CDParsedHtml.length !== 0 && (
+          <div
+            style={{ overflowX: "auto" }}
+            className="CountryFlowTable my-3 p-3 bg-light shadow-sm rounded border justify-content-center"
+          >
+            {ordersQP?.length !== 0 ? (
+              <p className="fw-bold text-center">{`File Flow Period: ${
+                ordersQP[0].date
+              } - ${ordersQP[ordersQP.length - 1].date}`}</p>
+            ) : null}
+
             <table className="table text-center table-bordered">
               <thead>
                 <tr>
                   <th></th>
-                  {dateArray.map((date, index) => (
-                    <th key={index}>{date.getDate()}</th>
+
+                  {ordersQP.map((data, index) => (
+                    <th key={index}>{data.date.split(" ")[1]}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>{CDParsedHtml.map((tableRow, index) => tableRow)}</tbody>
             </table>
-          )}
+          </div>
+        )}
+        <div className="StatusChart my-3">
+          {ordersQP?.length !== 0 ? (
+            <BarChart
+              title={`File Flow Status Period: ${ordersQP[0].date} - ${
+                ordersQP[ordersQP.length - 1].date
+              }`}
+              chartData={statDataFlowStatus}
+            />
+          ) : null}
         </div>
       </div>
     </>

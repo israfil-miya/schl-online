@@ -532,6 +532,7 @@ async function handleGetOrdersByFilterStat(req, res) {
     console.log("Received request with parameters:", fromtime, totime);
 
     let query = { type: { $ne: "Test" } };
+
     if (fromtime || totime) {
       query.createdAt = {};
       if (fromtime) {
@@ -594,6 +595,8 @@ async function handleGetOrdersByFilterStat(req, res) {
 
     const ordersQP = Object.values(mergedOrders);
 
+    console.log("ORDERS QP: ", ordersQP);
+
     const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
 
     let ordersDetails = {
@@ -606,13 +609,12 @@ async function handleGetOrdersByFilterStat(req, res) {
     }; // Initialize ordersDetails with the countries object
 
     // Create an array of promises
-    const orderPromises = clientsAll.map(async (clientData, index) => {
-      console.log({ ...query, client_code: clientData.client_code });
-      return Order.find(
+    const orderPromises = clientsAll.map(async (clientData) =>
+      Order.find(
         { ...query, client_code: clientData.client_code },
         { createdAt: 1, quantity: 1 },
-      );
-    });
+      ),
+    );
 
     // Use Promise.all to wait for all asynchronous calls to complete
     const ordersAll = await Promise.all(orderPromises);
@@ -680,7 +682,7 @@ async function handleGetOrdersByFilterStat(req, res) {
 
     const dateRange = getDatesInRange(fromtime, totime).map((date) => {
       const [year, month, day] = date.split("-");
-      return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}`;
+      return `${monthNames[month - 1]} ${day}`;
     });
 
     // Initialize data with all values set to 0
@@ -705,6 +707,8 @@ async function handleGetOrdersByFilterStat(req, res) {
       }
     });
 
+    console.log("XXX -> ", ordersQPWithMissingDates);
+
     // Add missing dates to ordersCD for each country
     const ordersCDWithMissingDates = {};
     for (const [country, ordersArr] of Object.entries(ordersCD)) {
@@ -722,9 +726,6 @@ async function handleGetOrdersByFilterStat(req, res) {
       ordersQP: ordersQPWithMissingDates,
       ordersCD: ordersCDWithMissingDates,
     };
-
-    console.log(returnData);
-    console.log("Date Range: ", dateRange);
 
     if (returnData) {
       res.status(200).json(returnData);
