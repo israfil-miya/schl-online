@@ -707,8 +707,6 @@ async function handleGetOrdersByFilterStat(req, res) {
       }
     });
 
-    console.log("XXX -> ", ordersQPWithMissingDates);
-
     // Add missing dates to ordersCD for each country
     const ordersCDWithMissingDates = {};
     for (const [country, ordersArr] of Object.entries(ordersCD)) {
