@@ -525,14 +525,31 @@ function getDatesInRange(fromTime, toTime) {
   return dates;
 }
 
+function getDateRange() {
+  const today = new Date();
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(today.getDate() - 14);
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${day}-${month}-${year}`;
+  };
+
+  return {
+    from: formatDate(fourteenDaysAgo),
+    to: formatDate(today),
+  };
+}
+
 async function handleGetOrdersByFilterStat(req, res) {
   try {
     const { fromtime, totime } = req.headers;
-
-    console.log("Received request with parameters:", fromtime, totime);
+    const fromStatus = getDateRange().from;
+    const toStatus = getDateRange().to;
 
     let query = { type: { $ne: "Test" } };
-
     if (fromtime || totime) {
       query.createdAt = {};
       if (fromtime) {
@@ -546,9 +563,6 @@ async function handleGetOrdersByFilterStat(req, res) {
         query.createdAt.$lte = toTimeDate;
       }
     }
-
-    const orders = await Order.find(query);
-
     const monthNames = [
       "January",
       "February",
@@ -564,6 +578,7 @@ async function handleGetOrdersByFilterStat(req, res) {
       "December",
     ];
 
+    const orders = await Order.find(query);
     const mergedOrders = orders.reduce((merged, order) => {
       const date =
         order.createdAt instanceof Date
@@ -592,10 +607,45 @@ async function handleGetOrdersByFilterStat(req, res) {
 
       return merged;
     }, {});
-
     const ordersQP = Object.values(mergedOrders);
 
-    console.log("ORDERS QP: ", ordersQP);
+    const ordersForStatus = await Order.find({
+      createdAt: {
+        $gte: new Date(ddMmYyyyToIsoDate(fromStatus)),
+        $lte: new Date(ddMmYyyyToIsoDate(toStatus)).setHours(23, 59, 59, 999),
+      },
+    });
+
+    const mergedOrdersStatus = ordersForStatus.reduce((merged, order) => {
+      const date =
+        order.createdAt instanceof Date
+          ? order.createdAt.toISOString().split("T")[0]
+          : order.createdAt.split("T")[0];
+      const [year, month, day] = date.split("-");
+      const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
+
+      if (!merged[formattedDate]) {
+        merged[formattedDate] = {
+          date: formattedDate,
+          orderQuantity: 0,
+          orderPending: 0,
+          fileQuantity: 0,
+          filePending: 0,
+        };
+      }
+
+      // Update fileQuantity and filePending based on the order status and quantity
+      merged[formattedDate].fileQuantity += order.quantity;
+      merged[formattedDate].orderQuantity++;
+      if (order.status !== "Finished") {
+        merged[formattedDate].filePending += order.quantity;
+        merged[formattedDate].orderPending++;
+      }
+
+      return merged;
+    }, {});
+
+    const ordersStatus = Object.values(mergedOrdersStatus);
 
     const clientsAll = await Client.find({}, { client_code: 1, country: 1 });
 
@@ -685,19 +735,19 @@ async function handleGetOrdersByFilterStat(req, res) {
       return `${monthNames[month - 1]} ${day}`;
     });
 
-    // Initialize data with all values set to 0
+    const dateRangeForStatus = getDatesInRange(fromStatus, toStatus).map(
+      (date) => {
+        const [year, month, day] = date.split("-");
+        return `${monthNames[month - 1]} ${day}`;
+      },
+    );
+
     const zeroDataQP = {
       orderQuantity: 0,
       orderPending: 0,
       fileQuantity: 0,
       filePending: 0,
     };
-    const zeroDataCD = {
-      orderQuantity: 0,
-      fileQuantity: 0,
-    };
-
-    // Add missing dates to ordersQP
     const ordersQPWithMissingDates = dateRange.map((date) => {
       const existingData = ordersQP.find((item) => item.date === date);
       if (existingData) {
@@ -707,7 +757,25 @@ async function handleGetOrdersByFilterStat(req, res) {
       }
     });
 
-    // Add missing dates to ordersCD for each country
+    const zeroDataStatus = {
+      orderQuantity: 0,
+      orderPending: 0,
+      fileQuantity: 0,
+      filePending: 0,
+    };
+    const ordersStatusWithMissingDates = dateRangeForStatus.map((date) => {
+      const existingData = ordersStatus.find((item) => item.date === date);
+      if (existingData) {
+        return existingData;
+      } else {
+        return { date, ...zeroDataStatus };
+      }
+    });
+
+    const zeroDataCD = {
+      orderQuantity: 0,
+      fileQuantity: 0,
+    };
     const ordersCDWithMissingDates = {};
     for (const [country, ordersArr] of Object.entries(ordersCD)) {
       ordersCDWithMissingDates[country] = dateRange.map((date) => {
@@ -723,6 +791,7 @@ async function handleGetOrdersByFilterStat(req, res) {
     const returnData = {
       ordersQP: ordersQPWithMissingDates,
       ordersCD: ordersCDWithMissingDates,
+      ordersStatus: ordersStatusWithMissingDates,
     };
 
     if (returnData) {

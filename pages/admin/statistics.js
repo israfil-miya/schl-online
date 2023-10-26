@@ -8,10 +8,13 @@ import Orders from "../../db/Orders";
 export default function Statistics() {
   const [ordersQP, setOrdersQP] = useState([]);
   const [ordersCD, setOrdersCD] = useState([]);
+  const [ordersStatus, setOrdersStatus] = useState([]);
+
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [statsOf, setStatsOf] = useState("Files");
   const [CDParsedHtml, setCDParsedHtml] = useState([]);
+
   const [statDataFlow, setStatDataFlow] = useState({ datasets: [] });
   const [statDataFlowStatus, setStatDataFlowStatus] = useState({
     datasets: [],
@@ -68,7 +71,8 @@ export default function Statistics() {
       if (!data.error) {
         setOrdersQP(data.ordersQP);
         setOrdersCD(data.ordersCD);
-        console.log(data);
+        setOrdersStatus(data.ordersStatus);
+        console.log("ORDERS STATUS: ", data.ordersStatus);
       } else {
         toast.error("Unable to retrieve orders list");
       }
@@ -113,6 +117,40 @@ export default function Statistics() {
   }, [ordersCD, statsOf]);
 
   useEffect(() => {
+    setStatDataFlowStatus({
+      labels: ordersStatus.map((data) => data.date),
+      datasets: [
+        {
+          data: ordersStatus.map((data) =>
+            statsOf == "Files"
+              ? data.fileQuantity
+              : statsOf == "Orders"
+              ? data.orderQuantity
+              : null,
+          ),
+          backgroundColor: "#efa438",
+          borderColor: "black",
+          borderWidth: 2,
+          minBarLength: 1,
+        },
+        {
+          data: ordersStatus.map((data) =>
+            statsOf == "Files"
+              ? data.filePending
+              : statsOf == "Orders"
+              ? data.orderPending
+              : null,
+          ),
+          backgroundColor: "#466cdb",
+          borderColor: "black",
+          borderWidth: 2,
+          minBarLength: 1,
+        },
+      ],
+    });
+  }, [ordersStatus, statsOf]);
+
+  useEffect(() => {
     setStatDataFlow({
       labels: ordersQP.map((data) => data.date),
       datasets: [
@@ -125,37 +163,6 @@ export default function Statistics() {
               : null,
           ),
           backgroundColor: "#efa438",
-          borderColor: "black",
-          borderWidth: 2,
-          minBarLength: 1,
-        },
-      ],
-    });
-    setStatDataFlowStatus({
-      labels: ordersQP.map((data) => data.date),
-      datasets: [
-        {
-          data: ordersQP.map((data) =>
-            statsOf == "Files"
-              ? data.fileQuantity
-              : statsOf == "Orders"
-              ? data.orderQuantity
-              : null,
-          ),
-          backgroundColor: "#efa438",
-          borderColor: "black",
-          borderWidth: 2,
-          minBarLength: 1,
-        },
-        {
-          data: ordersQP.map((data) =>
-            statsOf == "Files"
-              ? data.filePending
-              : statsOf == "Orders"
-              ? data.orderPending
-              : null,
-          ),
-          backgroundColor: "#466cdb",
           borderColor: "black",
           borderWidth: 2,
           minBarLength: 1,
@@ -271,11 +278,11 @@ export default function Statistics() {
           </div>
         )}
         <div className="StatusChart my-3">
-          {ordersQP?.length !== 0 ? (
+          {ordersStatus?.length !== 0 ? (
             <BarChart
-              title={`File Flow Status Period: ${ordersQP[0].date} - ${
-                ordersQP[ordersQP.length - 1].date
-              }`}
+              title={`File Flow Status Period: ${ordersStatus[0].date} - ${
+                ordersStatus[ordersStatus.length - 1].date
+              } (Last 14 days)`}
               chartData={statDataFlowStatus}
             />
           ) : null}

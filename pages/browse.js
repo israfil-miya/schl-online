@@ -275,7 +275,10 @@ export default function Browse() {
           alignItems: "center",
         }}
       >
-        <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
+        <div
+          style={{ overflowX: "auto" }}
+          className=" text-nowrap my-5 p-3 bg-light rounded border d-flex justify-content-center"
+        >
           <div
             className="filter_time me-3"
             style={{ display: "flex", alignItems: "center" }}

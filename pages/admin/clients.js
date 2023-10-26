@@ -8,6 +8,10 @@ import Navbar from "../../components/navbar";
 export default function Clients() {
   const router = useRouter();
   const { data: session } = useSession();
+
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+
   const [clients, setClients] = useState([]);
   const [clientCode, setClientCode] = useState("");
   const [clientName, setClientName] = useState("");
@@ -52,6 +56,7 @@ export default function Clients() {
         headers: {
           "Content-Type": "application/json",
           getallclients: true,
+          page,
         },
       };
 
@@ -169,9 +174,28 @@ export default function Clients() {
     setManageData({});
   }
 
+  function handlePrevious() {
+    setPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
+
+  function handleNext() {
+    setPage((p) => {
+      if (p === pageCount) return p;
+      return p + 1;
+    });
+  }
+
   useEffect(() => {
     getAllClients();
-  }, []);
+    setPageCount(clients?.pagination?.pageCount);
+  }, [clients?.pagination?.pageCount]);
+
+  useEffect(() => {
+    getAllClients();
+  }, [page]);
 
   return (
     <>
@@ -323,6 +347,52 @@ export default function Clients() {
           className="text-nowrap client-list my-5"
         >
           <h5 className="text-center py-4">Clients List</h5>
+
+          {clients?.items?.length !== 0 && (
+            <div className="container mb-5">
+              <div
+                className="float-end"
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <span className="me-3">
+                  Page{" "}
+                  <strong>
+                    {page}/{pageCount}
+                  </strong>
+                </span>
+                <div
+                  className="btn-group"
+                  role="group"
+                  aria-label="Basic outlined example"
+                >
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    disabled={page === 1}
+                    onClick={handlePrevious}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    disabled={page === pageCount}
+                    onClick={handleNext}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+
+              {/* <div className="float-start">
+            <div className={`btn-group ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
+              <button type="button" className="btn btn-sm btn-outline-success">
+                EXCEL EXPORT
+              </button>
+            </div>
+          </div> */}
+            </div>
+          )}
           <table className="table p-3 table-hover">
             <thead>
               <tr className="table-dark">
@@ -331,29 +401,21 @@ export default function Clients() {
                 <th>Client Name</th>
                 <th>Marketer Name</th>
                 <th>Contact Person</th>
-                <th>Designation</th>
-                <th>Contact Number</th>
                 <th>Email</th>
                 <th>Country</th>
-                <th>Address</th>
-                <th>Prices</th>
                 <th>Manage</th>
               </tr>
             </thead>
             <tbody>
-              {clients.map((client, index) => (
+              {clients?.items?.map((client, index) => (
                 <tr key={client._id}>
                   <td>{index + 1}</td>
                   <td>{client.client_code}</td>
                   <td>{client.client_name}</td>
                   <td>{client.marketer}</td>
                   <td>{client.contact_person}</td>
-                  <td>{client.designation}</td>
-                  <td>{client.contact_number}</td>
                   <td>{client.email}</td>
                   <td>{client.country}</td>
-                  <td>{client.address}</td>
-                  <td>{client.prices}</td>
                   <td>
                     <button
                       onClick={() => {
