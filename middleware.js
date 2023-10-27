@@ -8,7 +8,7 @@ export default function Middleware(req) {
   if (ip === undefined) return NextResponse.next();
 
   if (!ALLOWED_IPS.includes(ip)) {
-    return NextResponse.error("Forbidden: This website can only be accessed from the office!", { status: 403 });
+    return NextResponse.redirect("https://www.google.com")
   }
   
   return NextResponse.next();
