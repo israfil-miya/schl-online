@@ -1,21 +1,17 @@
 import { NextResponse } from "next/server";
 
+const ALLOWED_IPS = process.env.ALLOWEDIP.split(" ");
+
 export default function Middleware(req) {
-  const allowedIps = process.env.ALLOWEDIP.split(" ")
-  console.log(allowedIps)
-  // const ip = req.headers["x-forwarded-for"] || req.ip;
-  const ip = allowedIps[0]
+  const ip = req.headers["x-forwarded-for"] || req.ip;
 
   if (ip === undefined) return NextResponse.next();
 
-  if (!allowedIps.includes(ip)) {
-    const url = req.nextUrl.clone();
-    if (url.pathname.startsWith("/favicon") || url.pathname.startsWith("/images"))
-      return NextResponse.next();
-    return NextResponse.rewrite(new URL("/forbidden", req.url));
-  }
+  if (!ALLOWED_IPS.includes(ip))
+    return new Response(
+      "Forbidden: This website can only be accessed from the office!",
+      { status: 403 },
+    );
 
   return NextResponse.next();
 }
-
-Middleware.noAuth = true;
