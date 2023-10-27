@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../components/navbar";
-import BarChart from "../../components/charts/Bar.chart";
+import Navbar from "../components/navbar";
+import BarChart from "../components/charts/Bar.chart";
 import { getSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import Orders from "../../db/Orders";
+import Orders from "../db/Orders";
 
 export default function Statistics() {
   const [ordersQP, setOrdersQP] = useState([]);
@@ -85,18 +85,90 @@ export default function Statistics() {
     let parsed = [];
     console.log("Stats", statof);
     console.log(ordersCD);
+
     for (const country in ordersCD) {
+      let dailyTotalValue = 0;
       parsed.push(
         <tr key={country}>
-          <th>{country}</th>
-          {ordersCD[country].map((data, index) => (
-            <td key={index}>
-              {statsOf == "Files" ? data.fileQuantity : data.orderQuantity}
-            </td>
-          ))}
+          <td
+            style={{
+              minWidth: "40px",
+              maxWidth: "40px",
+              padding: "0px 0px 0px 5px",
+              backgroundColor: "#558d9e",
+              color: "#fff",
+            }}
+          >
+            {country}
+          </td>
+          {ordersCD[country].map((data, index) => {
+            dailyTotalValue +=
+              statsOf == "Files" ? data.fileQuantity : data.orderQuantity;
+            return (
+              <td
+                className="text-center"
+                style={{ padding: "0px" }}
+                key={index}
+              >
+                {statsOf == "Files" ? data.fileQuantity : data.orderQuantity}
+              </td>
+            );
+          })}
+          <td className="text-center fw-bold" style={{ padding: "0px" }}>
+            {dailyTotalValue}
+          </td>
         </tr>,
       );
     }
+    let tempObj = {};
+    if (ordersCD.Australia) {
+      ordersCD.Australia.map((countryDataByDate, index) => {
+        tempObj[countryDataByDate.date] = 0;
+      });
+    }
+    for (const country in ordersCD) {
+      ordersCD[country].map((countryDataByDate, index) => {
+        tempObj[countryDataByDate.date] +=
+          statsOf == "Files"
+            ? countryDataByDate.fileQuantity
+            : countryDataByDate.orderQuantity;
+      });
+    }
+
+    const totalArr = Object.values(tempObj);
+    let totalValue = 0;
+
+    totalArr.length !== 0 &&
+      parsed.push(
+        <tr>
+          <th
+            style={{
+              maxWidth: "40px",
+              padding: "0px 0px 0px 5px",
+              backgroundColor: "#558d9e",
+              color: "#fff",
+            }}
+          >
+            Total
+          </th>
+          {totalArr.map((value, index) => {
+            totalValue += value;
+            return (
+              <td
+                className="text-center fw-bold"
+                style={{ padding: "0px" }}
+                key={index}
+              >
+                {value}
+              </td>
+            );
+          })}
+          <td className="text-center fw-bold" style={{ padding: "0px" }}>
+            {totalValue}
+          </td>
+        </tr>,
+      );
+
     console.log(parsed);
     setCDParsedHtml(parsed);
   }
@@ -108,13 +180,14 @@ export default function Statistics() {
   useEffect(() => {
     if (fromTime && toTime) {
       filteredData();
-      parseCDHtml(statsOf);
     }
   }, [fromTime, toTime]);
 
   useEffect(() => {
-    parseCDHtml(statsOf); // Move this useEffect to ensure it's called after statsOf is updated
-  }, [ordersCD, statsOf]);
+    if (ordersCD && fromTime && toTime && statsOf) {
+      parseCDHtml(statsOf);
+    }
+  }, [ordersCD, fromTime, toTime, statsOf]);
 
   useEffect(() => {
     setStatDataFlowStatus({
@@ -173,7 +246,7 @@ export default function Statistics() {
 
   return (
     <>
-      <Navbar navFor="admin" />
+      <Navbar navFor="fileflow" />
       <div className="m-3">
         <div
           style={{
@@ -263,14 +336,29 @@ export default function Statistics() {
               } - ${ordersQP[ordersQP.length - 1].date}`}</p>
             ) : null}
 
-            <table className="table text-center table-bordered">
+            <table className="table table-bordered">
               <thead>
                 <tr>
-                  <th></th>
+                  <th
+                    style={{ backgroundColor: "#558d9e", color: "#fff" }}
+                  ></th>
 
                   {ordersQP.map((data, index) => (
-                    <th key={index}>{data.date.split(" ")[1]}</th>
+                    <th
+                      className="text-center"
+                      style={{ backgroundColor: "#558d9e", color: "#fff" }}
+                      key={index}
+                    >
+                      {data.date.split(" ")[1]}
+                    </th>
                   ))}
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#558d9e", color: "#fff" }}
+                  >
+                    Total
+                  </th>
                 </tr>
               </thead>
               <tbody>{CDParsedHtml.map((tableRow, index) => tableRow)}</tbody>
@@ -288,6 +376,18 @@ export default function Statistics() {
           ) : null}
         </div>
       </div>
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            padding: 0px;
+          }
+        `}
+      </style>
     </>
   );
 }

@@ -127,10 +127,10 @@ export default function Tasks() {
       const clientsList = await fetchApi(url, options);
 
       if (!clientsList.error) {
-        const clientCodes = clientsList
+        const clientCodes = clientsList.items
           .filter((client) => client.client_code != "")
           .map((client) => client.client_code);
-        const clientNames = clientsList
+        const clientNames = clientsList.items
           .filter((client) => client.client_name != "")
           .map((client) => client.client_name);
 

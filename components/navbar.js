@@ -151,6 +151,7 @@ export default function Navbar({ navFor }) {
             Browse
           </Link>
         ) : null}
+
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
             className={`${styles.navitem} ${
@@ -192,14 +193,6 @@ export default function Navbar({ navFor }) {
                   href="/admin/clients"
                 >
                   Clients
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className={`dropdown-item ${styles.dropitem}`}
-                  href="/admin/statistics"
-                >
-                  Statistics
                 </Link>
               </li>
             </ul>
@@ -259,6 +252,17 @@ export default function Navbar({ navFor }) {
               </li>
             </ul>
           </li>
+        ) : null}
+
+        {session.user.role === "admin" || session.user.role === "super" ? (
+          <Link
+            className={`${styles.navitem} ${
+              navFor === "fileflow" ? styles.active : ""
+            }`}
+            href="/fileflow"
+          >
+            File Flow
+          </Link>
         ) : null}
       </div>
       <style jsx>

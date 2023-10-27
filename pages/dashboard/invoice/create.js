@@ -207,7 +207,7 @@ export default function ClientDetails() {
 
       if (!clientsList.error) {
         let clientsCodeAndId = [];
-        clientsList.forEach((client, index) => {
+        clientsList.items.forEach((client, index) => {
           clientsCodeAndId.push({
             _id: client._id,
             client_code: client.client_code,
@@ -836,8 +836,7 @@ export default function ClientDetails() {
 
             th,
             td {
-              text-align: center;
-              padding: 10px 5px;
+              padding: 5px 2.5px;
             }
           `}
         </style>

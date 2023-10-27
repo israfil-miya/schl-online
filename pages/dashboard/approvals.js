@@ -176,17 +176,17 @@ export default function Approvals() {
   return (
     <>
       <Navbar navFor="dashboard" />
-      <div className="container my-5">
-        <div className="d-flex py-3">
+      <div className="my-5">
+        <div className="text-center my-4">
           <h5>Approval requests</h5>
-          <span className="text-body-secondary ms-2">
+          {/* <span className="text-body-secondary ms-2">
             (
             {
               approvals.filter((approveReq) => approveReq.checked_by == "None")
                 .length
             }
             )
-          </span>
+          </span> */}
         </div>
         <table
           style={{ overflow: "hidden" }}
