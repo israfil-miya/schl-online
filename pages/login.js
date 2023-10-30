@@ -114,7 +114,7 @@ export default function Login() {
           .card-header {
             text-align: center;
             padding: 20px;
-            background-image: url("https://amymhaddad.s3.amazonaws.com/oriental-tiles.png");
+            background-image: url("/images/oriental-tiles.png");
             background-position: center center;
             background-size: cover;
             position: relative;

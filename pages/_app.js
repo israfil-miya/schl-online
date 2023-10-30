@@ -4,7 +4,7 @@ import Head from "next/head";
 import Script from "next/script";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useSession, SessionProvider } from "next-auth/react";
+import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
 
 // Dynamically import NextNProgress only on the client side
@@ -12,7 +12,7 @@ const DynamicNextNProgress = dynamic(() => import("nextjs-progressbar"), {
   ssr: false,
 });
 
-function MyApp({ Component, pageProps }) {
+const SCHL = ({ Component, pageProps }) => {
   return (
     <>
       <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" />
@@ -52,7 +52,7 @@ function MyApp({ Component, pageProps }) {
       </SessionProvider>
     </>
   );
-}
+};
 
 const Auth = ({ children }) => {
   const { data: session, status } = useSession();
@@ -69,4 +69,26 @@ const Auth = ({ children }) => {
   }
   return children;
 };
-export default MyApp;
+
+SCHL.getInitialProps = async (context) => {
+  const req = context.ctx.req;
+  const ALLOWED_IPS = process.env.ALLOWEDIP.split(" ");
+
+  const session = await getSession(context);
+  const ip = req.headers["x-forwarded-for"] || req.ip;
+
+  if (
+    context.ctx.req.url != "/forbidden" &&
+    ip !== undefined &&
+    session.user.role !== "super" &&
+    session.user.role !== "admin"
+  ) {
+    if (!ALLOWED_IPS.includes(ip)) {
+      context.ctx.res.writeHead(302, { Location: "/forbidden" });
+      context.ctx.res.end();
+    } else return { pageProps: session };
+  }
+  return { pageProps: session };
+};
+
+export default SCHL;
