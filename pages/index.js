@@ -53,6 +53,7 @@ export default function Home({ orders, ordersRedo }) {
   };
 
   useEffect(() => {
+    
     if (error) {
       toast.error(error, {
         toastId: "error",
@@ -83,9 +84,9 @@ export default function Home({ orders, ordersRedo }) {
     }
   }, [error, success, router, orders]);
 
-  useEffect(() => {
-    router.replace(process.env.NEXT_PUBLIC_BASE_URL);
-  }, []);
+
+
+
 
   return (
     <>
