@@ -1,14 +1,14 @@
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { getSession } from "next-auth/react";
 
 import toast from "react-hot-toast";
 
-export default function Login() {
+export default function Login({ ip }) {
+  const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");
   const router = useRouter();
+  const { data: session } = useSession();
   let { error, success } = router.query;
-
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
@@ -38,7 +38,21 @@ export default function Login() {
     });
 
     if (!result.error) {
-      router.replace("/");
+      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          name,
+          password,
+          signin: true,
+        },
+      });
+      const user = await res.json();
+
+      if (ip !== undefined && user.role !== "super" && user.role !== "admin") {
+        if (!ALLOWED_IPS?.includes(ip)) router.replace("/forbidden");
+        else router.replace("/");
+      } else router.replace("/");
     }
     if (result.error) {
       router.replace("/login?error=" + result.error);
@@ -144,19 +158,13 @@ export default function Login() {
 }
 
 export async function getServerSideProps(context) {
-  const session = await getSession(context);
+  const req = context.req;
+  const ip = req?.headers["x-forwarded-for"] || req?.ip;
 
-  // code for redirect if not logged in
-  if (session) {
-    return {
-      redirect: {
-        destination: "/?error=You are already logged in",
-        permanent: true,
-      },
-    };
-  } else
-    return {
-      props: {},
-    };
+  return {
+    props: {
+      ip,
+    },
+  };
 }
 Login.noAuth = true;

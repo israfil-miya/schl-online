@@ -59,3 +59,31 @@ export default NextAuth({
     error: "/login",
   },
 });
+
+NextAuth.getInitialProps = async (context) => {
+  const req = context.ctx.req;
+  const ALLOWED_IPS = process.env.ALLOWEDIP.split(" ");
+
+  const session = await getSession(context);
+  const ip = req.headers["x-forwarded-for"] || req.ip || "103.106.236.161";
+
+  if (session) {
+    if (
+      context.ctx.req.url !== "/forbidden" &&
+      ip !== undefined &&
+      context.ctx.req.url !== "/login" &&
+      session.user.role !== "super" &&
+      session.user.role !== "admin"
+    ) {
+      if (!ALLOWED_IPS.includes(ip)) {
+        console.log(context.ctx.req.url);
+        // Redirect to the forbidden page if the IP is not in the allowed list
+        context.ctx.res.writeHead(302, { Location: "/forbidden" });
+        context.ctx.res.end();
+        return { pageProps: { session } };
+      }
+    }
+  }
+  // If none of the above conditions apply, return the session data
+  return { pageProps: { session } };
+};

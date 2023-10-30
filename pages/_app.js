@@ -72,23 +72,30 @@ const Auth = ({ children }) => {
 
 SCHL.getInitialProps = async (context) => {
   const req = context.ctx.req;
-  const ALLOWED_IPS = process.env.ALLOWEDIP.split(" ");
+  const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");
 
   const session = await getSession(context);
-  const ip = req.headers["x-forwarded-for"] || req.ip;
+  const ip = req?.headers["x-forwarded-for"] || req?.ip;
 
-  if (
-    context.ctx.req.url != "/forbidden" &&
-    ip !== undefined &&
-    session.user.role !== "super" &&
-    session.user.role !== "admin"
-  ) {
-    if (!ALLOWED_IPS.includes(ip)) {
-      context.ctx.res.writeHead(302, { Location: "/forbidden" });
-      context.ctx.res.end();
-    } else return { pageProps: session };
+  if (session) {
+    if (
+      context.ctx.req?.url !== "/forbidden" &&
+      ip !== undefined &&
+      context.ctx.req?.url !== "/login" &&
+      session.user.role !== "super" &&
+      session.user.role !== "admin"
+    ) {
+      if (!ALLOWED_IPS?.includes(ip)) {
+        console.log(context.ctx.req?.url);
+        // Redirect to the forbidden page if the IP is not in the allowed list
+        context.ctx.res?.writeHead(302, { Location: "/forbidden" });
+        context.ctx.res?.end();
+        return { pageProps: { session } };
+      }
+    }
   }
-  return { pageProps: session };
+  // If none of the above conditions apply, return the session data
+  return { pageProps: { session } };
 };
 
 export default SCHL;

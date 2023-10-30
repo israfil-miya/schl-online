@@ -6,7 +6,7 @@ import Navbar from "../components/navbar";
 
 const getCurrentTimes = (orders) => {
   console.log(orders);
-  const timesNow = orders.map((order) =>
+  const timesNow = orders?.map((order) =>
     order.timeDifference <= 0
       ? "Over"
       : calculateCountdown(order.timeDifference),
@@ -66,11 +66,11 @@ export default function Home({ orders, ordersRedo }) {
       router.replace("/");
     }
 
-    if (!orders || orders.error) {
+    if (!orders || orders?.error) {
       toast.error("Unable to retrieve tasks list");
     }
 
-    if (orders.length) {
+    if (orders?.length) {
       const countdownIntervalId = setInterval(async () => {
         const updatedOrders = await GetAllOrdersTime();
         const updatedCountdowns = getCurrentTimes(updatedOrders);
@@ -82,6 +82,10 @@ export default function Home({ orders, ordersRedo }) {
       };
     }
   }, [error, success, router, orders]);
+
+  useEffect(() => {
+    router.replace(process.env.NEXT_PUBLIC_BASE_URL);
+  }, []);
 
   return (
     <>
@@ -159,7 +163,7 @@ export default function Home({ orders, ordersRedo }) {
             </thead>
             <tbody>
               {orders &&
-                orders.map((order, index) => {
+                orders?.map((order, index) => {
                   let priorityColor = "";
                   const countdownTime = countdowns[index];
                   const [hours, minutes, seconds] = countdownTime.split(":");
