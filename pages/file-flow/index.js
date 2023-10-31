@@ -3,7 +3,7 @@ import Navbar from "../../components/navbar";
 import BarChart from "../../components/charts/Bar.chart";
 import { getSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import Orders from "../../db/Orders";
+import Link from "next/link";
 
 export default function Statistics() {
   const [ordersQP, setOrdersQP] = useState([]);
@@ -110,7 +110,15 @@ export default function Statistics() {
                 style={{ padding: "0px" }}
                 key={index}
               >
-                {statsOf == "Files" ? data.fileQuantity : data.orderQuantity}
+                <Link
+                  href={
+                    data.isoDate
+                      ? `/file-flow/country-file-flow?country=${country}&date=${data.isoDate}`
+                      : ""
+                  }
+                >
+                  {statsOf == "Files" ? data.fileQuantity : data.orderQuantity}
+                </Link>
               </td>
             );
           })}

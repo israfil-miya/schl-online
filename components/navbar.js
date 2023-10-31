@@ -259,7 +259,7 @@ export default function Navbar({ navFor }) {
             className={`${styles.navitem} ${
               navFor === "fileflow" ? styles.active : ""
             }`}
-            href="/fileflow"
+            href="/file-flow"
           >
             File Flow
           </Link>
