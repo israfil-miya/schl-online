@@ -53,7 +53,6 @@ export default NextAuth({
       session.user = token.user;
       return Promise.resolve(session);
     },
-
   },
   pages: {
     signIn: "/login",

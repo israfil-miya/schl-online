@@ -237,7 +237,7 @@ function ddMmYyyyToIsoDate(ddMmYyyy) {
 
     // Convert to ISODate format
     const isoDate = date.toISOString();
-    console.log(`Converted ${ddMmYyyy} to ISODate: ${isoDate}`);
+    // console.log(`Converted ${ddMmYyyy} to ISODate: ${isoDate}`);
     return isoDate;
   } catch (error) {
     console.error(`Error converting ${ddMmYyyy} to ISODate: ${error.message}`);
@@ -563,6 +563,7 @@ async function handleGetOrdersByFilterStat(req, res) {
         query.createdAt.$lte = toTimeDate;
       }
     }
+
     const monthNames = [
       "January",
       "February",
@@ -642,6 +643,8 @@ async function handleGetOrdersByFilterStat(req, res) {
         merged[formattedDate].orderPending++;
       }
 
+      merged[formattedDate].isoDate = order.createdAt;
+
       return merged;
     }, {});
 
@@ -718,6 +721,8 @@ async function handleGetOrdersByFilterStat(req, res) {
         merged[formattedDate].fileQuantity += order.quantity;
         merged[formattedDate].orderQuantity++;
 
+        merged[formattedDate].isoDate = order.createdAt;
+
         return merged;
       }, {});
 
@@ -747,6 +752,7 @@ async function handleGetOrdersByFilterStat(req, res) {
       orderPending: 0,
       fileQuantity: 0,
       filePending: 0,
+      isoDate: null,
     };
     const ordersQPWithMissingDates = dateRange.map((date) => {
       const existingData = ordersQP.find((item) => item.date === date);
@@ -775,6 +781,7 @@ async function handleGetOrdersByFilterStat(req, res) {
     const zeroDataCD = {
       orderQuantity: 0,
       fileQuantity: 0,
+      isoDate: null,
     };
     const ordersCDWithMissingDates = {};
     for (const [country, ordersArr] of Object.entries(ordersCD)) {

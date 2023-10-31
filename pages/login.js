@@ -49,10 +49,14 @@ export default function Login({ ip }) {
       });
       const user = await res.json();
 
-      if (ip !== undefined && user.role !== "super" && user.role !== "admin") {
-        if (!ALLOWED_IPS?.includes(ip)) router.replace("/forbidden");
-        else router.replace("/");
-      } else router.replace("/");
+      if (
+        process.env.NODE_ENV !== "development" &&
+        user.role !== "super" &&
+        user.role !== "admin" &&
+        !ALLOWED_IPS?.includes(ip)
+      )
+        router.replace("/forbidden");
+      else router.replace("/");
     }
     if (result.error) {
       router.replace("/login?error=" + result.error);
@@ -159,7 +163,19 @@ export default function Login({ ip }) {
 
 export async function getServerSideProps(context) {
   const req = context.req;
-  const ip = req?.headers["x-forwarded-for"] || req?.ip;
+  const ip =
+    process.env.NODE_ENV === "development"
+      ? process.env.NEXT_PUBLIC_DEVIP
+      : req?.headers["x-forwarded-for"] || req?.ip;
+
+  if (!ip) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {

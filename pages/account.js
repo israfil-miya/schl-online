@@ -176,3 +176,38 @@ export default function Account() {
     </>
   );
 }
+
+export async function getServerSideProps(context) {
+  let session = await getSession(context);
+
+  const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");
+
+  const req = context.req;
+  const ip =
+    process.env.NODE_ENV === "development"
+      ? process.env.NEXT_PUBLIC_DEVIP
+      : req?.headers["x-forwarded-for"] || req?.ip;
+
+  if (!ip) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
+
+  if (
+    process.env.NODE_ENV !== "development" &&
+    session.user.role !== "super" &&
+    session.user.role !== "admin" &&
+    !ALLOWED_IPS?.includes(ip)
+  ) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
+}
