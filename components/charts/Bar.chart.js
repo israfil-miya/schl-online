@@ -11,7 +11,7 @@ function BarChart({ chartData, title }) {
     maintainAspectRatio: false,
     scales: {
       y: {
-        beginAtZero: false,
+        beginAtZero: true,
         ticks: {
           callback: (value) => Math.round(value),
         },
@@ -56,7 +56,7 @@ function BarChart({ chartData, title }) {
             box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.8);
           }
           .chart-container {
-            height: 600px !important;
+            height: 300px !important;
           }
         `}
       </style>

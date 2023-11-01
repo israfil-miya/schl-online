@@ -286,26 +286,26 @@ export default function Statistics() {
               className="filter_stats_of me-3"
             >
               <input
-                className="form-check-input"
+                className="form-check-input me-2"
                 type="radio"
                 value="Files"
                 id="radio1"
                 checked={statsOf == "Files"}
                 onChange={(e) => setStatsOf(e.target.value)}
               />
-              <label className="form-check-label ms-2" htmlFor="radio1">
+              <label className="form-check-label me-3" htmlFor="radio1">
                 Files Flow
               </label>
 
               <input
-                className="form-check-input"
+                className="form-check-input me-2"
                 type="radio"
                 value={`Orders`}
                 id={`radio2`}
                 checked={statsOf == "Orders"}
                 onChange={(e) => setStatsOf(e.target.value)}
               />
-              <label className="form-check-label ms-2" htmlFor="radio2">
+              <label className="form-check-label" htmlFor="radio2">
                 Orders Flow
               </label>
             </div>
@@ -338,10 +338,12 @@ export default function Statistics() {
             </button>
           </div>
         </div>
+
+
         <div className="FlowChart">
           {ordersQP?.length !== 0 ? (
             <BarChart
-              title={`File Flow Period: ${ordersQP[0].date} - ${
+              title={`${statsOf == "Files" ? 'Files Flow' : 'Orders Flow'} Period: ${ordersQP[0].date} - ${
                 ordersQP[ordersQP.length - 1].date
               }`}
               chartData={statDataFlow}
@@ -356,7 +358,7 @@ export default function Statistics() {
             className="CountryFlowTable my-3 p-3 bg-light shadow-sm rounded border justify-content-center"
           >
             {ordersQP?.length !== 0 ? (
-              <p className="fw-bold text-center">{`File Flow Period: ${
+              <p className="fw-bold text-center">{`${statsOf == "Files" ? 'Files Flow' : 'Orders Flow'} Period: ${
                 ordersQP[0].date
               } - ${ordersQP[ordersQP.length - 1].date}`}</p>
             ) : null}
@@ -393,7 +395,7 @@ export default function Statistics() {
         <div className="StatusChart my-3">
           {ordersStatus?.length !== 0 ? (
             <BarChart
-              title={`File Flow Status Period: ${ordersStatus[0].date} - ${
+              title={`Current Status Period: ${ordersStatus[0].date} - ${
                 ordersStatus[ordersStatus.length - 1].date
               } (Last 14 days)`}
               chartData={statDataFlowStatus}
