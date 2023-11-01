@@ -232,15 +232,14 @@ export default function Statistics() {
   }, [ordersStatus, statsOf]);
 
   useEffect(() => {
-
-
-    const uniqueMonths = [...new Set(ordersQP.map((data) => new Date(data.date).getMonth()))];
+    const uniqueMonths = [
+      ...new Set(ordersQP.map((data) => new Date(data.date).getMonth())),
+    ];
     const colors = {};
-  
+
     uniqueMonths.forEach((month, index) => {
       colors[month] = index % 2 === 0 ? "#4169e1" : "#ffad33"; // Alternate between blue and red
     });
-
 
     setStatDataFlow({
       labels: ordersQP.map((data) => data.date),
@@ -257,7 +256,7 @@ export default function Statistics() {
             const month = new Date(data.date).getMonth();
             return colors[month] || "#efa438"; // Default color
           }),
-  
+
           borderColor: "black",
           borderWidth: 2,
           minBarLength: 1,
