@@ -35,26 +35,44 @@ async function handleNewClient(req, res) {
 async function handleGetAllClient(req, res) {
   try {
     const page = req.headers.page || 1;
+
+    let { country, clientcode, contactperson } = req.headers;
+
     const ITEMS_PER_PAGE = 20; // Number of items per page
 
-    const skip = (page - 1) * ITEMS_PER_PAGE;
+    let query = {};
+    if (country) query.country = country;
+    if (clientcode) query.client_code = clientcode;
+    if (contactperson) query.contact_person = contactperson;
 
-    const count = await Client.countDocuments({});
+    console.log(query);
 
-    let clients;
+    if (
+      Object.keys(query).length === 0 &&
+      query.constructor === Object &&
+      req.headers.isfilter == true
+    )
+      sendError(res, 400, "No filter applied");
+    else {
+      const skip = (page - 1) * ITEMS_PER_PAGE;
 
-    if (req.headers.notpaginated) clients = await Client.find({});
-    else clients = await Client.find({}).skip(skip).limit(ITEMS_PER_PAGE);
+      const count = await Client.countDocuments(query);
 
-    const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+      let clients;
 
-    res.status(200).json({
-      pagination: {
-        count,
-        pageCount,
-      },
-      items: clients,
-    });
+      if (req.headers.notpaginated) clients = await Client.find({});
+      else clients = await Client.find(query).skip(skip).limit(ITEMS_PER_PAGE);
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: clients,
+      });
+    }
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");

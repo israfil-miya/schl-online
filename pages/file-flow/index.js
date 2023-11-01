@@ -339,11 +339,12 @@ export default function Statistics() {
           </div>
         </div>
 
-
         <div className="FlowChart">
           {ordersQP?.length !== 0 ? (
             <BarChart
-              title={`${statsOf == "Files" ? 'Files Flow' : 'Orders Flow'} Period: ${ordersQP[0].date} - ${
+              title={`${
+                statsOf == "Files" ? "Files Flow" : "Orders Flow"
+              } Period: ${ordersQP[0].date} - ${
                 ordersQP[ordersQP.length - 1].date
               }`}
               chartData={statDataFlow}
@@ -358,9 +359,11 @@ export default function Statistics() {
             className="CountryFlowTable my-3 p-3 bg-light shadow-sm rounded border justify-content-center"
           >
             {ordersQP?.length !== 0 ? (
-              <p className="fw-bold text-center">{`${statsOf == "Files" ? 'Files Flow' : 'Orders Flow'} Period: ${
-                ordersQP[0].date
-              } - ${ordersQP[ordersQP.length - 1].date}`}</p>
+              <p className="fw-bold text-center">{`${
+                statsOf == "Files" ? "Files Flow" : "Orders Flow"
+              } Period: ${ordersQP[0].date} - ${
+                ordersQP[ordersQP.length - 1].date
+              }`}</p>
             ) : null}
 
             <table className="table table-bordered">

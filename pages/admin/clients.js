@@ -12,6 +12,8 @@ export default function Clients() {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
+  const [isFiltered, setIsFiltered] = useState(0);
+
   const [clients, setClients] = useState([]);
   const [clientCode, setClientCode] = useState("");
   const [clientName, setClientName] = useState("");
@@ -24,6 +26,9 @@ export default function Clients() {
   const [address, setAddress] = useState("");
   const [prices, setPrices] = useState("");
   const [currency, setCurrency] = useState("");
+  const [clientCodeFilter, setClientCodeFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
+  const [contactPersonFilter, setContactPersonFilter] = useState("");
 
   const [editedBy, setEditedBy] = useState("");
 
@@ -72,7 +77,36 @@ export default function Clients() {
       toast.error("Error retrieving clients");
     }
   }
+  async function getAllClientsFiltered() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallclients: true,
+          isfilter: true,
+          page,
+          country: countryFilter,
+          clientcode: clientCodeFilter,
+          contactperson: contactPersonFilter,
+        },
+      };
 
+      const clientsList = await fetchClientData(url, options);
+
+      if (!clientsList.error) {
+        setClients(clientsList);
+        setIsFiltered(1);
+      } else {
+        setIsFiltered(0);
+        await getAllClients();
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      toast.error("Error retrieving clients");
+    }
+  }
   async function addNewClient(e) {
     e.preventDefault();
 
@@ -189,12 +223,13 @@ export default function Clients() {
   }
 
   useEffect(() => {
-    getAllClients();
-    setPageCount(clients?.pagination?.pageCount);
+    if (!isFiltered) getAllClients();
+    if (clients) setPageCount(clients?.pagination?.pageCount);
   }, [clients?.pagination?.pageCount]);
 
   useEffect(() => {
-    getAllClients();
+    if (!isFiltered) getAllClients();
+    else getAllClientsFiltered();
   }, [page]);
 
   return (
@@ -347,6 +382,64 @@ export default function Clients() {
           className="text-nowrap client-list my-5"
         >
           <h5 className="text-center py-4">Clients List</h5>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
+              <div
+                style={{ display: "flex", alignItems: "center" }}
+                className="filter_folder me-3"
+              >
+                <strong>Client Code: </strong>
+                <input
+                  type="text"
+                  placeholder="Folder"
+                  className="form-control ms-2 custom-input"
+                  value={clientCodeFilter}
+                  onChange={(e) => setClientCodeFilter(e.target.value)}
+                />
+              </div>
+
+              <div
+                style={{ display: "flex", alignItems: "center" }}
+                className="filter_task me-3"
+              >
+                <strong>Contact Person: </strong>
+                <input
+                  type="text"
+                  placeholder="Task"
+                  className="form-control ms-2 custom-input"
+                  value={contactPersonFilter}
+                  onChange={(e) => setContactPersonFilter(e.target.value)}
+                />
+              </div>
+
+              <div
+                style={{ display: "flex", alignItems: "center" }}
+                className="filter_task me-3"
+              >
+                <strong>Country: </strong>
+                <input
+                  type="text"
+                  placeholder="Task"
+                  className="form-control ms-2 custom-input"
+                  value={countryFilter}
+                  onChange={(e) => setCountryFilter(e.target.value)}
+                />
+              </div>
+
+              <button
+                onClick={getAllClientsFiltered}
+                className="btn ms-4 btn-sm btn-outline-primary"
+              >
+                Search
+              </button>
+            </div>
+          </div>
 
           {clients?.items?.length !== 0 && (
             <div className="container mb-5">
@@ -393,6 +486,7 @@ export default function Clients() {
           </div> */}
             </div>
           )}
+
           <table className="table p-3 table-hover">
             <thead>
               <tr className="table-dark">
