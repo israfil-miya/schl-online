@@ -467,6 +467,7 @@ export default function ClientDetails() {
                 </button>
               </div>
             </div>
+
             {orders?.items?.length !== 0 && (
               <div className="container mb-3">
                 <div

@@ -95,7 +95,7 @@ export default function Statistics() {
               minWidth: "40px",
               maxWidth: "40px",
               padding: "0px 0px 0px 5px",
-              backgroundColor: "#558d9e",
+              backgroundColor: "#7aa63e",
               color: "#fff",
             }}
           >
@@ -153,7 +153,7 @@ export default function Statistics() {
             style={{
               maxWidth: "40px",
               padding: "0px 0px 0px 5px",
-              backgroundColor: "#558d9e",
+              backgroundColor: "#7aa63e",
               color: "#fff",
             }}
           >
@@ -348,13 +348,13 @@ export default function Statistics() {
               <thead>
                 <tr>
                   <th
-                    style={{ backgroundColor: "#558d9e", color: "#fff" }}
+                    style={{ backgroundColor: "#7aa63e", color: "#fff" }}
                   ></th>
 
                   {ordersQP.map((data, index) => (
                     <th
                       className="text-center"
-                      style={{ backgroundColor: "#558d9e", color: "#fff" }}
+                      style={{ backgroundColor: "#7aa63e", color: "#fff" }}
                       key={index}
                     >
                       {data.date.split(" ")[1]}
@@ -363,7 +363,7 @@ export default function Statistics() {
 
                   <th
                     className="text-center"
-                    style={{ backgroundColor: "#558d9e", color: "#fff" }}
+                    style={{ backgroundColor: "#7aa63e", color: "#fff" }}
                   >
                     Total
                   </th>

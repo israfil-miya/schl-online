@@ -121,6 +121,7 @@ export default function Tasks() {
         headers: {
           "Content-Type": "application/json",
           getallclients: true,
+          notpaginated: true,
         },
       };
 

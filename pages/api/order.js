@@ -812,6 +812,65 @@ async function handleGetOrdersByFilterStat(req, res) {
   }
 }
 
+async function handleGetOrdersByCountry(req, res) {
+  try {
+    let { country, fromtime, totime } = req.headers;
+    if (!country) sendError(res, 400, "Country must be provided");
+
+    let countriesList = ["Australia", "Denmark", "Finland", "Norway", "Sweden"];
+
+    let query = { type: { $ne: "Test" } };
+
+    if (fromtime || totime) {
+      query.createdAt = {};
+      if (fromtime) {
+        // Set the $gte filter for the start of the day
+        query.createdAt.$gte = new Date(ddMmYyyyToIsoDate(fromtime));
+      }
+      if (totime) {
+        // Set the $lte filter for the end of the day
+        const toTimeDate = new Date(ddMmYyyyToIsoDate(totime));
+        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
+        query.createdAt.$lte = toTimeDate;
+      }
+    }
+
+    let countryFilter = country;
+    if (country == "Others") countryFilter = { $nin: countriesList };
+
+    const clientsAll = await Client.find(
+      { country: countryFilter },
+      { client_code: 1, country: 1 },
+    );
+
+    const orderPromises = clientsAll.map(async (clientData) =>
+      Order.find({ ...query, client_code: clientData.client_code }),
+    );
+    const ordersAll = await Promise.all(orderPromises);
+
+    let returnData = {
+      details: [],
+      totalFiles: 0,
+    };
+
+    ordersAll.map((item) => {
+      if (item.length === 0) return;
+      item.map((data) => {
+        returnData.details.push(data);
+        returnData.totalFiles += data.quantity;
+      });
+    });
+
+    if (ordersAll) {
+      res.status(200).json(returnData);
+    } else {
+      sendError(res, 400, "Something went wrong");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -841,6 +900,8 @@ export default async function handle(req, res) {
         await handleGetAllOrdersOfClient(req, res);
       } else if (req.headers.getordersbyfilterstat) {
         await handleGetOrdersByFilterStat(req, res);
+      } else if (req.headers.getordersbycountry) {
+        await handleGetOrdersByCountry(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

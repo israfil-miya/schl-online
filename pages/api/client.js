@@ -40,7 +40,11 @@ async function handleGetAllClient(req, res) {
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
     const count = await Client.countDocuments({});
-    const clients = await Client.find({}).skip(skip).limit(ITEMS_PER_PAGE);
+
+    let clients;
+
+    if (req.headers.notpaginated) clients = await Client.find({});
+    else clients = await Client.find({}).skip(skip).limit(ITEMS_PER_PAGE);
 
     const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
 

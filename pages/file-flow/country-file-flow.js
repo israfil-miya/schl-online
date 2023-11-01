@@ -6,7 +6,18 @@ export default function View() {
   const router = useRouter();
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
+  const [orders, setOrders] = useState({});
   const [countryFilter, setCountryFilter] = useState("");
+
+  const optionsCountries = [
+    "Australia",
+    "Denmark",
+    "Finland",
+    "Norway",
+    "Sweden",
+    "Others",
+  ];
+
   const { country, date } = router.query;
 
   function formatDateToYYYYMMDD(dateString) {
@@ -23,15 +34,64 @@ export default function View() {
     return `${year}-${month}-${day}`;
   }
 
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length !== 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
+
+  async function getOrders() {
+    let adjustedFromTime = fromTime;
+    let adjustedToTime = toTime;
+
+    if (fromTime) {
+      adjustedFromTime = convertToDDMMYYYY(fromTime);
+    }
+    if (toTime) {
+      adjustedToTime = convertToDDMMYYYY(toTime);
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        country: countryFilter,
+        getordersbycountry: true,
+        fromtime: adjustedFromTime,
+        totime: adjustedToTime,
+      },
+    };
+
+    try {
+      const res = await fetch(url, options);
+      const data = await res.json();
+
+      if (!data.error) {
+        setOrders(data);
+        console.log(data);
+      } else {
+        toast.error("Unable to retrieve orders list");
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  }
+
   useEffect(() => {
     setFromTime(formatDateToYYYYMMDD(date));
     setToTime(formatDateToYYYYMMDD(date));
     setCountryFilter(country);
   }, []);
 
+  useEffect(() => {
+    if (countryFilter && (fromTime || toTime)) getOrders();
+  }, [countryFilter, fromTime, toTime]);
+
   return (
     <>
       <Navbar navFor="fileflow" />
+
       <div
         style={{
           display: "flex",
@@ -39,20 +99,27 @@ export default function View() {
           alignItems: "center",
         }}
       >
-        <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
-          <div
-            style={{ display: "flex", alignItems: "center" }}
-            className="filter_country me-3"
+        <div className=" mx-2 form-floating">
+          <select
+            required
+            onChange={(e) => setCountryFilter(e.target.value)}
+            className="form-select"
+            id="floatingSelectGrid"
           >
-            <strong>Country: </strong>
-            <input
-              type="text"
-              placeholder="Country"
-              className="form-control ms-2 custom-input"
-              value={countryFilter}
-              onChange={(e) => setCountryFilter(e.target.value)}
-            />
-          </div>
+            {optionsCountries?.map((country, index) => {
+              return (
+                <>
+                  <option key={index} defaultValue={index == 0}>
+                    {country}
+                  </option>
+                </>
+              );
+            })}
+          </select>
+          <label htmlFor="floatingSelectGrid">Select a country</label>
+        </div>
+
+        <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
           <div
             className="filter_time me-3"
             style={{ display: "flex", alignItems: "center" }}
@@ -74,18 +141,61 @@ export default function View() {
           </div>
 
           <button
-            onClick={null}
+            onClick={getOrders}
             className="btn ms-4 btn-sm btn-outline-primary"
           >
-            Search
+            Refresh
           </button>
         </div>
       </div>
+
       <div className="container">
-        <b>Country:</b> {country}
-        <br />
-        <b>Date:</b> {date}
+        <div style={{ overflowX: "auto" }} className="text-nowrap">
+          <table className="table table-bordered py-3 table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Client Name</th>
+                <th>Folder</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders?.details &&
+                orders?.details.map((order, index) => (
+                  <tr key={order._id}>
+                    <td>{index + 1}</td>
+                    <td className="text-break">{order.client_name}</td>
+                    <td className="text-break">{order.folder}</td>
+                    <td className="text-break">{order.quantity}</td>
+                  </tr>
+                ))}
+              <tr className="table-secondary">
+                <td className="fw-bold">Total</td>
+                <td></td>
+                <td></td>
+                <td className="fw-bold">{orders?.totalFiles}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <style jsx>
+        {`
+          #floatingSelectGrid {
+            max-height: 150px;
+            overflow-y: auto;
+          }
+          .table {
+            font-size: 15px;
+          }
+          th,
+          td {
+            padding: 3px 6px;
+          }
+        `}
+      </style>
     </>
   );
 }
