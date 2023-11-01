@@ -125,7 +125,7 @@ export default function Statistics() {
           <td className="text-center fw-bold" style={{ padding: "0px" }}>
             {dailyTotalValue}
           </td>
-        </tr>
+        </tr>,
       );
     }
     let tempObj = {};
@@ -174,7 +174,7 @@ export default function Statistics() {
           <td className="text-center fw-bold" style={{ padding: "0px" }}>
             {totalValue}
           </td>
-        </tr>
+        </tr>,
       );
 
     console.log(parsed);
@@ -202,13 +202,13 @@ export default function Statistics() {
       labels: ordersStatus.map((data) => data.date),
       datasets: [
         {
-          label: 'Total',
+          label: "Total",
           data: ordersStatus.map((data) =>
             statsOf == "Files"
               ? data.fileQuantity
               : statsOf == "Orders"
               ? data.orderQuantity
-              : null
+              : null,
           ),
           backgroundColor: "#efa438",
           borderColor: "black",
@@ -216,13 +216,13 @@ export default function Statistics() {
           minBarLength: 1,
         },
         {
-          label: 'Pending',
+          label: "Pending",
           data: ordersStatus.map((data) =>
             statsOf == "Files"
               ? data.filePending
               : statsOf == "Orders"
               ? data.orderPending
-              : null
+              : null,
           ),
           backgroundColor: "#466cdb",
           borderColor: "black",
@@ -253,7 +253,7 @@ export default function Statistics() {
               ? data.fileQuantity
               : statsOf == "Orders"
               ? data.orderQuantity
-              : null
+              : null,
           ),
           backgroundColor: ordersQP.map((data) => {
             const month = new Date(data.date).getMonth();
@@ -265,7 +265,7 @@ export default function Statistics() {
           minBarLength: 1,
         },
       ],
-      showLegend: false
+      showLegend: false,
     });
   }, [ordersQP, statsOf]);
 

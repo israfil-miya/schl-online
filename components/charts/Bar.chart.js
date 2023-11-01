@@ -37,7 +37,7 @@ function BarChart({ chartData, title }) {
         labels: {
           font: {
             weight: "bold",
-            size: 15
+            size: 15,
           },
         },
       },

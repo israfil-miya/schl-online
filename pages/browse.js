@@ -79,6 +79,11 @@ export default function Browse() {
     return `${day}-${month}-${year}`;
   };
 
+  const convertToYYYYMMDD = (dateString) => {
+    const [day, month, year] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
   async function filteredData() {
     let adjustedFromTime = fromTime;
     let adjustedToTime = toTime;
@@ -480,8 +485,10 @@ export default function Browse() {
                             client_name: order.client_name ?? "",
                             folder: order.folder ?? "",
                             quantity: order.quantity ?? "",
-                            download_date: order.download_date ?? "",
-                            delivery_date: order.delivery_date ?? "",
+                            download_date:
+                              convertToYYYYMMDD(order.download_date) ?? "",
+                            delivery_date:
+                              convertToYYYYMMDD(order.delivery_date) ?? "",
                             delivery_bd_time: order.delivery_bd_time ?? "",
                             task: order.task ?? "",
                             et: order.et ?? "",
