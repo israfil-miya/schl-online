@@ -125,7 +125,7 @@ export default function Statistics() {
           <td className="text-center fw-bold" style={{ padding: "0px" }}>
             {dailyTotalValue}
           </td>
-        </tr>,
+        </tr>
       );
     }
     let tempObj = {};
@@ -174,7 +174,7 @@ export default function Statistics() {
           <td className="text-center fw-bold" style={{ padding: "0px" }}>
             {totalValue}
           </td>
-        </tr>,
+        </tr>
       );
 
     console.log(parsed);
@@ -202,12 +202,13 @@ export default function Statistics() {
       labels: ordersStatus.map((data) => data.date),
       datasets: [
         {
+          label: 'Total',
           data: ordersStatus.map((data) =>
             statsOf == "Files"
               ? data.fileQuantity
               : statsOf == "Orders"
               ? data.orderQuantity
-              : null,
+              : null
           ),
           backgroundColor: "#efa438",
           borderColor: "black",
@@ -215,12 +216,13 @@ export default function Statistics() {
           minBarLength: 1,
         },
         {
+          label: 'Pending',
           data: ordersStatus.map((data) =>
             statsOf == "Files"
               ? data.filePending
               : statsOf == "Orders"
               ? data.orderPending
-              : null,
+              : null
           ),
           backgroundColor: "#466cdb",
           borderColor: "black",
@@ -228,6 +230,7 @@ export default function Statistics() {
           minBarLength: 1,
         },
       ],
+      showLegend: true,
     });
   }, [ordersStatus, statsOf]);
 
@@ -250,7 +253,7 @@ export default function Statistics() {
               ? data.fileQuantity
               : statsOf == "Orders"
               ? data.orderQuantity
-              : null,
+              : null
           ),
           backgroundColor: ordersQP.map((data) => {
             const month = new Date(data.date).getMonth();
@@ -262,6 +265,7 @@ export default function Statistics() {
           minBarLength: 1,
         },
       ],
+      showLegend: false
     });
   }, [ordersQP, statsOf]);
 
@@ -276,7 +280,7 @@ export default function Statistics() {
             alignItems: "center",
           }}
         >
-          <div className="my-5 p-3 bg-light rounded border d-flex justify-content-center">
+          <div className="my-2 p-3 bg-light rounded border d-flex justify-content-center">
             <div
               style={{ display: "flex", alignItems: "center" }}
               className="filter_stats_of me-3"
@@ -334,7 +338,7 @@ export default function Statistics() {
             </button>
           </div>
         </div>
-        <div className="FlowChart my-3">
+        <div className="FlowChart">
           {ordersQP?.length !== 0 ? (
             <BarChart
               title={`File Flow Period: ${ordersQP[0].date} - ${

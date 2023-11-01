@@ -32,7 +32,14 @@ function BarChart({ chartData, title }) {
         },
       },
       legend: {
-        display: false,
+        position: "bottom",
+        display: chartData.showLegend,
+        labels: {
+          font: {
+            weight: "bold",
+            size: 15
+          },
+        },
       },
     },
   };
