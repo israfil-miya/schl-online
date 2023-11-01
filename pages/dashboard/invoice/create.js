@@ -200,6 +200,7 @@ export default function ClientDetails() {
         headers: {
           "Content-Type": "application/json",
           getallclients: true,
+          notpaginated: true
         },
       };
 
