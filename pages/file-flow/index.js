@@ -198,40 +198,56 @@ export default function Statistics() {
   }, [ordersCD, fromTime, toTime, statsOf]);
 
   useEffect(() => {
-    setStatDataFlowStatus({
-      labels: ordersStatus.map((data) => data.date),
-      datasets: [
-        {
-          label: "Total",
-          data: ordersStatus.map((data) =>
-            statsOf == "Files"
-              ? data.fileQuantity
-              : statsOf == "Orders"
-              ? data.orderQuantity
-              : null,
-          ),
-          backgroundColor: "#efa438",
-          borderColor: "black",
-          borderWidth: 2,
-          minBarLength: 1,
-        },
-        {
-          label: "Pending",
-          data: ordersStatus.map((data) =>
-            statsOf == "Files"
-              ? data.filePending
-              : statsOf == "Orders"
-              ? data.orderPending
-              : null,
-          ),
-          backgroundColor: "#466cdb",
-          borderColor: "black",
-          borderWidth: 2,
-          minBarLength: 1,
-        },
-      ],
-      showLegend: true,
-    });
+    let quantityTotal = 0;
+    let quantityPending = 0;
+
+    ordersStatus.map((data) => {
+      if (statsOf == "Files") {
+        quantityTotal += data.fileQuantity;
+        quantityPending += data.filePending;
+      } else {
+        quantityTotal += data.orderQuantity;
+        quantityPending += data.orderPending;
+      }
+    }),
+      setStatDataFlowStatus({
+        labels: ordersStatus.map((data) => data.date),
+        datasets: [
+          {
+            label: `Total ${
+              statsOf == "Files" ? "Files" : "Orders"
+            } (${quantityTotal})`,
+            data: ordersStatus.map((data) =>
+              statsOf == "Files"
+                ? data.fileQuantity
+                : statsOf == "Orders"
+                ? data.orderQuantity
+                : null,
+            ),
+            backgroundColor: "#efa438",
+            borderColor: "black",
+            borderWidth: 2,
+            minBarLength: 1,
+          },
+          {
+            label: `Pending ${
+              statsOf == "Files" ? "Files" : "Orders"
+            } (${quantityPending})`,
+            data: ordersStatus.map((data) =>
+              statsOf == "Files"
+                ? data.filePending
+                : statsOf == "Orders"
+                ? data.orderPending
+                : null,
+            ),
+            backgroundColor: "#466cdb",
+            borderColor: "black",
+            borderWidth: 2,
+            minBarLength: 1,
+          },
+        ],
+        showLegend: true,
+      });
   }, [ordersStatus, statsOf]);
 
   useEffect(() => {

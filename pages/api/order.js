@@ -843,29 +843,33 @@ async function handleGetOrdersByCountry(req, res) {
       { client_code: 1, country: 1 },
     );
 
-    const orderPromises = clientsAll.map(async (clientData) =>
-      Order.find({ ...query, client_code: clientData.client_code }),
-    );
-    const ordersAll = await Promise.all(orderPromises);
-
     let returnData = {
       details: [],
       totalFiles: 0,
     };
 
-    ordersAll.map((item) => {
-      if (item.length === 0) return;
-      item.map((data) => {
-        returnData.details.push(data);
-        returnData.totalFiles += data.quantity;
-      });
+    // Create an array of promises for Order.find operations
+    const promises = clientsAll.map((clientData) => {
+      return Order.find({ ...query, client_code: clientData.client_code })
+        .lean()
+        .then((ordersOfClient) => {
+          if (ordersOfClient.length === 0) return;
+
+          ordersOfClient.forEach((data) => {
+            returnData.details.push({ ...data, country: clientData.country });
+            returnData.totalFiles += data.quantity;
+          });
+        });
     });
 
-    if (ordersAll) {
-      res.status(200).json(returnData);
-    } else {
-      sendError(res, 400, "Something went wrong");
-    }
+    Promise.all(promises)
+      .then(() => {
+        res.status(200).json(returnData);
+      })
+      .catch((error) => {
+        console.log(error);
+        sendError(res, 400, "Something went wrong");
+      });
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");

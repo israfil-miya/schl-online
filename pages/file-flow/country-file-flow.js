@@ -157,6 +157,7 @@ export default function View() {
                 <th>#</th>
                 <th>Client Name</th>
                 <th>Folder</th>
+                <th>Country</th>
                 <th>Quantity</th>
               </tr>
             </thead>
@@ -167,11 +168,13 @@ export default function View() {
                     <td>{index + 1}</td>
                     <td className="text-break">{order.client_name}</td>
                     <td className="text-break">{order.folder}</td>
+                    <td className="text-break">{order.country}</td>
                     <td className="text-break">{order.quantity}</td>
                   </tr>
                 ))}
               <tr className="table-secondary">
                 <td className="fw-bold">Total</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td className="fw-bold">{orders?.totalFiles}</td>
