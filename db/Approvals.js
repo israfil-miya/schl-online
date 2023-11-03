@@ -26,6 +26,18 @@ const ApprovalSchema = new mongoose.Schema(
     role: {
       type: String,
     },
+    company_provided_name: {
+      type: String,
+    },
+    joining_date: {
+      type: String,
+    },
+    phone: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
 
     id: {
       type: String,

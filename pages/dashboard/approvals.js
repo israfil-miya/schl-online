@@ -686,9 +686,86 @@ export default function Approvals() {
                   <option value="admin">Admin</option>
                   <option value="super">Super</option>
                   <option value="manager">Manager</option>
+                  <option value="marketer">Marketer</option>
                 </select>
               </div>
             </div>
+
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Joining Date
+              </label>
+              <input
+                required
+                value={manageData.joiningdate}
+                onChange={(e) =>
+                  setManageData((prevData) => ({
+                    ...prevData,
+                    joiningdate: e.target.value,
+                  }))
+                }
+                type="date"
+                className="form-control"
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Phone
+              </label>
+              <input
+                required
+                value={manageData.phone}
+                onChange={(e) =>
+                  setManageData((prevData) => ({
+                    ...prevData,
+                    phone: e.target.value,
+                  }))
+                }
+                type="text"
+                assword
+                className="form-control"
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Email
+              </label>
+              <input
+                required
+                value={manageData.email}
+                onChange={(e) =>
+                  setManageData((prevData) => ({
+                    ...prevData,
+                    email: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            {manageData.role == "marketer" && (
+              <div className="marketr-exclusive">
+                <div className="mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Company Provided Name
+                  </label>
+                  <input
+                    required
+                    value={manageData.companyprovidedname}
+                    onChange={(e) =>
+                      setManageData((prevData) => ({
+                        ...prevData,
+                        companyprovidedname: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="modal-footer p-1">
               <button
                 type="button"
@@ -776,8 +853,60 @@ export default function Approvals() {
                   <option value="admin">Admin</option>
                   <option value="super">Super</option>
                   <option value="manager">Manager</option>
+                  <option value="marketer">Marketer</option>
                 </select>
               </div>
+
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Joining Date
+                </label>
+                <input
+                  value={userInfo.joining_date}
+                  disabled
+                  type="date"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Phone
+                </label>
+                <input
+                  value={userInfo.phone}
+                  disabled
+                  type="text"
+                  assword
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Email
+                </label>
+                <input
+                  value={userInfo.email}
+                  disabled
+                  type="email"
+                  className="form-control"
+                />
+              </div>
+
+              {userInfo.role == "marketer" && (
+                <div className="marketr-exclusive">
+                  <div className="mb-3">
+                    <label htmlFor="date" className="form-label">
+                      Company Provided Name
+                    </label>
+                    <input
+                      value={userInfo.company_provided_name}
+                      disabled
+                      type="text"
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <div className="modal-footer p-1">
               <button

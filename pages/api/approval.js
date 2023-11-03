@@ -70,13 +70,23 @@ async function handleResponse(req, res) {
     }
 
     if (data.req_type == "User Create") {
+      console.log("CLIENT CREATE DATA: ", data);
+
+      let insertdata = {
+        name: data.name,
+        password: data.password,
+        role: data.role,
+      };
+      if (data.phone) insertdata.phone = data.phone;
+      if (data.email) insertdata.email = data.email;
+      if (data.company_provided_name)
+        insertdata.company_provided_name = data.company_provided_name;
+      if (data.joining_date) insertdata.joining_date = data.joining_date;
+      console.log("CLIENT CREATE DATA: ", insertdata);
+
       const resData = await User.findOneAndUpdate(
         { name: data.name },
-        {
-          name: data.name,
-          password: data.password,
-          role: data.role,
-        },
+        insertdata,
         {
           new: true,
           upsert: true,
