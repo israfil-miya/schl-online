@@ -437,7 +437,8 @@ export default function Browse() {
               <th>Comment</th>
               <th>Type</th>
               <th>Status</th>
-              {session.user.role != "user" ? <th>Manage</th> : <></>}
+              {session.user.role == "admin" ||
+                (session.user.role == "super" && <th>Manage</th>)}
             </tr>
           </thead>
           <tbody>

@@ -264,6 +264,80 @@ export default function Navbar({ navFor }) {
             File Flow
           </Link>
         ) : null}
+        {session.user.role === "admin" ||
+        session.user.role === "super" ||
+        session.user.role === "marketer" ? (
+          <li
+            className={`${styles.navitem} ${
+              navFor === "crm" ? styles.active : ""
+            } `}
+          >
+            <li
+              className="nav-link dropdown-toggle"
+              id="navbarDropdownMenuLink"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <Link
+                href={
+                  session.user.role === "marketer"
+                    ? `/crm/marketer/stats?name=${session.user.name}`
+                    : "/crm/marketers"
+                }
+              >
+                CRM
+              </Link>
+            </li>
+            {session.user.role === "admin" ||
+              (session.user.role === "super" && (
+                <ul
+                  className="dropdown-menu"
+                  aria-labelledby="navbarDropdownMenuLink"
+                >
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/crm/marketers"
+                    >
+                      Marketers
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/crm/report"
+                    >
+                      Report
+                    </Link>
+                  </li>
+                </ul>
+              ))}
+            {session.user.role === "marketer" && (
+              <ul
+                className="dropdown-menu marketers-menu"
+                aria-labelledby="navbarDropdownMenuLink"
+              >
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href={`/crm/marketer/stats?name=${session.user.name}`}
+                  >
+                    My Stats
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href={`/crm/marketer/report?name=${session.user.name}`}
+                  >
+                    Daily Report
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+        ) : null}
       </div>
       <style jsx>
         {`
