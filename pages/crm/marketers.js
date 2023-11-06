@@ -61,8 +61,8 @@ export default function Marketers() {
               {marketersList?.length !== 0 &&
                 marketersList?.map((marketer, index) => {
                   return (
-                    <tr>
-                      <td key={index}>{index + 1}</td>
+                    <tr key={index}>
+                      <td>{index + 1}</td>
                       <td className="marketer_name text-decoration-underline">
                         <Link
                           href={`/crm/marketer/stats?name=${marketer.name}`}
