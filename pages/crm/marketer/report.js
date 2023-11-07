@@ -85,7 +85,7 @@ export default function DailyReport() {
       <Navbar navFor="crm" />
       <div className="container my-5">
         <div className="add-order">
-          <h5 className="py-3">Today's Report</h5>
+          <h5 className="py-3">Today&apos;s Report</h5>
           <form onSubmit={AddNewReport} id="inputForm">
             <div className="mb-3">
               <label htmlFor="calling_date" className="form-label">
