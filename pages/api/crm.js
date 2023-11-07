@@ -37,6 +37,55 @@ const handleNewReport = async (req, res) => {
   }
 };
 
+async function handleGetAllReports(req, res) {
+  try {
+    const page = req.headers.page || 1;
+
+    let { country, company_name, category, marketer_name } = req.headers;
+
+    const ITEMS_PER_PAGE = 20; // Number of items per page
+
+    let query = {};
+
+    if (country) query.country = country;
+    if (company_name) query.company_name = company_name;
+    if (category) query.category = category;
+    if (marketer_name) query.marketer_name = marketer_name;
+
+    console.log(query);
+
+    if (
+      Object.keys(query).length === 0 &&
+      query.constructor === Object &&
+      req.headers.isfilter == true
+    )
+      sendError(res, 400, "No filter applied");
+    else {
+      const skip = (page - 1) * ITEMS_PER_PAGE;
+
+      const count = await Report.countDocuments(query);
+
+      let reports;
+
+      if (req.headers.notpaginated) reports = await Report.find({});
+      else reports = await Report.find(query).skip(skip).limit(ITEMS_PER_PAGE);
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: reports,
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -44,6 +93,8 @@ export default async function handle(req, res) {
     case "GET":
       if (req.headers.getallmarketers) {
         await handleGetAllMarketers(req, res);
+      } else if (req.headers.getallreports) {
+        await handleGetAllReports(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
