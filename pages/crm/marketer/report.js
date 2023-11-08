@@ -92,6 +92,7 @@ export default function DailyReport() {
                 Calling Date
               </label>
               <input
+                disabled
                 value={reportData.calling_date}
                 onChange={(e) =>
                   setReportData({ ...reportData, calling_date: e.target.value })

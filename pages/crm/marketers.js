@@ -36,6 +36,12 @@ export default function Marketers() {
     }
   };
 
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length != 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
+
   useEffect(() => {
     getMarketers();
   }, []);
@@ -71,7 +77,11 @@ export default function Marketers() {
                         </Link>
                       </td>
                       <td>{marketer.company_provided_name}</td>
-                      <td>{marketer.joining_date}</td>
+                      <td>
+                        {marketer.joining_date
+                          ? convertToDDMMYYYY(marketer.joining_date)
+                          : ""}
+                      </td>
                       <td>{marketer.phone}</td>
                       <td>{marketer.email}</td>
                     </tr>

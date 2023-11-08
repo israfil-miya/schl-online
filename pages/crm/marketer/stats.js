@@ -16,6 +16,8 @@ export default function MyStats() {
     country: "",
     company_name: "",
     category: "",
+    fromdate: "",
+    todate: "",
   });
 
   const [reports, setReports] = useState([]);
@@ -80,6 +82,12 @@ export default function MyStats() {
     }
   }
 
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length != 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
+
   function handlePrevious() {
     setPage((p) => {
       if (p === 1) return p;
@@ -119,6 +127,30 @@ export default function MyStats() {
             }}
           >
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
+              <div
+                className="filter_time me-3"
+                style={{ display: "flex", alignItems: "center" }}
+              >
+                <strong>Date: </strong>
+                <input
+                  type="date"
+                  className="form-control mx-2 custom-input"
+                  value={filters.fromdate}
+                  onChange={(e) =>
+                    setFilters({ ...filters, fromdate: e.target.value })
+                  }
+                />
+                <span> To </span>
+                <input
+                  type="date"
+                  className="form-control ms-2 custom-input"
+                  value={filters.todate}
+                  onChange={(e) =>
+                    setFilters({ ...filters, todate: e.target.value })
+                  }
+                />
+              </div>
+
               <div
                 style={{ display: "flex", alignItems: "center" }}
                 className="filter_folder me-3"
@@ -221,9 +253,9 @@ export default function MyStats() {
           </div> */}
             </div>
           )}
-          <h5 className="text-center py-4">Reports</h5>
+
           <div style={{ overflowX: "auto" }} className="text-nowrap">
-            <table className="table table-striped">
+            <table className="table table-bordered table-striped">
               <thead>
                 <tr>
                   <th>#</th>
@@ -245,26 +277,42 @@ export default function MyStats() {
                 </tr>
               </thead>
               <tbody>
-                {reports?.items?.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{item.calling_date}</td>
-                    <td>{item.followup_date}</td>
-                    <td>{item.country}</td>
-                    <td>{item.website}</td>
-                    <td>{item.category}</td>
-                    <td>{item.company_name}</td>
-                    <td>{item.contact_person}</td>
-                    <td>{item.designation}</td>
-                    <td>{item.contact_number}</td>
-                    <td>{item.email_address}</td>
-                    <td>{item.calling_status}</td>
-                    <td>{item.email_status}</td>
-                    <td>{item.feedback}</td>
-                    <td>{item.linkedin}</td>
-                    <td>{item.leads_taken_feedback}</td>
+                {reports?.items?.length ? (
+                  reports?.items?.map((item, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>
+                        {item.calling_date
+                          ? convertToDDMMYYYY(item.calling_date)
+                          : ""}
+                      </td>
+                      <td>
+                        {item.followup_date
+                          ? convertToDDMMYYYY(item.followup_date)
+                          : ""}
+                      </td>
+                      <td>{item.country}</td>
+                      <td>{item.website}</td>
+                      <td>{item.category}</td>
+                      <td>{item.company_name}</td>
+                      <td>{item.contact_person}</td>
+                      <td>{item.designation}</td>
+                      <td>{item.contact_number}</td>
+                      <td>{item.email_address}</td>
+                      <td>{item.calling_status}</td>
+                      <td>{item.email_status}</td>
+                      <td className="text-wrap">{item.feedback}</td>
+                      <td>{item.linkedin}</td>
+                      <td className="text-wrap">{item.leads_taken_feedback}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr key={0}>
+                    <td colSpan="16" className=" align-center text-center">
+                      No Reports To Show.
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
