@@ -29,8 +29,43 @@ export default function Clients() {
   const [clientCodeFilter, setClientCodeFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
   const [contactPersonFilter, setContactPersonFilter] = useState("");
+  const [marketerNameFilter, setMarketerNameFilter] = useState("");
+
+  const [marketersList, setMarketersList] = useState([]);
 
   const [editedBy, setEditedBy] = useState("");
+
+  const getMarketersList = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallmarketers: true,
+        },
+      };
+
+      const list = await fetchClientData(url, options);
+
+      if (!list.error) {
+        let marketersName = [];
+        list.forEach((marketer, index) => {
+          marketersName.push({
+            _id: marketer._id,
+            marketer_name: marketer.name,
+          });
+        });
+
+        setMarketersList(marketersName);
+      } else {
+        toast.error("Unable to retrieve file list", { toastId: "error1" });
+      }
+    } catch (error) {
+      console.error("Error fetching file list:", error);
+      toast.error("Error retrieving file list", { toastId: "error3" });
+    }
+  };
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -90,6 +125,7 @@ export default function Clients() {
           country: countryFilter,
           clientcode: clientCodeFilter,
           contactperson: contactPersonFilter,
+          marketer: marketerNameFilter,
         },
       };
 
@@ -231,6 +267,10 @@ export default function Clients() {
     if (!isFiltered) getAllClients();
     else getAllClientsFiltered();
   }, [page]);
+
+  useEffect(() => {
+    getMarketersList();
+  }, []);
 
   return (
     <>
@@ -389,6 +429,25 @@ export default function Clients() {
               alignItems: "center",
             }}
           >
+            <div className=" mx-2 form-floating">
+              <select
+                required
+                onChange={(e) => setMarketerNameFilter(e.target.value)}
+                className="form-select"
+                id="floatingSelectGrid"
+              >
+                {marketersList?.map((marketer, index) => {
+                  return (
+                    <>
+                      <option key={index} defaultValue={index == 0}>
+                        {marketer?.marketer_name}
+                      </option>
+                    </>
+                  );
+                })}
+              </select>
+              <label htmlFor="floatingSelectGrid">Select</label>
+            </div>
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
               <div
                 style={{ display: "flex", alignItems: "center" }}
@@ -403,7 +462,6 @@ export default function Clients() {
                   onChange={(e) => setClientCodeFilter(e.target.value)}
                 />
               </div>
-
               <div
                 style={{ display: "flex", alignItems: "center" }}
                 className="filter_task me-3"
@@ -411,7 +469,7 @@ export default function Clients() {
                 <strong>Contact Person: </strong>
                 <input
                   type="text"
-                  placeholder="Task"
+                  placeholder="Contact Person"
                   className="form-control ms-2 custom-input"
                   value={contactPersonFilter}
                   onChange={(e) => setContactPersonFilter(e.target.value)}
@@ -425,7 +483,7 @@ export default function Clients() {
                 <strong>Country: </strong>
                 <input
                   type="text"
-                  placeholder="Task"
+                  placeholder="Country"
                   className="form-control ms-2 custom-input"
                   value={countryFilter}
                   onChange={(e) => setCountryFilter(e.target.value)}
@@ -497,6 +555,7 @@ export default function Clients() {
                 <th>Contact Person</th>
                 <th>Email</th>
                 <th>Country</th>
+                <th>Prices</th>
                 <th>Manage</th>
               </tr>
             </thead>
@@ -510,6 +569,7 @@ export default function Clients() {
                   <td>{client.contact_person}</td>
                   <td>{client.email}</td>
                   <td>{client.country}</td>
+                  <td className="text-wrap">{client.prices}</td>
                   <td>
                     <button
                       onClick={() => {

@@ -36,7 +36,7 @@ async function handleGetAllClient(req, res) {
   try {
     const page = req.headers.page || 1;
 
-    let { country, clientcode, contactperson } = req.headers;
+    let { country, clientcode, contactperson, marketer } = req.headers;
 
     const ITEMS_PER_PAGE = 20; // Number of items per page
 
@@ -44,6 +44,7 @@ async function handleGetAllClient(req, res) {
     if (country) query.country = country;
     if (clientcode) query.client_code = clientcode;
     if (contactperson) query.contact_person = contactperson;
+    if (marketer) query.marketer = marketer;
 
     console.log(query);
 

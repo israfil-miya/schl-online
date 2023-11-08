@@ -12,6 +12,8 @@ export default function Report() {
 
   const [isFiltered, setIsFiltered] = useState(0);
 
+  const [marketersList, setMarketersList] = useState([]);
+
   const [filters, setFilters] = useState({
     country: "",
     company_name: "",
@@ -87,6 +89,38 @@ export default function Report() {
     return `${day}-${month}-${year}`;
   };
 
+  const getMarketersList = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallmarketers: true,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        let marketersName = [];
+        list.forEach((marketer, index) => {
+          marketersName.push({
+            _id: marketer._id,
+            marketer_name: marketer.name,
+          });
+        });
+
+        setMarketersList(marketersName);
+      } else {
+        toast.error("Unable to retrieve file list", { toastId: "error1" });
+      }
+    } catch (error) {
+      console.error("Error fetching file list:", error);
+      toast.error("Error retrieving file list", { toastId: "error3" });
+    }
+  };
+
   function handlePrevious() {
     setPage((p) => {
       if (p === 1) return p;
@@ -99,6 +133,10 @@ export default function Report() {
       return p + 1;
     });
   }
+
+  useEffect(() => {
+    getMarketersList();
+  }, []);
 
   useEffect(() => {
     if (!isFiltered) getAllReports();
@@ -125,6 +163,27 @@ export default function Report() {
               alignItems: "center",
             }}
           >
+            <div className=" mx-2 form-floating">
+              <select
+                required
+                onChange={(e) =>
+                  setFilters({ ...filters, marketer_name: e.target.value })
+                }
+                className="form-select"
+                id="floatingSelectGrid"
+              >
+                {marketersList?.map((marketer, index) => {
+                  return (
+                    <>
+                      <option key={index} defaultValue={index == 0}>
+                        {marketer?.marketer_name}
+                      </option>
+                    </>
+                  );
+                })}
+              </select>
+              <label htmlFor="floatingSelectGrid">Select</label>
+            </div>
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
               <div
                 className="filter_time me-3"
@@ -146,22 +205,6 @@ export default function Report() {
                   value={filters.todate}
                   onChange={(e) =>
                     setFilters({ ...filters, todate: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_marketer_name me-3"
-              >
-                <strong>Marketer: </strong>
-                <input
-                  type="text"
-                  placeholder="Marketer Name"
-                  className="form-control ms-2 custom-input"
-                  value={filters.marketer_name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, marketer_name: e.target.value })
                   }
                 />
               </div>
