@@ -374,6 +374,17 @@ export default function Report() {
               </tbody>
             </table>
           </div>
+
+          <div className="bg-light my-2">
+            <h5 className="text-center">Daily Report</h5>
+            <table className="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Marketer</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
         </div>
       </div>
     </>

@@ -84,8 +84,8 @@ export default function DailyReport() {
     <>
       <Navbar navFor="crm" />
       <div className="container my-5">
-        <div className="add-order">
-          <h5 className="py-3">Today&apos;s Report</h5>
+        <div className="add-report">
+          <h5 className="py-3">New Report</h5>
           <form onSubmit={AddNewReport} id="inputForm">
             <div className="mb-3">
               <label htmlFor="calling_date" className="form-label">
@@ -94,9 +94,6 @@ export default function DailyReport() {
               <input
                 disabled
                 value={reportData.calling_date}
-                onChange={(e) =>
-                  setReportData({ ...reportData, calling_date: e.target.value })
-                }
                 type="date"
                 className="form-control"
                 id="calling_date"

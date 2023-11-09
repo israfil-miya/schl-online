@@ -331,6 +331,14 @@ export default function Navbar({ navFor }) {
                     className={`dropdown-item ${styles.dropitem}`}
                     href={`/crm/marketer/report?name=${session.user.name}`}
                   >
+                    Report
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href={`/crm/marketer/daily-report?name=${session.user.name}`}
+                  >
                     Daily Report
                   </Link>
                 </li>

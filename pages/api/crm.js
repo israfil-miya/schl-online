@@ -1,6 +1,8 @@
 import User from "../../db/Users";
 import dbConnect from "../../db/dbConnect";
 import Report from "../../db/Reports";
+import DailyReport from "../../db/DailyReports";
+
 dbConnect();
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -43,8 +45,6 @@ function yyyyMmDdtoISODate(yyyyMmDd) {
 
 const handleGetAllMarketers = async (req, res) => {
   try {
-    const data = req.body;
-
     const userData = await User.find({ role: "marketer" });
     res.status(200).json(userData);
   } catch (e) {
@@ -62,6 +62,32 @@ const handleNewReport = async (req, res) => {
       res.status(200).json(resData);
     } else {
       sendError(res, 400, "No order found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+};
+
+const handleDailyReport = async (req, res) => {
+  try {
+    const data = req.body;
+
+    const prevData = await DailyReport.findOne({
+      $and: [
+        { marketer_name: { $eq: data.marketer_name } },
+        { report_date: { $eq: data.report_date } },
+      ],
+    });
+
+    if (prevData) res.status(200).json({ newReport: false, prevData });
+    else {
+      const resData = await DailyReport.create(data);
+      if (resData) {
+        res.status(200).json({ newReport: true, resData });
+      } else {
+        sendError(res, 400, "Unable to submit");
+      }
     }
   } catch (e) {
     console.error(e);
@@ -151,8 +177,10 @@ export default async function handle(req, res) {
     case "POST":
       if (req.headers.newreport) {
         await handleNewReport(req, res);
+      } else if (req.headers.dailyreport) {
+        await handleDailyReport(req, res);
       } else {
-        //
+        sendError(res, 400, "Not a valid POST request");
       }
 
       break;
