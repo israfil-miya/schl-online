@@ -159,6 +159,66 @@ async function handleGetAllReports(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+async function handleGetDailyReports(req, res) {
+  try {
+    const page = req.headers.page || 1;
+
+    let { marketer_name, fromdate, todate } = req.headers;
+
+    const ITEMS_PER_PAGE = 20; // Number of items per page
+
+    let query = {};
+
+    if (marketer_name) query.marketer_name = marketer_name;
+    if (fromdate || todate) {
+      query.createdAt = {};
+      if (fromdate) {
+        // Set the $gte filter for the start of the day
+        query.createdAt.$gte = new Date(yyyyMmDdtoISODate(fromdate));
+      }
+      if (todate) {
+        // Set the $lte filter for the end of the day
+        const toTimeDate = new Date(yyyyMmDdtoISODate(todate));
+        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
+        query.createdAt.$lte = toTimeDate;
+      }
+    }
+
+    if (
+      Object.keys(query).length === 0 &&
+      query.constructor === Object &&
+      req.headers.isfilter == true
+    )
+      sendError(res, 400, "No filter applied");
+    else {
+      const skip = (page - 1) * ITEMS_PER_PAGE;
+
+      const count = await DailyReport.countDocuments(query);
+
+      let reports;
+
+      if (req.headers.notpaginated) reports = await DailyReport.find({});
+      else
+        reports = await DailyReport.find(query)
+          .skip(skip)
+          .limit(ITEMS_PER_PAGE)
+          .sort({ updatedAt: -1 });
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: reports,
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -169,6 +229,8 @@ export default async function handle(req, res) {
         await handleGetAllMarketers(req, res);
       } else if (req.headers.getallreports) {
         await handleGetAllReports(req, res);
+      } else if (req.headers.getdailyreports) {
+        await handleGetDailyReports(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

@@ -7,16 +7,28 @@ import toast from "react-hot-toast";
 export default function DailyReport() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { name } = router.query;
+
+  const getTodayDate = () => {
+    const today = new Date();
+
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    return formatDate(today);
+  };
   const [reportData, setReportData] = useState({
-    report_date: "",
-    marketer_name: "",
+    report_date: getTodayDate(),
+    marketer_name: session.user.name,
     calls_made: "",
     contacts_made: "",
     prospects: "",
     test_jobs: "",
   });
-
-  const { name } = router.query;
 
   const [existingReport, setExistingReport] = useState({});
 
@@ -38,6 +50,7 @@ export default function DailyReport() {
     const result = await res.json();
     if (!result.error) {
       if (result.newReport) {
+        console.log(result);
         toast.success("Submitted today's report");
       } else {
         setExistingReport({
@@ -51,33 +64,14 @@ export default function DailyReport() {
       }
     } else toast.error(result.message);
 
-    setReportData({
-      report_date: "",
-      marketer_name: "",
+    setReportData((prev) => ({
+      ...prev,
       calls_made: "",
       contacts_made: "",
       prospects: "",
       test_jobs: "",
-    });
+    }));
   };
-
-  useEffect(() => {
-    const today = new Date();
-
-    const formatDate = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
-
-    setReportData({
-      ...reportData,
-      report_date: formatDate(today),
-      marketer_name: session.user.name,
-    });
-  }, []);
-
 
   return (
     <>
@@ -85,7 +79,11 @@ export default function DailyReport() {
       <div className="container my-5">
         <div className="add-today-report">
           <h5 className="py-3">Today&apos;s Report</h5>
-          {existingReport.report_date && <small style={{color: "red"}}>Today&apos;s report already have been submitted!</small>}
+          {existingReport.report_date && (
+            <small style={{ color: "red" }}>
+              Today&apos;s report already have been submitted!
+            </small>
+          )}
           <form
             aria-disabled={existingReport.report_date}
             onSubmit={AddDailyReport}
@@ -191,4 +189,52 @@ export default function DailyReport() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");
+
+  const req = context.req;
+  const ip =
+    process.env.NODE_ENV === "development"
+      ? process.env.NEXT_PUBLIC_DEVIP
+      : req?.headers["x-forwarded-for"] || req?.ip;
+
+  if (!ip) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
+
+  if (
+    process.env.NODE_ENV !== "development" &&
+    session.user.role !== "super" &&
+    session.user.role !== "admin" &&
+    !ALLOWED_IPS?.includes(ip)
+  ) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
+
+  // code for redirect if not logged in
+  if (!session || session.user.role != "marketer") {
+    return {
+      redirect: {
+        destination: "/?error=You need Marketer role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }

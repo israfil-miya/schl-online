@@ -16,7 +16,7 @@ const cities = [
 
   // Add more cities as needed
 ];
-export default function Navbar({ navFor }) {
+export default function Navbar({ navFor, shortNote }) {
   const { data: session } = useSession();
   const signOutHandle = () => {
     signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/login` });
@@ -346,6 +346,16 @@ export default function Navbar({ navFor }) {
             )}
           </li>
         ) : null}
+
+        {shortNote ? (
+          <div style={{ color: "white" }} className="pt-2 ms-auto">
+            {shortNote}
+          </div>
+        ) : (
+          <div style={{ color: "white" }} className="pt-2 ms-auto">
+            Good Day! 😊
+          </div>
+        )}
       </div>
       <style jsx>
         {`

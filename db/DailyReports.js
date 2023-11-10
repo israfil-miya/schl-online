@@ -6,10 +6,11 @@ const DailyReportSchema = new mongoose.Schema(
     calls_made: Number,
     contacts_made: String,
     prospects: Number,
-    test_jobs: String
+    test_jobs: String,
   },
   { timestamps: true },
 );
 
 module.exports =
-  mongoose.models.DailyReport || mongoose.model("DailyReport", DailyReportSchema)
+  mongoose.models.DailyReport ||
+  mongoose.model("DailyReport", DailyReportSchema);

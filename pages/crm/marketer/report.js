@@ -7,8 +7,22 @@ import toast from "react-hot-toast";
 export default function DailyReport() {
   const router = useRouter();
   const { data: session } = useSession();
+
+  const getTodayDate = () => {
+    const today = new Date();
+
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    return formatDate(today);
+  };
+
   const [reportData, setReportData] = useState({
-    calling_date: "",
+    calling_date: getTodayDate(),
     followup_date: "",
     country: "",
     website: "",
@@ -49,7 +63,8 @@ export default function DailyReport() {
       toast.success("Submitted new report");
     } else toast.error(result.message);
 
-    setReportData({
+    setReportData((prev) => ({
+      ...prev,
       followup_date: "",
       country: "",
       website: "",
@@ -64,21 +79,8 @@ export default function DailyReport() {
       feedback: "",
       linkedin: "",
       leads_taken_feedback: "",
-    });
+    }));
   };
-
-  useEffect(() => {
-    const today = new Date();
-
-    const formatDate = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
-    };
-
-    setReportData({ ...reportData, calling_date: formatDate(today) });
-  }, []);
 
   return (
     <>
@@ -322,4 +324,52 @@ export default function DailyReport() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");
+
+  const req = context.req;
+  const ip =
+    process.env.NODE_ENV === "development"
+      ? process.env.NEXT_PUBLIC_DEVIP
+      : req?.headers["x-forwarded-for"] || req?.ip;
+
+  if (!ip) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
+
+  if (
+    process.env.NODE_ENV !== "development" &&
+    session.user.role !== "super" &&
+    session.user.role !== "admin" &&
+    !ALLOWED_IPS?.includes(ip)
+  ) {
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
+  }
+
+  // code for redirect if not logged in
+  if (!session || session.user.role != "marketer") {
+    return {
+      redirect: {
+        destination: "/?error=You need Marketer role to access the page",
+        permanent: true,
+      },
+    };
+  } else
+    return {
+      props: {},
+    };
 }
