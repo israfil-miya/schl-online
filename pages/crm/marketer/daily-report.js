@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../../components/navbar";
-import { getSession, useSession } from "next-auth/react";
+import { useSession, SessionProvider, getSession } from "next-auth/react";
 import toast from "react-hot-toast";
 
 export default function DailyReport() {
