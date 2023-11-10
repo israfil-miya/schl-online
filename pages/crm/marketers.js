@@ -141,8 +141,7 @@ export async function getServerSideProps(context) {
   // code for redirect if not logged in
   if (
     !session ||
-    session.user.role != "admin" ||
-    session.user.role != "super"
+    (session.user.role != "admin" && session.user.role != "super")
   ) {
     return {
       redirect: {
