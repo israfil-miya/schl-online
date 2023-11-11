@@ -26,6 +26,19 @@ export default function Report() {
 
   const [reports, setReports] = useState([]);
 
+  const [dailyReportsPage, setDailyReportsPage] = useState(1);
+  const [dailyReportsPageCount, setDailyReportsPageCount] = useState(0);
+
+  const [dailyReportsIsFiltered, setDailyReportsIsFiltered] = useState(0);
+
+  const [dailyReportFilters, setDailyReportFilters] = useState({
+    fromdate: "",
+    todate: "",
+    marketer_name: "",
+  });
+
+  const [dailyReports, setDailyReports] = useState([]);
+
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
@@ -84,6 +97,58 @@ export default function Report() {
     }
   }
 
+  async function getDailyReports() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getdailyreports: true,
+          dailyReportsPage,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        setDailyReports(list);
+      } else {
+        toast.error("Unable to retrieve reports");
+      }
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      toast.error("Error retrieving reports");
+    }
+  }
+  async function getDailyReportsFiltered() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getdailyreports: true,
+          isfilter: true,
+          ...dailyReportFilters,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        setDailyReports(list);
+        setDailyReportsIsFiltered(1);
+      } else {
+        setDailyReportsIsFiltered(0);
+        await getDailyReports();
+      }
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      toast.error("Error retrieving reports");
+    }
+  }
+
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
     if (year.length != 4) return dateString;
@@ -135,6 +200,19 @@ export default function Report() {
     });
   }
 
+  function handlePreviousDailyReports() {
+    setDailyReportsPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
+  function handleNextDailyReports() {
+    setDailyReportsPage((p) => {
+      if (p === dailyReportsPageCount) return p;
+      return p + 1;
+    });
+  }
+
   useEffect(() => {
     getMarketersList();
   }, []);
@@ -149,14 +227,235 @@ export default function Report() {
     else getAllReportsFiltered();
   }, [page]);
 
+  useEffect(() => {
+    if (!dailyReportsIsFiltered) getDailyReports();
+    if (dailyReports)
+      setDailyReportsPageCount(dailyReports?.pagination?.pageCount);
+  }, [dailyReports?.pagination?.pageCount]);
+
+  useEffect(() => {
+    if (!dailyReportsIsFiltered) getDailyReports();
+    else getDailyReportsFiltered();
+  }, [dailyReportsPage]);
+
   return (
     <>
       <Navbar navFor="crm" />
-      <div className="containter text-center">
+      <div className="containter mb-5 text-center">
         <div
-          style={{ overflowX: "auto" }}
-          className="text-nowrap client-list my-5"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
+          <div className=" mx-2 form-floating">
+            <select
+              required
+              onChange={(e) =>
+                setFilters({ ...filters, marketer_name: e.target.value })
+              }
+              className="form-select"
+              id="floatingSelectGrid"
+            >
+              {marketersList?.map((marketer, index) => {
+                return (
+                  <>
+                    <option key={index} defaultValue={index == 0}>
+                      {marketer?.marketer_name}
+                    </option>
+                  </>
+                );
+              })}
+            </select>
+            <label htmlFor="floatingSelectGrid">Select marketer</label>
+          </div>
+          <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
+            <div
+              className="filter_time me-3"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <strong>Date: </strong>
+              <input
+                type="date"
+                className="form-control mx-2 custom-input"
+                value={filters.fromdate}
+                onChange={(e) =>
+                  setFilters({ ...filters, fromdate: e.target.value })
+                }
+              />
+              <span> To </span>
+              <input
+                type="date"
+                className="form-control ms-2 custom-input"
+                value={filters.todate}
+                onChange={(e) =>
+                  setFilters({ ...filters, todate: e.target.value })
+                }
+              />
+            </div>
+
+            <div
+              style={{ display: "flex", alignItems: "center" }}
+              className="filter_folder me-3"
+            >
+              <strong>Country: </strong>
+              <input
+                type="text"
+                placeholder="Country"
+                className="form-control ms-2 custom-input"
+                value={filters.country}
+                onChange={(e) =>
+                  setFilters({ ...filters, country: e.target.value })
+                }
+              />
+            </div>
+
+            <div
+              style={{ display: "flex", alignItems: "center" }}
+              className="filter_task me-3"
+            >
+              <strong>Category: </strong>
+              <input
+                type="text"
+                placeholder="Category"
+                className="form-control ms-2 custom-input"
+                value={filters.category}
+                onChange={(e) =>
+                  setFilters({ ...filters, category: e.target.value })
+                }
+              />
+            </div>
+
+            <div
+              style={{ display: "flex", alignItems: "center" }}
+              className="filter_task me-3"
+            >
+              <strong>Company: </strong>
+              <input
+                type="text"
+                placeholder="Company Name"
+                className="form-control ms-2 custom-input"
+                value={filters.company_name}
+                onChange={(e) =>
+                  setFilters({ ...filters, company_name: e.target.value })
+                }
+              />
+            </div>
+
+            <button
+              onClick={getAllReportsFiltered}
+              className="btn ms-4 btn-sm btn-outline-primary"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        {reports?.items?.length !== 0 && (
+          <div className="container mb-5">
+            <div
+              className="float-end"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <span className="me-3">
+                Page{" "}
+                <strong>
+                  {page}/{pageCount}
+                </strong>
+              </span>
+              <div
+                className="btn-group"
+                role="group"
+                aria-label="Basic outlined example"
+              >
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === 1}
+                  onClick={handlePrevious}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === pageCount}
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ overflowX: "auto" }} className="text-nowrap">
+          <table className="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Calling Date</th>
+                <th>Followup Date</th>
+                <th>Country</th>
+                <th>Website</th>
+                <th>Category</th>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Designation</th>
+                <th>Contact Number</th>
+                <th>Email Address</th>
+                <th>Calling Status</th>
+                <th>Email Status</th>
+                <th>Feedback</th>
+                <th>LinkedIn</th>
+                <th>Leads Taken Feedback</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports?.items?.length ? (
+                reports?.items?.map((item, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>
+                      {item.calling_date
+                        ? convertToDDMMYYYY(item.calling_date)
+                        : ""}
+                    </td>
+                    <td>
+                      {item.followup_date
+                        ? convertToDDMMYYYY(item.followup_date)
+                        : ""}
+                    </td>
+                    <td>{item.country}</td>
+                    <td>{item.website}</td>
+                    <td>{item.category}</td>
+                    <td>{item.company_name}</td>
+                    <td>{item.contact_person}</td>
+                    <td>{item.designation}</td>
+                    <td>{item.contact_number}</td>
+                    <td>{item.email_address}</td>
+                    <td>{item.calling_status}</td>
+                    <td>{item.email_status}</td>
+                    <td className="text-wrap">{item.feedback}</td>
+                    <td>{item.linkedin}</td>
+                    <td className="text-wrap">{item.leads_taken_feedback}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr key={0}>
+                  <td colSpan="16" className=" align-center text-center">
+                    No Reports To Show.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="daily-report mt-3">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Daily Reports
+          </h5>
           <div
             style={{
               display: "flex",
@@ -168,7 +467,10 @@ export default function Report() {
               <select
                 required
                 onChange={(e) =>
-                  setFilters({ ...filters, marketer_name: e.target.value })
+                  setDailyReportFilters({
+                    ...dailyReportFilters,
+                    marketer_name: e.target.value,
+                  })
                 }
                 className="form-select"
                 id="floatingSelectGrid"
@@ -183,7 +485,7 @@ export default function Report() {
                   );
                 })}
               </select>
-              <label htmlFor="floatingSelectGrid">Select</label>
+              <label htmlFor="floatingSelectGrid">Select marketer</label>
             </div>
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
               <div
@@ -194,72 +496,30 @@ export default function Report() {
                 <input
                   type="date"
                   className="form-control mx-2 custom-input"
-                  value={filters.fromdate}
+                  value={dailyReportFilters.fromdate}
                   onChange={(e) =>
-                    setFilters({ ...filters, fromdate: e.target.value })
+                    setDailyReportFilters({
+                      ...dailyReportFilters,
+                      fromdate: e.target.value,
+                    })
                   }
                 />
                 <span> To </span>
                 <input
                   type="date"
                   className="form-control ms-2 custom-input"
-                  value={filters.todate}
+                  value={dailyReportFilters.todate}
                   onChange={(e) =>
-                    setFilters({ ...filters, todate: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_folder me-3"
-              >
-                <strong>Country: </strong>
-                <input
-                  type="text"
-                  placeholder="Country"
-                  className="form-control ms-2 custom-input"
-                  value={filters.country}
-                  onChange={(e) =>
-                    setFilters({ ...filters, country: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_task me-3"
-              >
-                <strong>Category: </strong>
-                <input
-                  type="text"
-                  placeholder="Category"
-                  className="form-control ms-2 custom-input"
-                  value={filters.category}
-                  onChange={(e) =>
-                    setFilters({ ...filters, category: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_task me-3"
-              >
-                <strong>Company: </strong>
-                <input
-                  type="text"
-                  placeholder="Company Name"
-                  className="form-control ms-2 custom-input"
-                  value={filters.company_name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, company_name: e.target.value })
+                    setDailyReportFilters({
+                      ...dailyReportFilters,
+                      todate: e.target.value,
+                    })
                   }
                 />
               </div>
 
               <button
-                onClick={getAllReportsFiltered}
+                onClick={getDailyReportsFiltered}
                 className="btn ms-4 btn-sm btn-outline-primary"
               >
                 Search
@@ -267,7 +527,7 @@ export default function Report() {
             </div>
           </div>
 
-          {reports?.items?.length !== 0 && (
+          {dailyReports?.items?.length !== 0 && (
             <div className="container mb-5">
               <div
                 className="float-end"
@@ -276,7 +536,7 @@ export default function Report() {
                 <span className="me-3">
                   Page{" "}
                   <strong>
-                    {page}/{pageCount}
+                    {dailyReportsPage}/{dailyReportsPageCount}
                   </strong>
                 </span>
                 <div
@@ -287,82 +547,50 @@ export default function Report() {
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-secondary"
-                    disabled={page === 1}
-                    onClick={handlePrevious}
+                    disabled={dailyReportsPage === 1}
+                    onClick={handlePreviousDailyReports}
                   >
                     Previous
                   </button>
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-secondary"
-                    disabled={page === pageCount}
-                    onClick={handleNext}
+                    disabled={dailyReportsPage === dailyReportsPageCount}
+                    onClick={handleNextDailyReports}
                   >
                     Next
                   </button>
                 </div>
               </div>
-
-              {/* <div className="float-start">
-            <div className={`btn-group ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
-              <button type="button" className="btn btn-sm btn-outline-success">
-                EXCEL EXPORT
-              </button>
-            </div>
-          </div> */}
             </div>
           )}
 
           <div style={{ overflowX: "auto" }} className="text-nowrap">
-            <table className="table table-bordered table-striped">
+            <table className="table table-bordered table-hover">
               <thead>
-                <tr>
+                <tr className="table-dark">
                   <th>#</th>
-                  <th>Calling Date</th>
-                  <th>Followup Date</th>
-                  <th>Country</th>
-                  <th>Website</th>
-                  <th>Category</th>
-                  <th>Company Name</th>
-                  <th>Contact Person</th>
-                  <th>Designation</th>
-                  <th>Contact Number</th>
-                  <th>Email Address</th>
-                  <th>Calling Status</th>
-                  <th>Email Status</th>
-                  <th>Feedback</th>
-                  <th>LinkedIn</th>
-                  <th>Leads Taken Feedback</th>
+                  <th>Report Date</th>
+                  <th>Calls Made</th>
+                  <th>Contacts Made</th>
+                  <th>Prospects</th>
+                  <th>Test Jobs</th>
                 </tr>
               </thead>
               <tbody>
-                {reports?.items?.length ? (
-                  reports?.items?.map((item, index) => (
+                {dailyReports?.items?.length ? (
+                  dailyReports?.items?.map((item, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
                       <td>
-                        {item.calling_date
-                          ? convertToDDMMYYYY(item.calling_date)
+                        {item.report_date
+                          ? convertToDDMMYYYY(item.report_date)
                           : ""}
                       </td>
-                      <td>
-                        {item.followup_date
-                          ? convertToDDMMYYYY(item.followup_date)
-                          : ""}
-                      </td>
-                      <td>{item.country}</td>
-                      <td>{item.website}</td>
-                      <td>{item.category}</td>
-                      <td>{item.company_name}</td>
-                      <td>{item.contact_person}</td>
-                      <td>{item.designation}</td>
-                      <td>{item.contact_number}</td>
-                      <td>{item.email_address}</td>
-                      <td>{item.calling_status}</td>
-                      <td>{item.email_status}</td>
-                      <td className="text-wrap">{item.feedback}</td>
-                      <td>{item.linkedin}</td>
-                      <td className="text-wrap">{item.leads_taken_feedback}</td>
+                      <td>{item.calls_made}</td>
+                      <td>{item.contacts_made}</td>
+                      <td>{item.prospects}</td>
+                      <td>{item.test_jobs}</td>
                     </tr>
                   ))
                 ) : (
@@ -377,6 +605,18 @@ export default function Report() {
           </div>
         </div>
       </div>
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            padding: 5px 2.5px;
+          }
+        `}
+      </style>
     </>
   );
 }
