@@ -2,6 +2,7 @@ import User from "../../db/Users";
 import dbConnect from "../../db/dbConnect";
 import Report from "../../db/Reports";
 import DailyReport from "../../db/DailyReports";
+const moment = require("moment-timezone");
 
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -159,6 +160,7 @@ async function handleGetAllReports(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
 async function handleGetDailyReports(req, res) {
   try {
     const page = req.headers.page || 1;
@@ -220,6 +222,76 @@ async function handleGetDailyReports(req, res) {
   }
 }
 
+const getvalidWeekDays = () => {
+  const isWeekend = (date) => {
+    const dayOfWeek = date.getDay();
+    return dayOfWeek === 0 /* Sunday */ || dayOfWeek === 6 /* Saturday */;
+  };
+
+  const today = moment().utc();
+
+  // Calculate the date 5 days ago in UTC
+  const fiveDaysAgo = moment().subtract(5, "days").utc();
+
+  // Initialize an array to store valid weekdays
+  const validWeekdays = [];
+
+  // Iterate from five days ago until today
+  for (let d = moment(fiveDaysAgo); d <= today; d.add(1, "day")) {
+    // Skip weekends (Saturday and Monday)
+    if (!isWeekend(d.toDate())) {
+      const startOfDay = moment(d).startOf("day");
+      const endOfDay = moment(d).endOf("day");
+      validWeekdays.push({
+        createdAt: { $gte: startOfDay.toDate(), $lte: endOfDay.toDate() },
+      }); // Store valid weekdays
+    }
+  }
+
+  return validWeekdays;
+};
+
+async function handleGetDailyReportsLast5Days(req, res) {
+  try {
+    let validWeekdays = getvalidWeekDays();
+
+    let resData = await DailyReport.find({ $or: validWeekdays });
+
+    let returnData = resData.reduce((acc, entry) => {
+      // Find existing entry for the marketer
+      const existingEntry = acc.find(
+        (item) => item.marketer_name === entry.marketer_name,
+      );
+
+      if (existingEntry) {
+        // Update existing entry with new data
+        existingEntry.data.total_calls_made += entry.calls_made || 0;
+        existingEntry.data.total_prospects += entry.prospects || 0;
+        existingEntry.data.total_test_jobs += entry.test_jobs || 0;
+      } else {
+        // Create a new entry if the marketer doesn't exist in the result array
+        acc.push({
+          marketer_name: entry.marketer_name,
+          data: {
+            total_calls_made: entry.calls_made || 0,
+            total_prospects: entry.prospects || 0,
+            total_test_jobs: entry.test_jobs || 0,
+          },
+        });
+      }
+
+      return acc;
+    }, []);
+
+    if (resData && returnData) {
+      res.status(200).json(returnData);
+    } else sendError(res, 500, "No data found");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -231,6 +303,8 @@ export default async function handle(req, res) {
         await handleGetAllReports(req, res);
       } else if (req.headers.getdailyreports) {
         await handleGetDailyReports(req, res);
+      } else if (req.headers.getdailyreportslast5days) {
+        await handleGetDailyReportsLast5Days(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

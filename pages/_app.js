@@ -5,7 +5,7 @@ import Script from "next/script";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 
 // Dynamically import NextNProgress only on the client side
 const DynamicNextNProgress = dynamic(() => import("nextjs-progressbar"), {
@@ -27,7 +27,7 @@ const SCHL = ({ Component, pageProps }) => {
         <title>SCHL PORTAL</title>
       </Head>
 
-      <Toaster position="top-right" reverseOrder={true} />
+      <Toaster richColors position="top-right" reverseOrder={true} />
 
       {/* Render NextNProgress only on the client side */}
       {typeof window !== "undefined" && (

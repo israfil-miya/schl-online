@@ -2,7 +2,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export default function Login({ ip }) {
   const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");

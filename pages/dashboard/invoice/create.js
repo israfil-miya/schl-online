@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import generateInvoice from "../../../lib/invoice";
 import Navbar from "../../../components/navbar";
 import { useSession, getSession } from "next-auth/react";

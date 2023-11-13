@@ -4,9 +4,9 @@ const DailyReportSchema = new mongoose.Schema(
     report_date: String,
     marketer_name: String,
     calls_made: Number,
-    contacts_made: String,
+    contacts_made: Number,
     prospects: Number,
-    test_jobs: String,
+    test_jobs: Number,
   },
   { timestamps: true },
 );

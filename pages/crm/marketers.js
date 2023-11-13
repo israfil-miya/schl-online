@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export default function Marketers() {
   const [marketersList, setMarketersList] = useState([]);

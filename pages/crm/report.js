@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
-export default function Report() {
+async function fetchApi(url, options) {
+  const res = await fetch(url, options);
+  const data = await res.json();
+  return data;
+}
+
+export default function Report(props) {
   const router = useRouter();
   const { name } = router.query;
 
@@ -39,11 +45,9 @@ export default function Report() {
 
   const [dailyReports, setDailyReports] = useState([]);
 
-  async function fetchApi(url, options) {
-    const res = await fetch(url, options);
-    const data = await res.json();
-    return data;
-  }
+  const [dailyReportStatus, setDailyReportStatus] = useState(
+    props.dailyReportStatus,
+  );
 
   async function getAllReports() {
     try {
@@ -668,8 +672,26 @@ export async function getServerSideProps(context) {
         permanent: true,
       },
     };
-  } else
-    return {
-      props: {},
+  } else {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getdailyreportslast5days: true,
+      },
     };
+
+    let res = await fetchApi(url, options);
+
+    if (!res.error) {
+      return {
+        props: { dailyReportStatus: res },
+      };
+    } else {
+      return {
+        props: {},
+      };
+    }
+  }
 }

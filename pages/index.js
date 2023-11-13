@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 
 import Navbar from "../components/navbar";
