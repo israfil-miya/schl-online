@@ -4,14 +4,15 @@ import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
 
-export default function Marketers() {
-  const [marketersList, setMarketersList] = useState([]);
+async function fetchApi(url, options) {
+  const res = await fetch(url, options);
+  const data = await res.json();
+  return data;
+}
 
-  async function fetchApi(url, options) {
-    const res = await fetch(url, options);
-    const data = await res.json();
-    return data;
-  }
+export default function Marketers(props) {
+  const [marketersList, setMarketersList] = useState([]);
+  const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
 
   const getMarketers = async () => {
     try {
@@ -43,7 +44,84 @@ export default function Marketers() {
     return `${day}-${month}-${year}`;
   };
 
+  const createDailyStatusReportTable = () => {
+    let parsedTableRows = [];
+    let total_calls_made = 0;
+    let total_test_jobs = 0;
+    let total_prospects = 0;
+
+    props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
+      total_calls_made += parseInt(
+        FiveDayReportOfMarketer.data.total_calls_made,
+      )
+        ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
+        : 0;
+      total_test_jobs += parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+        ? parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+        : 0;
+      total_prospects += parseInt(FiveDayReportOfMarketer.data.total_prospects)
+        ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
+        : 0;
+      parsedTableRows.push(
+        <tr key={index}>
+          <td
+            style={{
+              minWidth: "40px",
+              maxWidth: "40px",
+              padding: "0px 0px 0px 5px",
+              backgroundColor: "#212529",
+              color: "#fff",
+            }}
+          >
+            {FiveDayReportOfMarketer.marketer_name}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_calls_made}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_prospects}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_test_jobs}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {"No Follow Up"}
+          </td>
+        </tr>,
+      );
+    });
+
+    parsedTableRows.push(
+      <tr>
+        <th
+          style={{
+            minWidth: "40px",
+            maxWidth: "40px",
+            padding: "0px 0px 0px 5px",
+            backgroundColor: "#212529",
+            color: "#fff",
+          }}
+        >
+          Total
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_calls_made}
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_prospects}
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_test_jobs}
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}></th>
+      </tr>,
+    );
+
+    return parsedTableRows;
+  };
+
   useEffect(() => {
+    setDailyReportStatusRowHtml(createDailyStatusReportTable());
     getMarketers();
   }, []);
   return (
@@ -51,7 +129,9 @@ export default function Marketers() {
       <Navbar navFor="crm" />
       <div className="container">
         <div className="markers-list my-5">
-          <h5 className="py-3">Marketers List</h5>
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Marketers List
+          </h5>
 
           <table className="table table-hover">
             <thead>
@@ -91,12 +171,63 @@ export default function Marketers() {
             </tbody>
           </table>
         </div>
+        <div className="daily-report-status mt-3">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Daily Report Status (Last Five Business Days)
+          </h5>
+
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th style={{ backgroundColor: "#212529", color: "#fff" }}></th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Calls
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Prospects
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Tests
+                </th>
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Follow Up
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <style jsx>
         {`
           .marketer_name:hover {
             color: rgba(0, 0, 0, 0.7);
+          }
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            padding: 2.5px 5px;
           }
         `}
       </style>
@@ -149,8 +280,26 @@ export async function getServerSideProps(context) {
         permanent: true,
       },
     };
-  } else
-    return {
-      props: {},
+  } else {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getdailyreportslast5days: true,
+      },
     };
+
+    let res = await fetchApi(url, options);
+
+    if (!res.error) {
+      return {
+        props: { dailyReportStatus: res },
+      };
+    } else {
+      return {
+        props: {},
+      };
+    }
+  }
 }

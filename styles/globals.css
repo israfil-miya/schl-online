@@ -28,10 +28,6 @@ a {
   text-decoration: none;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 .navbar-toggler:focus,
 .navbar-toggler:active,
 .navbar-toggler-icon:focus {

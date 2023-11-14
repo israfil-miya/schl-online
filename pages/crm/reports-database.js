@@ -32,21 +32,6 @@ export default function Report(props) {
 
   const [reports, setReports] = useState([]);
 
-  const [dailyReportsPage, setDailyReportsPage] = useState(1);
-  const [dailyReportsPageCount, setDailyReportsPageCount] = useState(0);
-
-  const [dailyReportsIsFiltered, setDailyReportsIsFiltered] = useState(0);
-
-  const [dailyReportFilters, setDailyReportFilters] = useState({
-    fromdate: "",
-    todate: "",
-    marketer_name: "",
-  });
-
-  const [dailyReports, setDailyReports] = useState([]);
-
-  const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
-
   async function getAllReports() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
@@ -92,58 +77,6 @@ export default function Report(props) {
       } else {
         setIsFiltered(0);
         await getAllReports();
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error("Error retrieving reports");
-    }
-  }
-
-  async function getDailyReports() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getdailyreports: true,
-          dailyReportsPage,
-        },
-      };
-
-      const list = await fetchApi(url, options);
-
-      if (!list.error) {
-        setDailyReports(list);
-      } else {
-        toast.error("Unable to retrieve reports");
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error("Error retrieving reports");
-    }
-  }
-  async function getDailyReportsFiltered() {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getdailyreports: true,
-          isfilter: true,
-          ...dailyReportFilters,
-        },
-      };
-
-      const list = await fetchApi(url, options);
-
-      if (!list.error) {
-        setDailyReports(list);
-        setDailyReportsIsFiltered(1);
-      } else {
-        setDailyReportsIsFiltered(0);
-        await getDailyReports();
       }
     } catch (error) {
       console.error("Error fetching reports:", error);
@@ -202,55 +135,7 @@ export default function Report(props) {
     });
   }
 
-  function handlePreviousDailyReports() {
-    setDailyReportsPage((p) => {
-      if (p === 1) return p;
-      return p - 1;
-    });
-  }
-  function handleNextDailyReports() {
-    setDailyReportsPage((p) => {
-      if (p === dailyReportsPageCount) return p;
-      return p + 1;
-    });
-  }
-
-  const createDailyStatusReportTable = () => {
-    let parsedTableRows = [];
-    props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
-      parsedTableRows.push(
-        <tr key={index}>
-          <th
-            style={{
-              minWidth: "40px",
-              maxWidth: "40px",
-              padding: "0px 0px 0px 5px",
-              backgroundColor: "#212529",
-              color: "#fff",
-            }}
-          >
-            {FiveDayReportOfMarketer.marketer_name}
-          </th>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_calls_made}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_prospects}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_test_jobs}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {"No Follow Up"}
-          </td>
-        </tr>,
-      );
-    });
-    setDailyReportStatusRowHtml(parsedTableRows);
-  };
-
   useEffect(() => {
-    createDailyStatusReportTable();
     getMarketersList();
   }, []);
 
@@ -264,22 +149,11 @@ export default function Report(props) {
     else getAllReportsFiltered();
   }, [page]);
 
-  useEffect(() => {
-    if (!dailyReportsIsFiltered) getDailyReports();
-    if (dailyReports)
-      setDailyReportsPageCount(dailyReports?.pagination?.pageCount);
-  }, [dailyReports?.pagination?.pageCount]);
-
-  useEffect(() => {
-    if (!dailyReportsIsFiltered) getDailyReports();
-    else getDailyReportsFiltered();
-  }, [dailyReportsPage]);
-
   return (
     <>
       <Navbar navFor="crm" />
-      <div className="containter mb-5">
-        <div className="daily-report mt-5">
+      <div className="containter">
+        <div className="daily-report my-5">
           <div
             style={{
               display: "flex",
@@ -449,10 +323,7 @@ export default function Report(props) {
                   <th>Contact Number</th>
                   <th>Email Address</th>
                   <th>Calling Status</th>
-                  <th>Email Status</th>
-                  <th>Feedback</th>
                   <th>LinkedIn</th>
-                  <th>Leads Taken Feedback</th>
                 </tr>
               </thead>
               <tbody>
@@ -478,11 +349,8 @@ export default function Report(props) {
                       <td>{item.designation}</td>
                       <td>{item.contact_number}</td>
                       <td>{item.email_address}</td>
-                      <td>{item.calling_status}</td>
-                      <td>{item.email_status}</td>
-                      <td className="text-wrap">{item.feedback}</td>
+                      <td className="text-wrap">{item.calling_status}</td>
                       <td>{item.linkedin}</td>
-                      <td className="text-wrap">{item.leads_taken_feedback}</td>
                     </tr>
                   ))
                 ) : (
@@ -495,209 +363,6 @@ export default function Report(props) {
               </tbody>
             </table>
           </div>
-        </div>
-        <div className="daily-report mt-3">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Daily Reports
-          </h5>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <div className=" mx-2 form-floating">
-              <select
-                required
-                onChange={(e) =>
-                  setDailyReportFilters({
-                    ...dailyReportFilters,
-                    marketer_name: e.target.value,
-                  })
-                }
-                className="form-select"
-                id="floatingSelectGrid"
-              >
-                <option
-                  value={""}
-                  defaultValue={true}
-                  className="text-body-secondary"
-                >
-                  Select a marketer
-                </option>
-                {marketersList?.map((marketer, index) => {
-                  return (
-                    <>
-                      <option key={index} defaultValue={index == 0}>
-                        {marketer?.marketer_name}
-                      </option>
-                    </>
-                  );
-                })}
-              </select>
-              <label htmlFor="floatingSelectGrid">Select a marketer</label>
-            </div>
-            <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
-              <div
-                className="filter_time me-3"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <strong>Date: </strong>
-                <input
-                  type="date"
-                  className="form-control mx-2 custom-input"
-                  value={dailyReportFilters.fromdate}
-                  onChange={(e) =>
-                    setDailyReportFilters({
-                      ...dailyReportFilters,
-                      fromdate: e.target.value,
-                    })
-                  }
-                />
-                <span> To </span>
-                <input
-                  type="date"
-                  className="form-control ms-2 custom-input"
-                  value={dailyReportFilters.todate}
-                  onChange={(e) =>
-                    setDailyReportFilters({
-                      ...dailyReportFilters,
-                      todate: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <button
-                onClick={getDailyReportsFiltered}
-                className="btn ms-4 btn-sm btn-outline-primary"
-              >
-                Search
-              </button>
-            </div>
-          </div>
-
-          {dailyReports?.items?.length !== 0 && (
-            <div className="container mb-5">
-              <div
-                className="float-end"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <span className="me-3">
-                  Page{" "}
-                  <strong>
-                    {dailyReportsPage}/{dailyReportsPageCount}
-                  </strong>
-                </span>
-                <div
-                  className="btn-group"
-                  role="group"
-                  aria-label="Basic outlined example"
-                >
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    disabled={dailyReportsPage === 1}
-                    onClick={handlePreviousDailyReports}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    disabled={dailyReportsPage === dailyReportsPageCount}
-                    onClick={handleNextDailyReports}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div style={{ overflowX: "auto" }} className="text-nowrap">
-            <table className="table table-bordered table-hover">
-              <thead>
-                <tr className="table-dark">
-                  <th>#</th>
-                  <th>Report Date</th>
-                  <th>Calls Made</th>
-                  <th>Contacts Made</th>
-                  <th>Prospects</th>
-                  <th>Test Jobs</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dailyReports?.items?.length ? (
-                  dailyReports?.items?.map((item, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>
-                        {item.report_date
-                          ? convertToDDMMYYYY(item.report_date)
-                          : ""}
-                      </td>
-                      <td>{item.calls_made}</td>
-                      <td>{item.contacts_made}</td>
-                      <td>{item.prospects}</td>
-                      <td>{item.test_jobs}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr key={0}>
-                    <td colSpan="16" className=" align-center text-center">
-                      No Reports To Show.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="daily-report-status mt-3">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Daily Report Status (Last Five Business Day)
-          </h5>
-
-          <table className="table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th style={{ backgroundColor: "#212529", color: "#fff" }}></th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Calls
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Prospects
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Tests
-                </th>
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Follow Up
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)}
-            </tbody>
-          </table>
         </div>
       </div>
       <style jsx>
