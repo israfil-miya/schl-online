@@ -45,9 +45,7 @@ export default function Report(props) {
 
   const [dailyReports, setDailyReports] = useState([]);
 
-  const [dailyReportStatus, setDailyReportStatus] = useState(
-    props.dailyReportStatus,
-  );
+  const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
 
   async function getAllReports() {
     try {
@@ -217,7 +215,42 @@ export default function Report(props) {
     });
   }
 
+  const createDailyStatusReportTable = () => {
+    let parsedTableRows = [];
+    props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
+      parsedTableRows.push(
+        <tr key={index}>
+          <th
+            style={{
+              minWidth: "40px",
+              maxWidth: "40px",
+              padding: "0px 0px 0px 5px",
+              backgroundColor: "#212529",
+              color: "#fff",
+            }}
+          >
+            {FiveDayReportOfMarketer.marketer_name}
+          </th>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_calls_made}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_prospects}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_test_jobs}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {"No Follow Up"}
+          </td>
+        </tr>,
+      );
+    });
+    setDailyReportStatusRowHtml(parsedTableRows);
+  };
+
   useEffect(() => {
+    createDailyStatusReportTable();
     getMarketersList();
   }, []);
 
@@ -263,17 +296,22 @@ export default function Report(props) {
                 className="form-select"
                 id="floatingSelectGrid"
               >
+                <option
+                  value={""}
+                  defaultValue={true}
+                  className="text-body-secondary"
+                >
+                  Select a marketer
+                </option>
                 {marketersList?.map((marketer, index) => {
                   return (
                     <>
-                      <option key={index} defaultValue={index == 0}>
-                        {marketer?.marketer_name}
-                      </option>
+                      <option key={index}>{marketer?.marketer_name}</option>
                     </>
                   );
                 })}
               </select>
-              <label htmlFor="floatingSelectGrid">Select marketer</label>
+              <label htmlFor="floatingSelectGrid">Marketer filter</label>
             </div>
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
               <div
@@ -481,6 +519,13 @@ export default function Report(props) {
                 className="form-select"
                 id="floatingSelectGrid"
               >
+                <option
+                  value={""}
+                  defaultValue={true}
+                  className="text-body-secondary"
+                >
+                  Select a marketer
+                </option>
                 {marketersList?.map((marketer, index) => {
                   return (
                     <>
@@ -491,7 +536,7 @@ export default function Report(props) {
                   );
                 })}
               </select>
-              <label htmlFor="floatingSelectGrid">Select marketer</label>
+              <label htmlFor="floatingSelectGrid">Select a marketer</label>
             </div>
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
               <div
@@ -609,6 +654,50 @@ export default function Report(props) {
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="daily-report-status mt-3">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Daily Report Status (Last Five Business Day)
+          </h5>
+
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th style={{ backgroundColor: "#212529", color: "#fff" }}></th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Calls
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Prospects
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Tests
+                </th>
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Follow Up
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)}
+            </tbody>
+          </table>
         </div>
       </div>
       <style jsx>

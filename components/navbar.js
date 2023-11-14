@@ -353,7 +353,7 @@ export default function Navbar({ navFor, shortNote }) {
           </div>
         ) : (
           <div style={{ color: "white" }} className="pt-2 ms-auto">
-            Good Day! 😊
+            Have a good day!
           </div>
         )}
       </div>

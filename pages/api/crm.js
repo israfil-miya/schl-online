@@ -230,15 +230,11 @@ const getvalidWeekDays = () => {
 
   const today = moment().utc();
 
-  // Calculate the date 5 days ago in UTC
   const fiveDaysAgo = moment().subtract(5, "days").utc();
 
-  // Initialize an array to store valid weekdays
   const validWeekdays = [];
 
-  // Iterate from five days ago until today
   for (let d = moment(fiveDaysAgo); d <= today; d.add(1, "day")) {
-    // Skip weekends (Saturday and Monday)
     if (!isWeekend(d.toDate())) {
       const startOfDay = moment(d).startOf("day");
       const endOfDay = moment(d).endOf("day");
