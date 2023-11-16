@@ -876,7 +876,6 @@ export default function Approvals() {
                   value={userInfo.phone}
                   disabled
                   type="text"
-                  assword
                   className="form-control"
                 />
               </div>

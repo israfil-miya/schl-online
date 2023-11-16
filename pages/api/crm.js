@@ -288,6 +288,42 @@ async function handleGetDailyReportsLast5Days(req, res) {
   }
 }
 
+function formatDate(date) {
+  var d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
+
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
+}
+
+async function handleGetNearestFollowUps(req, res) {
+  try {
+    let marketer_name = req.headers.marketer_name;
+    let todayDate = formatDate(new Date()); // today's date in yyyy-mm-dd format
+    let resData;
+    if (marketer_name)
+      resData = await Report.find({
+        marketer_name,
+        followup_date: { $gte: todayDate },
+      }).sort({ followup_date: 1 });
+    else
+      resData = await Report.find({ followup_date: { $gte: todayDate } }).sort({
+        followup_date: 1,
+      });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else sendError(res, 500, "No data found");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -301,6 +337,8 @@ export default async function handle(req, res) {
         await handleGetDailyReports(req, res);
       } else if (req.headers.getdailyreportslast5days) {
         await handleGetDailyReportsLast5Days(req, res);
+      } else if (req.headers.getnearestfollowups) {
+        await handleGetNearestFollowUps(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

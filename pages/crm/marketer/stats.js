@@ -4,7 +4,13 @@ import Navbar from "../../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
 
-export default function MyStats() {
+async function fetchApi(url, options) {
+  const res = await fetch(url, options);
+  const data = await res.json();
+  return data;
+}
+
+export default function MyStats(props) {
   const router = useRouter();
   const { name } = router.query;
 
@@ -32,11 +38,7 @@ export default function MyStats() {
   const [reports, setReports] = useState([]);
   const [dailyReports, setDailyReports] = useState([]);
 
-  async function fetchApi(url, options) {
-    const res = await fetch(url, options);
-    const data = await res.json();
-    return data;
-  }
+  const [nearestFollowUps, setNearestFollowUps] = useState([]);
 
   async function getDailyReports() {
     try {
@@ -151,6 +153,12 @@ export default function MyStats() {
     if (year.length != 4) return dateString;
     return `${day}-${month}-${year}`;
   };
+  const convertToYYYYMMDD = (dateString) => {
+    console.log(dateString);
+    if (!dateString) return null;
+    const [day, month, year] = dateString.split("-");
+    return `${year}-${month}-${day}`;
+  };
 
   function handlePreviousDailyReports() {
     setDailyReportsPage((p) => {
@@ -178,6 +186,11 @@ export default function MyStats() {
   }
 
   useEffect(() => {
+    console.log(props);
+    setNearestFollowUps(props.nearestFollowUps);
+  }, []);
+
+  useEffect(() => {
     if (!reportsIsFiltered) getAllReports();
     if (reports) setReportsPageCount(reports?.pagination?.pageCount);
   }, [reports?.pagination?.pageCount]);
@@ -202,7 +215,71 @@ export default function MyStats() {
     <>
       <Navbar navFor="crm" shortNote={name + " - STATS"} />
       <div className="containter">
-        <div className="client-list mt-5">
+        <div className="followup-list my-5 text-nowrap">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Closest Followups
+          </h5>
+
+          <table className="table table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Calling Date</th>
+                <th>Followup Date</th>
+                <th>Country</th>
+                <th>Website</th>
+                <th>Category</th>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Designation</th>
+                <th>Contact Number</th>
+                <th>Email Address</th>
+                <th>Calling Status</th>
+                <th>LinkedIn</th>
+              </tr>
+            </thead>
+            <tbody>
+              {nearestFollowUps?.length !== 0 ? (
+                nearestFollowUps?.map((item, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>
+                        {item.calling_date
+                          ? convertToDDMMYYYY(item.calling_date)
+                          : ""}
+                      </td>
+                      <td>
+                        {item.followup_date
+                          ? convertToDDMMYYYY(item.followup_date)
+                          : ""}
+                      </td>
+                      <td>{item.country}</td>
+                      <td>{item.website}</td>
+                      <td>{item.category}</td>
+                      <td>{item.company_name}</td>
+                      <td>{item.contact_person}</td>
+                      <td>{item.designation}</td>
+                      <td>{item.contact_number}</td>
+                      <td>{item.email_address}</td>
+                      <td>{item.calling_status}</td>
+                      <td>{item.linkedin}</td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr key={0}>
+                  <td colSpan="13" className=" align-center text-center">
+                    No Followups To Show.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="report-list mt-5">
+          <h5 className="bg-light text-center p-2 mb-3 border">Call Reports</h5>
           <div
             style={{
               display: "flex",
@@ -361,10 +438,7 @@ export default function MyStats() {
                   <th>Contact Number</th>
                   <th>Email Address</th>
                   <th>Calling Status</th>
-                  <th>Email Status</th>
-                  <th>Feedback</th>
                   <th>LinkedIn</th>
-                  <th>Leads Taken Feedback</th>
                 </tr>
               </thead>
               <tbody>
@@ -391,15 +465,12 @@ export default function MyStats() {
                       <td>{item.contact_number}</td>
                       <td>{item.email_address}</td>
                       <td>{item.calling_status}</td>
-                      <td>{item.email_status}</td>
-                      <td className="text-wrap">{item.feedback}</td>
                       <td>{item.linkedin}</td>
-                      <td className="text-wrap">{item.leads_taken_feedback}</td>
                     </tr>
                   ))
                 ) : (
                   <tr key={0}>
-                    <td colSpan="16" className=" align-center text-center">
+                    <td colSpan="13" className=" align-center text-center">
                       No Reports To Show.
                     </td>
                   </tr>
@@ -537,6 +608,7 @@ export default function MyStats() {
           </div>
         </div>
       </div>
+
       <style jsx>
         {`
           .table {
@@ -555,6 +627,7 @@ export default function MyStats() {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
+  const { name } = context.query;
 
   const ALLOWED_IPS = process.env.NEXT_PUBLIC_ALLOWEDIP?.split(" ");
 
@@ -601,8 +674,29 @@ export async function getServerSideProps(context) {
         permanent: true,
       },
     };
-  } else
-    return {
-      props: {},
+  } else {
+    const url1 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options1 = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getnearestfollowups: true,
+        marketer_name: name,
+      },
     };
+
+    let res1 = await fetchApi(url1, options1);
+
+    if (!res1.error) {
+      return {
+        props: {
+          nearestFollowUps: res1,
+        },
+      };
+    } else {
+      return {
+        props: {},
+      };
+    }
+  }
 }
