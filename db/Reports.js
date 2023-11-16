@@ -18,6 +18,7 @@ const ReportSchema = new mongoose.Schema(
     feedback: String,
     linkedin: String,
     leads_taken_feedback: String,
+    followup_done: Boolean,
   },
   { timestamps: true },
 );

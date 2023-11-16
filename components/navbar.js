@@ -308,7 +308,7 @@ export default function Navbar({ navFor, shortNote }) {
                       className={`dropdown-item ${styles.dropitem}`}
                       href="/crm/reports-database"
                     >
-                      Reports
+                      Call Reports
                     </Link>
                   </li>
                   <li>
@@ -329,9 +329,9 @@ export default function Navbar({ navFor, shortNote }) {
                 <li>
                   <Link
                     className={`dropdown-item ${styles.dropitem}`}
-                    href={`/crm/marketer/stats?name=${session.user.name}`}
+                    href="/crm/marketers"
                   >
-                    My Stats
+                    Marketers
                   </Link>
                 </li>
                 <li>
@@ -339,7 +339,7 @@ export default function Navbar({ navFor, shortNote }) {
                     className={`dropdown-item ${styles.dropitem}`}
                     href={`/crm/marketer/report?name=${session.user.name}`}
                   >
-                    Report
+                    Call Report Submit
                   </Link>
                 </li>
                 <li>
@@ -347,7 +347,23 @@ export default function Navbar({ navFor, shortNote }) {
                     className={`dropdown-item ${styles.dropitem}`}
                     href={`/crm/marketer/daily-report?name=${session.user.name}`}
                   >
-                    Daily Report
+                    Daily Report Submit
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href="/crm/reports-database"
+                  >
+                    Call Reports
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href="/crm/daily-reports-database"
+                  >
+                    Daily Reports
                   </Link>
                 </li>
               </ul>

@@ -288,32 +288,50 @@ async function handleGetDailyReportsLast5Days(req, res) {
   }
 }
 
-function formatDate(date) {
-  var d = new Date(date),
-    month = "" + (d.getMonth() + 1),
-    day = "" + d.getDate(),
-    year = d.getFullYear();
-
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
-
-  return [year, month, day].join("-");
-}
-
 async function handleGetNearestFollowUps(req, res) {
   try {
     let marketer_name = req.headers.marketer_name;
-    let todayDate = formatDate(new Date()); // today's date in yyyy-mm-dd format
     let resData;
-    if (marketer_name)
+
+    if (marketer_name) {
       resData = await Report.find({
+        followup_done: false,
         marketer_name,
-        followup_date: { $gte: todayDate },
+        followup_date: { $ne: "" },
       }).sort({ followup_date: 1 });
-    else
-      resData = await Report.find({ followup_date: { $gte: todayDate } }).sort({
+    } else {
+      resData = await Report.find({
+        followup_done: false,
+        followup_date: { $ne: "" },
+      }).sort({
         followup_date: 1,
       });
+
+      let returnData = resData.reduce((acc, entry) => {
+        // Find existing entry for the marketer
+        const existingEntry = acc.find(
+          (item) => item.marketer_name === entry.marketer_name,
+        );
+
+        if (existingEntry) {
+          // Update existing entry with new data
+          existingEntry.prospectsCount += 1;
+        } else {
+          // Create a new entry if the marketer doesn't exist in the result array
+          acc.push({
+            marketer_name: entry.marketer_name,
+            prospectsCount: 1,
+          });
+        }
+
+        return acc;
+      }, []);
+
+      if (returnData) {
+        res.status(200).json(returnData);
+      } else sendError(res, 500, "No data found");
+      return;
+    }
 
     if (resData) {
       res.status(200).json(resData);

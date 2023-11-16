@@ -3,6 +3,7 @@ import Link from "next/link";
 import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
+import { useRouter } from "next/router";
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -11,6 +12,7 @@ async function fetchApi(url, options) {
 }
 
 export default function Marketers(props) {
+  const router = useRouter();
   const [marketersList, setMarketersList] = useState([]);
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
   const [nearestFollowUps, setNearestFollowUps] = useState([]);
@@ -156,13 +158,7 @@ export default function Marketers(props) {
                   return (
                     <tr key={index}>
                       <td>{index + 1}</td>
-                      <td className="marketer_name text-decoration-underline">
-                        <Link
-                          href={`/crm/marketer/stats?name=${marketer.name}`}
-                        >
-                          {marketer.name}
-                        </Link>
-                      </td>
+                      <td className="">{marketer.name}</td>
                       <td>{marketer.company_provided_name}</td>
                       <td>
                         {marketer.joining_date
@@ -226,50 +222,30 @@ export default function Marketers(props) {
               <tr className="table-dark">
                 <th>#</th>
                 <th>Marketer Name</th>
-                <th>Follow Up Date(s)</th>
-                <th>Calling Status</th>
-                <th>Details</th>
+                <th>Remaining Followup</th>
               </tr>
             </thead>
             <tbody>
               {nearestFollowUps?.length !== 0 &&
                 nearestFollowUps?.map((followupdata, index) => {
                   return (
-                    <tr key={index} className={index == 0 && "table-secondary"}>
+                    <tr key={index}>
                       <td>{index + 1}</td>
-                      <td className="marketer_name">
-                        {followupdata.marketer_name}
-                      </td>
-                      <td>
-                        {followupdata.followup_date
-                          ? convertToDDMMYYYY(followupdata.followup_date)
-                          : ""}
-                      </td>
-                      <td className="text-wrap">
-                        {followupdata.calling_status}
-                      </td>
-                      <td
-                        className="align-middle"
-                        style={{ textAlign: "center" }}
-                      >
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => {
-                            setVeiwFollowUp({
-                              ...followupdata,
-                              followup_date:
-                                convertToYYYYMMDD(followupdata.followup_date) ??
-                                "",
-                              calling_date:
-                                convertToYYYYMMDD(followupdata.calling_date) ??
-                                "",
-                            });
-                          }}
-                          data-bs-toggle="modal"
-                          data-bs-target="#veiwModal"
+                      <td className="marketer_name text-decoration-underline">
+                        <Link
+                          target="_blank"
+                          href={
+                            process.env.NEXT_PUBLIC_BASE_URL +
+                            "/crm/followup/" +
+                            followupdata.marketer_name
+                          }
                         >
-                          Veiw
-                        </button>
+                          {followupdata.marketer_name}
+                        </Link>
+                      </td>
+
+                      <td className="text-wrap">
+                        {followupdata.prospectsCount}
                       </td>
                     </tr>
                   );
@@ -549,7 +525,9 @@ export async function getServerSideProps(context) {
   // code for redirect if not logged in
   if (
     !session ||
-    (session.user.role != "admin" && session.user.role != "super")
+    (session.user.role != "admin" &&
+      session.user.role != "super" &&
+      session.user.role != "marketer")
   ) {
     return {
       redirect: {
