@@ -264,6 +264,7 @@ export default function Navbar({ navFor, shortNote }) {
             File Flow
           </Link>
         ) : null}
+
         {session.user.role === "admin" ||
         session.user.role === "super" ||
         session.user.role === "marketer" ? (
@@ -282,92 +283,63 @@ export default function Navbar({ navFor, shortNote }) {
               <Link
                 href={
                   session.user.role === "marketer"
-                    ? `/crm/marketer/stats?name=${session.user.name}`
+                    ? `/crm/marketers`
                     : "/crm/marketers"
                 }
               >
                 CRM
               </Link>
             </li>
-            {session.user.role === "admin" ||
-              (session.user.role === "super" && (
-                <ul
-                  className="dropdown-menu"
-                  aria-labelledby="navbarDropdownMenuLink"
+
+            <ul
+              className="dropdown-menu"
+              aria-labelledby="navbarDropdownMenuLink"
+            >
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/crm/marketers"
                 >
+                  Marketers
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/crm/reports-database"
+                >
+                  Call Reports
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/crm/daily-reports-database"
+                >
+                  Daily Reports
+                </Link>
+              </li>
+              {session.user.role === "marketer" && (
+                <>
                   <li>
                     <Link
                       className={`dropdown-item ${styles.dropitem}`}
-                      href="/crm/marketers"
+                      href={`/crm/marketer/report?name=${session.user.name}`}
                     >
-                      Marketers
+                      Call Report Submit
                     </Link>
                   </li>
                   <li>
                     <Link
                       className={`dropdown-item ${styles.dropitem}`}
-                      href="/crm/reports-database"
+                      href={`/crm/marketer/daily-report?name=${session.user.name}`}
                     >
-                      Call Reports
+                      Daily Report Submit
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      className={`dropdown-item ${styles.dropitem}`}
-                      href="/crm/daily-reports-database"
-                    >
-                      Daily Reports
-                    </Link>
-                  </li>
-                </ul>
-              ))}
-            {session.user.role === "marketer" && (
-              <ul
-                className="dropdown-menu marketers-menu"
-                aria-labelledby="navbarDropdownMenuLink"
-              >
-                <li>
-                  <Link
-                    className={`dropdown-item ${styles.dropitem}`}
-                    href="/crm/marketers"
-                  >
-                    Marketers
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={`dropdown-item ${styles.dropitem}`}
-                    href={`/crm/marketer/report?name=${session.user.name}`}
-                  >
-                    Call Report Submit
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={`dropdown-item ${styles.dropitem}`}
-                    href={`/crm/marketer/daily-report?name=${session.user.name}`}
-                  >
-                    Daily Report Submit
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={`dropdown-item ${styles.dropitem}`}
-                    href="/crm/reports-database"
-                  >
-                    Call Reports
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={`dropdown-item ${styles.dropitem}`}
-                    href="/crm/daily-reports-database"
-                  >
-                    Daily Reports
-                  </Link>
-                </li>
-              </ul>
-            )}
+                </>
+              )}
+            </ul>
           </li>
         ) : null}
 
