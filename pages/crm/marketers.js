@@ -13,6 +13,7 @@ async function fetchApi(url, options) {
 
 export default function Marketers(props) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [marketersList, setMarketersList] = useState([]);
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
 
@@ -293,7 +294,7 @@ export default function Marketers(props) {
   }, []);
   return (
     <>
-      <Navbar navFor="crm" />
+      <Navbar navFor={session.user.role == "marketer" ? "marketers" : "crm"} />
       <div className="container">
         <div className="marketers-list my-5">
           <h5 className="bg-light text-center p-2 mb-3 border">

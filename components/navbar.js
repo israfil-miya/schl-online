@@ -133,15 +133,17 @@ export default function Navbar({ navFor, shortNote }) {
       </nav>
 
       <div className={`px-5 navigation ${styles.nav}`}>
-        <Link
-          className={`${styles.navitem} ${
-            navFor === "tasks" ? styles.active : ""
-          }`}
-          href="/"
-        >
-          Tasks
-        </Link>
-        {session.user.role !== "user" ? (
+        {session.user.role !== "marketer" ? (
+          <Link
+            className={`${styles.navitem} ${
+              navFor === "tasks" ? styles.active : ""
+            }`}
+            href="/"
+          >
+            Tasks
+          </Link>
+        ) : null}
+        {session.user.role !== "user" && session.user.role !== "marketer" ? (
           <Link
             className={`${styles.navitem} ${
               navFor === "browse" ? styles.active : ""
@@ -265,9 +267,7 @@ export default function Navbar({ navFor, shortNote }) {
           </Link>
         ) : null}
 
-        {session.user.role === "admin" ||
-        session.user.role === "super" ||
-        session.user.role === "marketer" ? (
+        {session.user.role === "admin" || session.user.role === "super" ? (
           <li
             className={`${styles.navitem} ${
               navFor === "crm" ? styles.active : ""
@@ -319,28 +319,54 @@ export default function Navbar({ navFor, shortNote }) {
                   Daily Reports
                 </Link>
               </li>
-              {session.user.role === "marketer" && (
-                <>
-                  <li>
-                    <Link
-                      className={`dropdown-item ${styles.dropitem}`}
-                      href={`/crm/marketer/report?name=${session.user.name}`}
-                    >
-                      Call Report Submit
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className={`dropdown-item ${styles.dropitem}`}
-                      href={`/crm/marketer/daily-report?name=${session.user.name}`}
-                    >
-                      Daily Report Submit
-                    </Link>
-                  </li>
-                </>
-              )}
             </ul>
           </li>
+        ) : null}
+
+        {session.user.role === "marketer" ? (
+          <>
+            <Link
+              className={`${styles.navitem} ${
+                navFor === "marketers" ? styles.active : ""
+              }`}
+              href="/crm/marketers"
+            >
+              Marketers
+            </Link>
+            <Link
+              className={`${styles.navitem} ${
+                navFor === "call-reports" ? styles.active : ""
+              }`}
+              href="/crm/reports-database"
+            >
+              Call Reports
+            </Link>
+            <Link
+              className={`${styles.navitem} ${
+                navFor === "daily-reports" ? styles.active : ""
+              }`}
+              href="/crm/daily-reports-database"
+            >
+              Daily Reports
+            </Link>
+
+            <Link
+              className={`${styles.navitem} ${
+                navFor === "call-report-submit" ? styles.active : ""
+              }`}
+              href={`/crm/marketer/report?name=${session.user.name}`}
+            >
+              Call Report Submit
+            </Link>
+            <Link
+              className={`${styles.navitem} ${
+                navFor === "daily-report-submit" ? styles.active : ""
+              }`}
+              href={`/crm/marketer/daily-report?name=${session.user.name}`}
+            >
+              Daily Report Submit
+            </Link>
+          </>
         ) : null}
 
         {shortNote ? (

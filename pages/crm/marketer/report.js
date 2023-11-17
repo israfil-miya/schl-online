@@ -88,7 +88,7 @@ export default function DailyReport() {
 
   return (
     <>
-      <Navbar navFor="crm" />
+      <Navbar navFor="call-report-submit" />
       <div className="container my-5">
         <div className="add-report">
           <h5 className="py-3">New Report</h5>

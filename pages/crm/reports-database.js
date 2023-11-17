@@ -13,6 +13,7 @@ async function fetchApi(url, options) {
 export default function Report(props) {
   const router = useRouter();
   const { name } = router.query;
+  const { data: session } = useSession();
 
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
@@ -151,7 +152,7 @@ export default function Report(props) {
 
   return (
     <>
-      <Navbar navFor="crm" />
+      <Navbar navFor={session.user.role == "marketer" ? "call-reports" : "crm"} />
       <div className="containter">
         <div className="daily-report my-5">
           <div

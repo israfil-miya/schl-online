@@ -12,6 +12,7 @@ async function fetchApi(url, options) {
 
 export default function DailyReportsDatabase() {
   const router = useRouter();
+  const { data: session } = useSession();
   const { name } = router.query;
 
   const [marketersList, setMarketersList] = useState([]);
@@ -149,7 +150,7 @@ export default function DailyReportsDatabase() {
 
   return (
     <>
-      <Navbar navFor="crm" />
+      <Navbar navFor={session.user.role == "marketer" ? "daily-reports" : "crm"} />
       <div className="container">
         <div className="daily-report my-5">
           <div
