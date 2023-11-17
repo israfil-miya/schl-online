@@ -15,8 +15,12 @@ export default function Marketers(props) {
   const router = useRouter();
   const [marketersList, setMarketersList] = useState([]);
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
-  const [nearestFollowUps, setNearestFollowUps] = useState([]);
-  const [veiwFollowUp, setVeiwFollowUp] = useState({});
+
+  const [availableFollowUps, setAvailableFollowUps] = useState([]);
+  const [testJobsStatus, setTestJobsStatus] = useState([]);
+  const [prospectsStatus, setProspectsStatus] = useState([]);
+  const [prospectsStatusCount, setProspectsStatusCount] = useState(0);
+  const [testJobsStatusCount, setTestJobsStatusCount] = useState(0);
 
   const getMarketers = async () => {
     try {
@@ -48,14 +52,7 @@ export default function Marketers(props) {
     return `${day}-${month}-${year}`;
   };
 
-  const convertToYYYYMMDD = (dateString) => {
-    console.log(dateString);
-    if (!dateString) return null;
-    const [day, month, year] = dateString.split("-");
-    return `${year}-${month}-${day}`;
-  };
-
-  const createDailyStatusReportTable = () => {
+  const createDailyReportStatusTable = () => {
     let parsedTableRows = [];
     let total_calls_made = 0;
     let total_test_jobs = 0;
@@ -63,7 +60,7 @@ export default function Marketers(props) {
 
     props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
       total_calls_made += parseInt(
-        FiveDayReportOfMarketer.data.total_calls_made,
+        FiveDayReportOfMarketer.data.total_calls_made
       )
         ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
         : 0;
@@ -95,7 +92,7 @@ export default function Marketers(props) {
           <td className="text-center" style={{ padding: "0px" }}>
             {FiveDayReportOfMarketer.data.total_test_jobs}
           </td>
-        </tr>,
+        </tr>
       );
     });
 
@@ -121,22 +118,184 @@ export default function Marketers(props) {
         <th className="text-center" style={{ padding: "0px" }}>
           {total_test_jobs}
         </th>
-      </tr>,
+      </tr>
     );
 
     return parsedTableRows;
   };
+  //   let parsedTableRows = [];
+  //   let total_test_jobs = 0;
+
+  //   props?.test.map((FiveDayReportOfMarketer, index) => {
+  //     total_calls_made += parseInt(
+  //       FiveDayReportOfMarketer.data.total_calls_made,
+  //     )
+  //       ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
+  //       : 0;
+  //     total_test_jobs += parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+  //       ? parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+  //       : 0;
+  //     total_prospects += parseInt(FiveDayReportOfMarketer.data.total_prospects)
+  //       ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
+  //       : 0;
+  //     parsedTableRows.push(
+  //       <tr key={index}>
+  //         <td
+  //           style={{
+  //             minWidth: "40px",
+  //             maxWidth: "40px",
+  //             padding: "0px 0px 0px 5px",
+  //             backgroundColor: "#212529",
+  //             color: "#fff",
+  //           }}
+  //         >
+  //           {FiveDayReportOfMarketer.marketer_name}
+  //         </td>
+  //         <td className="text-center" style={{ padding: "0px" }}>
+  //           {FiveDayReportOfMarketer.data.total_calls_made}
+  //         </td>
+  //         <td className="text-center" style={{ padding: "0px" }}>
+  //           {FiveDayReportOfMarketer.data.total_prospects}
+  //         </td>
+  //         <td className="text-center" style={{ padding: "0px" }}>
+  //           {FiveDayReportOfMarketer.data.total_test_jobs}
+  //         </td>
+  //       </tr>,
+  //     );
+  //   });
+
+  //   parsedTableRows.push(
+  //     <tr>
+  //       <th
+  //         style={{
+  //           minWidth: "40px",
+  //           maxWidth: "40px",
+  //           padding: "0px 0px 0px 5px",
+  //           backgroundColor: "#212529",
+  //           color: "#fff",
+  //         }}
+  //       >
+  //         Total
+  //       </th>
+  //       <th className="text-center" style={{ padding: "0px" }}>
+  //         {total_calls_made}
+  //       </th>
+  //       <th className="text-center" style={{ padding: "0px" }}>
+  //         {total_prospects}
+  //       </th>
+  //       <th className="text-center" style={{ padding: "0px" }}>
+  //         {total_test_jobs}
+  //       </th>
+  //     </tr>,
+  //   );
+
+  //   return parsedTableRows;
+  // };
+  // const createProspectsStatusTable = () => {
+  //   let parsedTableRows = [];
+  //   let total_calls_made = 0;
+  //   let total_test_jobs = 0;
+  //   let total_prospects = 0;
+
+  //   props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
+  //     total_calls_made += parseInt(
+  //       FiveDayReportOfMarketer.data.total_calls_made,
+  //     )
+  //       ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
+  //       : 0;
+  //     total_test_jobs += parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+  //       ? parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+  //       : 0;
+  //     total_prospects += parseInt(FiveDayReportOfMarketer.data.total_prospects)
+  //       ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
+  //       : 0;
+  //     parsedTableRows.push(
+  //       <tr key={index}>
+  //         <td
+  //           style={{
+  //             minWidth: "40px",
+  //             maxWidth: "40px",
+  //             padding: "0px 0px 0px 5px",
+  //             backgroundColor: "#212529",
+  //             color: "#fff",
+  //           }}
+  //         >
+  //           {FiveDayReportOfMarketer.marketer_name}
+  //         </td>
+  //         <td className="text-center" style={{ padding: "0px" }}>
+  //           {FiveDayReportOfMarketer.data.total_calls_made}
+  //         </td>
+  //         <td className="text-center" style={{ padding: "0px" }}>
+  //           {FiveDayReportOfMarketer.data.total_prospects}
+  //         </td>
+  //         <td className="text-center" style={{ padding: "0px" }}>
+  //           {FiveDayReportOfMarketer.data.total_test_jobs}
+  //         </td>
+  //       </tr>,
+  //     );
+  //   });
+
+  //   parsedTableRows.push(
+  //     <tr>
+  //       <th
+  //         style={{
+  //           minWidth: "40px",
+  //           maxWidth: "40px",
+  //           padding: "0px 0px 0px 5px",
+  //           backgroundColor: "#212529",
+  //           color: "#fff",
+  //         }}
+  //       >
+  //         Total
+  //       </th>
+  //       <th className="text-center" style={{ padding: "0px" }}>
+  //         {total_calls_made}
+  //       </th>
+  //       <th className="text-center" style={{ padding: "0px" }}>
+  //         {total_prospects}
+  //       </th>
+  //       <th className="text-center" style={{ padding: "0px" }}>
+  //         {total_test_jobs}
+  //       </th>
+  //     </tr>,
+  //   );
+
+  //   return parsedTableRows;
+  // };
 
   useEffect(() => {
-    setDailyReportStatusRowHtml(createDailyStatusReportTable());
-    setNearestFollowUps(props.nearestFollowUps);
+    setDailyReportStatusRowHtml(createDailyReportStatusTable());
+    setAvailableFollowUps(props.availableFollowUps);
+    setTestJobsStatus(props.testJobsStatus);
+    setProspectsStatus(props.prospectsStatus);
+
+    setTestJobsStatusCount(
+      props.testJobsStatus.reduce(
+        (acc, entry) => {
+          acc.tests_count += entry.tests_count;
+          return acc;
+        },
+        { tests_count: 0 }
+      ).tests_count
+    );
+
+    setProspectsStatusCount(
+      props.prospectsStatus.reduce(
+        (acc, entry) => {
+          acc.prospects_count += entry.prospects_count;
+          return acc;
+        },
+        { prospects_count: 0 }
+      ).prospects_count
+    );
+
     getMarketers();
   }, []);
   return (
     <>
       <Navbar navFor="crm" />
       <div className="container">
-        <div className="markers-list my-5">
+        <div className="marketers-list my-5">
           <h5 className="bg-light text-center p-2 mb-3 border">
             Marketers List
           </h5>
@@ -214,7 +373,7 @@ export default function Marketers(props) {
 
         <div className="followup-list my-5 text-nowrap">
           <h5 className="bg-light text-center p-2 mb-3 border">
-            Closest Followups
+            Available Followups
           </h5>
 
           <table className="table table-hover">
@@ -226,8 +385,8 @@ export default function Marketers(props) {
               </tr>
             </thead>
             <tbody>
-              {nearestFollowUps?.length !== 0 ?
-                (nearestFollowUps?.map((followupdata, index) => {
+              {availableFollowUps?.length !== 0 ? (
+                availableFollowUps?.map((followupdata, index) => {
                   return (
                     <tr key={index}>
                       <td>{index + 1}</td>
@@ -245,231 +404,151 @@ export default function Marketers(props) {
                       </td>
 
                       <td className="text-wrap">
-                        {followupdata.prospectsCount}
+                        {followupdata.followups_count}
                       </td>
                     </tr>
                   );
-                })) : (
-                  <tr>
-                    <td className="text-center" colSpan="3">No avaiable followup</td>
-                  </tr>
-                )}
+                })
+              ) : (
+                <tr>
+                  <td className="text-center" colSpan="3">
+                    No avaiable followup
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      </div>
 
-      <div
-        className="modal fade"
-        id="veiwModal"
-        tabIndex="-1"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered ">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Report Data
-              </h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <div className="mb-3">
-                <label htmlFor="calling_date" className="form-label">
-                  Calling Date
-                </label>
-                <input
-                  disabled
-                  value={veiwFollowUp.calling_date}
-                  type="text"
-                  className="form-control"
-                  id="calling_date"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="followup_date" className="form-label">
-                  Followup Date
-                </label>
-                <input
-                  value={veiwFollowUp.followup_date}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="followup_date"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="country" className="form-label">
-                  Country
-                </label>
-                <input
-                  value={veiwFollowUp.country}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="country"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="website" className="form-label">
-                  Website
-                </label>
-                <input
-                  value={veiwFollowUp.website}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="website"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="category" className="form-label">
-                  Category
-                </label>
-                <input
-                  value={veiwFollowUp.category}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="category"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="company_name" className="form-label">
-                  Company Name
-                </label>
-                <input
-                  value={veiwFollowUp.company_name}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="company_name"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="contact_person" className="form-label">
-                  Contact Person
-                </label>
-                <input
-                  value={veiwFollowUp.contact_person}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="contact_person"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="designation" className="form-label">
-                  Designation
-                </label>
-                <input
-                  value={veiwFollowUp.designation}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="designation"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="contact_number" className="form-label">
-                  Contact Number
-                </label>
-                <input
-                  value={veiwFollowUp.contact_number}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="contact_number"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="email_address" className="form-label">
-                  Email Address
-                </label>
-                <input
-                  value={veiwFollowUp.email_address}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="email_address"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="calling_status" className="form-label">
-                  Calling Status
-                </label>
-                <input
-                  value={veiwFollowUp.calling_status}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="calling_status"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="email_status" className="form-label">
-                  Email Status
-                </label>
-                <input
-                  value={veiwFollowUp.email_status}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="email_status"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="feedback" className="form-label">
-                  Feedback
-                </label>
-                <textarea
-                  disabled
-                  value={veiwFollowUp.feedback}
-                  type="text"
-                  className="form-control"
-                  id="feedback"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="linkedin" className="form-label">
-                  LinkedIn
-                </label>
-                <input
-                  value={veiwFollowUp.linkedin}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="linkedin"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="leads_taken_feedback" className="form-label">
-                  Leads Taken Feedback
-                </label>
-                <textarea
-                  value={veiwFollowUp.leads_taken_feedback}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="leads_taken_feedback"
-                />
-              </div>
-            </div>
-            <div className="modal-footer p-1">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+        <div className="test-jobs-list my-5 text-nowrap">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Test Jobs Status (Last Five Business Days)
+          </h5>
+
+          <table className="table table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Marketer Name</th>
+                <th>Tests</th>
+              </tr>
+            </thead>
+            <tbody>
+              {testJobsStatus?.length !== 0 ? (
+                testJobsStatus?.map((testdata, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td className="marketer_name text-decoration-underline">
+                        <Link
+                          target="_blank"
+                          href={
+                            process.env.NEXT_PUBLIC_BASE_URL +
+                            "/crm/testjob/" +
+                            testdata.marketer_name
+                          }
+                        >
+                          {testdata.marketer_name}
+                        </Link>
+                      </td>
+
+                      <td className="text-wrap">{testdata.tests_count}</td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td className="text-center" colSpan="3">
+                    No prospect report
+                  </td>
+                </tr>
+              )}
+
+              {testJobsStatus?.length !== 0 && (
+                <tr className="fw-bold table-secondary">
+                  <td></td>
+                  <td className="marketer_name text-decoration-underline">
+                    <Link
+                      target="_blank"
+                      href={
+                        process.env.NEXT_PUBLIC_BASE_URL + "/crm/testjob/status"
+                      }
+                    >
+                      Total
+                    </Link>
+                  </td>
+                  <td>{testJobsStatusCount}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="prospects-list my-5 text-nowrap">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Prospects Status (Last Five Business Days)
+          </h5>
+
+          <table className="table table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Marketer Name</th>
+                <th>Prospects</th>
+              </tr>
+            </thead>
+            <tbody>
+              {prospectsStatus?.length !== 0 ? (
+                prospectsStatus?.map((prospectdata, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td className="marketer_name text-decoration-underline">
+                        <Link
+                          target="_blank"
+                          href={
+                            process.env.NEXT_PUBLIC_BASE_URL +
+                            "/crm/prospect/" +
+                            prospectdata.marketer_name
+                          }
+                        >
+                          {prospectdata.marketer_name}
+                        </Link>
+                      </td>
+
+                      <td className="text-wrap">
+                        {prospectdata.prospects_count}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td className="text-center" colSpan="3">
+                    No prospect report
+                  </td>
+                </tr>
+              )}
+
+              {prospectsStatus?.length !== 0 && (
+                <tr className="fw-bold table-secondary">
+                  <td></td>
+                  <td className="marketer_name text-decoration-underline">
+                    <Link
+                      target="_blank"
+                      href={
+                        process.env.NEXT_PUBLIC_BASE_URL +
+                        "/crm/prospect/status"
+                      }
+                    >
+                      Total
+                    </Link>
+                  </td>
+                  <td>{prospectsStatusCount}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -558,14 +637,36 @@ export async function getServerSideProps(context) {
       },
     };
 
+    const url2 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options2 = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        gettestslast5days: true,
+      },
+    };
+
+    const url3 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options3 = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getprospectslast5days: true,
+      },
+    };
+
     let res = await fetchApi(url, options);
     let res1 = await fetchApi(url1, options1);
+    let res2 = await fetchApi(url2, options2);
+    let res3 = await fetchApi(url3, options3);
 
     if (!res.error && !res1.error) {
       return {
         props: {
           dailyReportStatus: res,
-          nearestFollowUps: res1,
+          availableFollowUps: res1,
+          testJobsStatus: res2,
+          prospectsStatus: res3,
         },
       };
     } else {

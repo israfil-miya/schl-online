@@ -37,7 +37,8 @@ export default function DailyReport() {
     feedback: "",
     linkedin: "",
     leads_taken_feedback: "",
-    is_test: false
+    is_test: false,
+    is_prospected: false
   });
 
   const { name } = router.query;
@@ -80,7 +81,8 @@ export default function DailyReport() {
       feedback: "",
       linkedin: "",
       leads_taken_feedback: "",
-      is_test: false
+      is_test: false,
+      is_prospected: false
     }));
   };
 
@@ -317,7 +319,7 @@ export default function DailyReport() {
                 id="leads_taken_feedback"
               />
             </div>
-            <div className="mb-3">
+            <div className="">
               <div className="form-check">
                 {/* Checkbox input */}
                 <input
@@ -336,6 +338,28 @@ export default function DailyReport() {
                 {/* Label for the checkbox */}
                 <label htmlFor="myCheckbox" className="form-check-label">
                   Test Job
+                </label>
+              </div>
+            </div>
+            <div className="mb-3">
+              <div className="form-check">
+                {/* Checkbox input */}
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={reportData.is_prospected}
+                  onChange={(e) =>
+                    setReportData({
+                      ...reportData,
+                      is_prospected: !reportData.is_prospected,
+                    })
+                  }
+                />
+
+                {/* Label for the checkbox */}
+                <label htmlFor="myCheckbox" className="form-check-label">
+                  Prospecting
                 </label>
               </div>
             </div>

@@ -288,6 +288,78 @@ async function handleGetDailyReportsLast5Days(req, res) {
   }
 }
 
+async function handleGetTestsLast5Days(req, res) {
+  try {
+    let validWeekdays = getvalidWeekDays();
+
+    let resData = await Report.find({ $or: validWeekdays, is_test: true });
+
+    let returnData = resData.reduce((acc, entry) => {
+      // Find existing entry for the marketer
+      const existingEntry = acc.find(
+        (item) => item.marketer_name === entry.marketer_name,
+      );
+
+      if (existingEntry) {
+        // Update existing entry with new data
+        existingEntry.tests_count += 1;
+      } else {
+        // Create a new entry if the marketer doesn't exist in the result array
+        acc.push({
+          marketer_name: entry.marketer_name,
+          tests_count: 1,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    if (resData && returnData) {
+      res.status(200).json(returnData);
+    } else sendError(res, 500, "No data found");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleGetProspectsLast5Days(req, res) {
+  try {
+    let validWeekdays = getvalidWeekDays();
+
+    let resData = await Report.find({ $or: validWeekdays, is_prospected: true });
+
+    let returnData = resData.reduce((acc, entry) => {
+      // Find existing entry for the marketer
+      const existingEntry = acc.find(
+        (item) => item.marketer_name === entry.marketer_name,
+      );
+
+      if (existingEntry) {
+        // Update existing entry with new data
+        existingEntry.prospects_count += 1;
+      } else {
+        // Create a new entry if the marketer doesn't exist in the result array
+        acc.push({
+          marketer_name: entry.marketer_name,
+          prospects_count: 1,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    console.log(returnData)
+
+    if (resData && returnData) {
+      res.status(200).json(returnData);
+    } else sendError(res, 500, "No data found");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 async function handleGetNearestFollowUps(req, res) {
   try {
     let marketer_name = req.headers.marketer_name;
@@ -315,12 +387,12 @@ async function handleGetNearestFollowUps(req, res) {
 
         if (existingEntry) {
           // Update existing entry with new data
-          existingEntry.prospectsCount += 1;
+          existingEntry.followups_count += 1;
         } else {
           // Create a new entry if the marketer doesn't exist in the result array
           acc.push({
             marketer_name: entry.marketer_name,
-            prospectsCount: 1,
+            followups_count: 1,
           });
         }
 
@@ -378,6 +450,10 @@ export default async function handle(req, res) {
         await handleGetNearestFollowUps(req, res);
       } else if (req.headers.finishfollowup) {
         await handleFinishFollowup(req, res);
+      } else if (req.headers.gettestslast5days) {
+        await handleGetTestsLast5Days(req, res);
+      } else if (req.headers.getprospectslast5days) {
+        await handleGetProspectsLast5Days(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

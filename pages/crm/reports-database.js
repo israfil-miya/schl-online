@@ -325,6 +325,7 @@ export default function Report(props) {
                   <th>Calling Status</th>
                   <th>LinkedIn</th>
                   <th>Test</th>
+                  <th>Prospected</th>
                 </tr>
               </thead>
               <tbody>
@@ -353,6 +354,7 @@ export default function Report(props) {
                       <td className="text-wrap">{item.calling_status}</td>
                       <td>{item.linkedin}</td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
+                      <td>{item.is_prospected ? "Yes" : "No"}</td>
                     </tr>
                   ))
                 ) : (

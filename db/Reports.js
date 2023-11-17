@@ -26,6 +26,10 @@ const ReportSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    is_prospected: {
+      type: Boolean,
+      default: false
+    },
   }, { timestamps: true },
 );
 
