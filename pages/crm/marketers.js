@@ -226,8 +226,8 @@ export default function Marketers(props) {
               </tr>
             </thead>
             <tbody>
-              {nearestFollowUps?.length !== 0 &&
-                nearestFollowUps?.map((followupdata, index) => {
+              {nearestFollowUps?.length !== 0 ?
+                (nearestFollowUps?.map((followupdata, index) => {
                   return (
                     <tr key={index}>
                       <td>{index + 1}</td>
@@ -249,7 +249,11 @@ export default function Marketers(props) {
                       </td>
                     </tr>
                   );
-                })}
+                })) : (
+                  <tr>
+                    <td className="text-center" colSpan="3">No avaiable followup</td>
+                  </tr>
+                )}
             </tbody>
           </table>
         </div>

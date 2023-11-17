@@ -18,9 +18,15 @@ const ReportSchema = new mongoose.Schema(
     feedback: String,
     linkedin: String,
     leads_taken_feedback: String,
-    followup_done: Boolean,
-  },
-  { timestamps: true },
+    followup_done:  {
+      type: Boolean,
+      default: false
+    },
+    is_test: {
+      type: Boolean,
+      default: false
+    },
+  }, { timestamps: true },
 );
 
 module.exports =

@@ -324,6 +324,7 @@ export default function Report(props) {
                   <th>Email Address</th>
                   <th>Calling Status</th>
                   <th>LinkedIn</th>
+                  <th>Test</th>
                 </tr>
               </thead>
               <tbody>
@@ -351,6 +352,7 @@ export default function Report(props) {
                       <td>{item.email_address}</td>
                       <td className="text-wrap">{item.calling_status}</td>
                       <td>{item.linkedin}</td>
+                      <td>{item.is_test ? "Yes" : "No"}</td>
                     </tr>
                   ))
                 ) : (

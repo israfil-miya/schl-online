@@ -342,6 +342,25 @@ async function handleGetNearestFollowUps(req, res) {
   }
 }
 
+
+async function handleFinishFollowup(req, res) {
+  try {
+    let followupDataId = req.headers.id
+
+    let resData = await Report.findByIdAndUpdate(followupDataId, { followup_done: true })
+
+
+    if (resData) {
+      res.status(200).json({ message: "Succesfully updated the followup status" })
+    } else {
+      sendError(res, 500, "Unable to update the followup status")
+    }
+
+  } catch (e) {
+    sendError(res, 500, e.message)
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -357,6 +376,8 @@ export default async function handle(req, res) {
         await handleGetDailyReportsLast5Days(req, res);
       } else if (req.headers.getnearestfollowups) {
         await handleGetNearestFollowUps(req, res);
+      } else if (req.headers.finishfollowup) {
+        await handleFinishFollowup(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
