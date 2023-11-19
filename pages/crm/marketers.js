@@ -18,10 +18,6 @@ export default function Marketers(props) {
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
 
   const [availableFollowUps, setAvailableFollowUps] = useState([]);
-  const [testJobsStatus, setTestJobsStatus] = useState([]);
-  const [prospectsStatus, setProspectsStatus] = useState([]);
-  const [prospectsStatusCount, setProspectsStatusCount] = useState(0);
-  const [testJobsStatusCount, setTestJobsStatusCount] = useState(0);
 
   const getMarketers = async () => {
     try {
@@ -61,7 +57,7 @@ export default function Marketers(props) {
 
     props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
       total_calls_made += parseInt(
-        FiveDayReportOfMarketer.data.total_calls_made
+        FiveDayReportOfMarketer.data.total_calls_made,
       )
         ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
         : 0;
@@ -93,7 +89,7 @@ export default function Marketers(props) {
           <td className="text-center" style={{ padding: "0px" }}>
             {FiveDayReportOfMarketer.data.total_test_jobs}
           </td>
-        </tr>
+        </tr>,
       );
     });
 
@@ -119,7 +115,7 @@ export default function Marketers(props) {
         <th className="text-center" style={{ padding: "0px" }}>
           {total_test_jobs}
         </th>
-      </tr>
+      </tr>,
     );
 
     return parsedTableRows;
@@ -267,29 +263,6 @@ export default function Marketers(props) {
   useEffect(() => {
     setDailyReportStatusRowHtml(createDailyReportStatusTable());
     setAvailableFollowUps(props.availableFollowUps);
-    setTestJobsStatus(props.testJobsStatus);
-    setProspectsStatus(props.prospectsStatus);
-
-    setTestJobsStatusCount(
-      props.testJobsStatus.reduce(
-        (acc, entry) => {
-          acc.tests_count += entry.tests_count;
-          return acc;
-        },
-        { tests_count: 0 }
-      ).tests_count
-    );
-
-    setProspectsStatusCount(
-      props.prospectsStatus.reduce(
-        (acc, entry) => {
-          acc.prospects_count += entry.prospects_count;
-          return acc;
-        },
-        { prospects_count: 0 }
-      ).prospects_count
-    );
-
     getMarketers();
   }, []);
   return (
@@ -383,6 +356,7 @@ export default function Marketers(props) {
                 <th>#</th>
                 <th>Marketer Name</th>
                 <th>Remaining Followup</th>
+                <th>Nearest Date</th>
               </tr>
             </thead>
             <tbody>
@@ -407,6 +381,9 @@ export default function Marketers(props) {
                       <td className="text-wrap">
                         {followupdata.followups_count}
                       </td>
+                      <td className="text-wrap">
+                        {convertToDDMMYYYY(followupdata.followup_date)}
+                      </td>
                     </tr>
                   );
                 })
@@ -415,137 +392,6 @@ export default function Marketers(props) {
                   <td className="text-center" colSpan="3">
                     No avaiable followup
                   </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="test-jobs-list my-5 text-nowrap">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Test Jobs Status (Last Five Business Days)
-          </h5>
-
-          <table className="table table-hover">
-            <thead>
-              <tr className="table-dark">
-                <th>#</th>
-                <th>Marketer Name</th>
-                <th>Tests</th>
-              </tr>
-            </thead>
-            <tbody>
-              {testJobsStatus?.length !== 0 ? (
-                testJobsStatus?.map((testdata, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td className="marketer_name text-decoration-underline">
-                        <Link
-                          target="_blank"
-                          href={
-                            process.env.NEXT_PUBLIC_BASE_URL +
-                            "/crm/testjob/" +
-                            testdata.marketer_name
-                          }
-                        >
-                          {testdata.marketer_name}
-                        </Link>
-                      </td>
-
-                      <td className="text-wrap">{testdata.tests_count}</td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td className="text-center" colSpan="3">
-                    No prospect report
-                  </td>
-                </tr>
-              )}
-
-              {testJobsStatus?.length !== 0 && (
-                <tr className="fw-bold table-secondary">
-                  <td></td>
-                  <td className="marketer_name text-decoration-underline">
-                    <Link
-                      target="_blank"
-                      href={
-                        process.env.NEXT_PUBLIC_BASE_URL + "/crm/testjob/status"
-                      }
-                    >
-                      Total
-                    </Link>
-                  </td>
-                  <td>{testJobsStatusCount}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="prospects-list my-5 text-nowrap">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Prospects Status (Last Five Business Days)
-          </h5>
-
-          <table className="table table-hover">
-            <thead>
-              <tr className="table-dark">
-                <th>#</th>
-                <th>Marketer Name</th>
-                <th>Prospects</th>
-              </tr>
-            </thead>
-            <tbody>
-              {prospectsStatus?.length !== 0 ? (
-                prospectsStatus?.map((prospectdata, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td className="marketer_name text-decoration-underline">
-                        <Link
-                          target="_blank"
-                          href={
-                            process.env.NEXT_PUBLIC_BASE_URL +
-                            "/crm/prospect/" +
-                            prospectdata.marketer_name
-                          }
-                        >
-                          {prospectdata.marketer_name}
-                        </Link>
-                      </td>
-
-                      <td className="text-wrap">
-                        {prospectdata.prospects_count}
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td className="text-center" colSpan="3">
-                    No prospect report
-                  </td>
-                </tr>
-              )}
-
-              {prospectsStatus?.length !== 0 && (
-                <tr className="fw-bold table-secondary">
-                  <td></td>
-                  <td className="marketer_name text-decoration-underline">
-                    <Link
-                      target="_blank"
-                      href={
-                        process.env.NEXT_PUBLIC_BASE_URL +
-                        "/crm/prospect/status"
-                      }
-                    >
-                      Total
-                    </Link>
-                  </td>
-                  <td>{prospectsStatusCount}</td>
                 </tr>
               )}
             </tbody>
@@ -638,36 +484,14 @@ export async function getServerSideProps(context) {
       },
     };
 
-    const url2 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options2 = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        gettestslast5days: true,
-      },
-    };
-
-    const url3 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options3 = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getprospectslast5days: true,
-      },
-    };
-
     let res = await fetchApi(url, options);
     let res1 = await fetchApi(url1, options1);
-    let res2 = await fetchApi(url2, options2);
-    let res3 = await fetchApi(url3, options3);
 
     if (!res.error && !res1.error) {
       return {
         props: {
           dailyReportStatus: res,
           availableFollowUps: res1,
-          testJobsStatus: res2,
-          prospectsStatus: res3,
         },
       };
     } else {

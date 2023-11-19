@@ -341,14 +341,6 @@ export default function Navbar({ navFor, shortNote }) {
             >
               Call Reports
             </Link>
-            <Link
-              className={`${styles.navitem} ${
-                navFor === "daily-reports" ? styles.active : ""
-              }`}
-              href="/crm/daily-reports-database"
-            >
-              Daily Reports
-            </Link>
 
             <Link
               className={`${styles.navitem} ${
@@ -357,14 +349,6 @@ export default function Navbar({ navFor, shortNote }) {
               href={`/crm/marketer/report?name=${session.user.name}`}
             >
               Call Report Submit
-            </Link>
-            <Link
-              className={`${styles.navitem} ${
-                navFor === "daily-report-submit" ? styles.active : ""
-              }`}
-              href={`/crm/marketer/daily-report?name=${session.user.name}`}
-            >
-              Daily Report Submit
             </Link>
           </>
         ) : null}

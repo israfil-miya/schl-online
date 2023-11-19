@@ -16,7 +16,7 @@ export default function Followup() {
 
   const [nearestFollowUps, setNearestFollowUps] = useState([]);
 
-  const [manageData, setManageData] = useState([])
+  const [manageData, setManageData] = useState([]);
 
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
@@ -26,23 +26,20 @@ export default function Followup() {
 
   const handlefinishfollowup = async () => {
     let result;
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "/api/crm",
-      {
-        method: "GET",
-        headers: {
-          finishfollowup: true,
-          id: manageData._id,
-          "Content-Type": "application/json",
-        },
+    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/crm", {
+      method: "GET",
+      headers: {
+        finishfollowup: true,
+        id: manageData._id,
+        "Content-Type": "application/json",
       },
-    );
+    });
     result = await res.json();
     if (!result.error) {
-      let listLength = await getReportsForFollowup()
-      if(!listLength) {
-        console.log("this executed")
-        router.push(process.env.NEXT_PUBLIC_BASE_URL + "/crm/marketers")
+      let listLength = await getReportsForFollowup();
+      if (!listLength) {
+        console.log("this executed");
+        router.push(process.env.NEXT_PUBLIC_BASE_URL + "/crm/marketers");
       }
       toast.success("Changed the status of followup");
     }
@@ -61,16 +58,16 @@ export default function Followup() {
 
     let res1 = await fetchApi(url1, options1);
 
-    if(!res1.error) {
-      setNearestFollowUps(res1)
-      return res1.length
+    if (!res1.error) {
+      setNearestFollowUps(res1);
+      return res1.length;
     } else {
-      toast.error("Unable to fetch the folowup list of " + name)
+      toast.error("Unable to fetch the folowup list of " + name);
     }
   };
 
   useEffect(() => {
-    getReportsForFollowup()
+    getReportsForFollowup();
   }, []);
 
   return (
@@ -126,14 +123,16 @@ export default function Followup() {
                     <td>{item.email_address}</td>
                     <td>{item.calling_status}</td>
                     <td>{item.linkedin}</td>
-                    <td className="align-middle"
-                      style={{ textAlign: "center" }}>
-                      <button onClick={() =>
-                        setManageData(item)
-                      }
+                    <td
+                      className="align-middle"
+                      style={{ textAlign: "center" }}
+                    >
+                      <button
+                        onClick={() => setManageData(item)}
                         className="btn btn-sm btn-outline-primary"
                         data-bs-toggle="modal"
-                        data-bs-target="#finishModal">
+                        data-bs-target="#finishModal"
+                      >
                         Finish
                       </button>
                     </td>
@@ -150,10 +149,6 @@ export default function Followup() {
           </tbody>
         </table>
       </div>
-
-
-
-
 
       <div
         className="modal fade"
@@ -198,8 +193,6 @@ export default function Followup() {
         </div>
       </div>
 
-
-
       <style jsx>
         {`
           .table {
@@ -215,9 +208,6 @@ export default function Followup() {
     </>
   );
 }
-
-
-
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);

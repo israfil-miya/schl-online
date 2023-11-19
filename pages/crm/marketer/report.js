@@ -38,7 +38,7 @@ export default function DailyReport() {
     linkedin: "",
     leads_taken_feedback: "",
     is_test: false,
-    is_prospected: false
+    is_prospected: false,
   });
 
   const { name } = router.query;
@@ -82,7 +82,7 @@ export default function DailyReport() {
       linkedin: "",
       leads_taken_feedback: "",
       is_test: false,
-      is_prospected: false
+      is_prospected: false,
     }));
   };
 

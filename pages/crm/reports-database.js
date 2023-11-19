@@ -152,7 +152,9 @@ export default function Report(props) {
 
   return (
     <>
-      <Navbar navFor={session.user.role == "marketer" ? "call-reports" : "crm"} />
+      <Navbar
+        navFor={session.user.role == "marketer" ? "call-reports" : "crm"}
+      />
       <div className="containter">
         <div className="daily-report my-5">
           <div

@@ -1,7 +1,6 @@
 import User from "../../db/Users";
 import dbConnect from "../../db/dbConnect";
 import Report from "../../db/Reports";
-import DailyReport from "../../db/DailyReports";
 const moment = require("moment-timezone");
 
 dbConnect();
@@ -63,32 +62,6 @@ const handleNewReport = async (req, res) => {
       res.status(200).json(resData);
     } else {
       sendError(res, 400, "No order found");
-    }
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-};
-
-const handleDailyReport = async (req, res) => {
-  try {
-    const data = req.body;
-
-    const prevData = await DailyReport.findOne({
-      $and: [
-        { marketer_name: { $eq: data.marketer_name } },
-        { report_date: { $eq: data.report_date } },
-      ],
-    });
-
-    if (prevData) res.status(200).json({ newReport: false, prevData });
-    else {
-      const resData = await DailyReport.create(data);
-      if (resData) {
-        res.status(200).json({ newReport: true, resData });
-      } else {
-        sendError(res, 400, "Unable to submit");
-      }
     }
   } catch (e) {
     console.error(e);
@@ -161,67 +134,6 @@ async function handleGetAllReports(req, res) {
   }
 }
 
-async function handleGetDailyReports(req, res) {
-  try {
-    const page = req.headers.page || 1;
-
-    let { marketer_name, fromdate, todate } = req.headers;
-
-    const ITEMS_PER_PAGE = 20; // Number of items per page
-
-    let query = {};
-
-    if (marketer_name) query.marketer_name = marketer_name;
-    if (fromdate || todate) {
-      query.createdAt = {};
-      if (fromdate) {
-        // Set the $gte filter for the start of the day
-        query.createdAt.$gte = new Date(yyyyMmDdtoISODate(fromdate));
-      }
-      if (todate) {
-        // Set the $lte filter for the end of the day
-        const toTimeDate = new Date(yyyyMmDdtoISODate(todate));
-        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
-        query.createdAt.$lte = toTimeDate;
-      }
-    }
-
-    if (
-      Object.keys(query).length === 0 &&
-      query.constructor === Object &&
-      req.headers.isfilter == true
-    )
-      sendError(res, 400, "No filter applied");
-    else {
-      const skip = (page - 1) * ITEMS_PER_PAGE;
-
-      const count = await DailyReport.countDocuments(query);
-
-      let reports;
-
-      if (req.headers.notpaginated) reports = await DailyReport.find({});
-      else
-        reports = await DailyReport.find(query)
-          .skip(skip)
-          .limit(ITEMS_PER_PAGE)
-          .sort({ updatedAt: -1 });
-
-      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
-
-      res.status(200).json({
-        pagination: {
-          count,
-          pageCount,
-        },
-        items: reports,
-      });
-    }
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
 const getvalidWeekDays = () => {
   const isWeekend = (date) => {
     const dayOfWeek = date.getDay();
@@ -251,7 +163,9 @@ async function handleGetDailyReportsLast5Days(req, res) {
   try {
     let validWeekdays = getvalidWeekDays();
 
-    let resData = await DailyReport.find({ $or: validWeekdays });
+    console.log(validWeekdays);
+
+    let resData = await Report.find({ $or: validWeekdays });
 
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
@@ -261,95 +175,23 @@ async function handleGetDailyReportsLast5Days(req, res) {
 
       if (existingEntry) {
         // Update existing entry with new data
-        existingEntry.data.total_calls_made += entry.calls_made || 0;
-        existingEntry.data.total_prospects += entry.prospects || 0;
-        existingEntry.data.total_test_jobs += entry.test_jobs || 0;
+        existingEntry.data.total_calls_made += 1;
+        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
+        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
       } else {
         // Create a new entry if the marketer doesn't exist in the result array
         acc.push({
           marketer_name: entry.marketer_name,
           data: {
-            total_calls_made: entry.calls_made || 0,
-            total_prospects: entry.prospects || 0,
-            total_test_jobs: entry.test_jobs || 0,
+            total_calls_made: 1,
+            total_prospects: entry.is_prospected ? 1 : 0,
+            total_test_jobs: entry.is_test ? 1 : 0,
           },
         });
       }
 
       return acc;
     }, []);
-
-    if (resData && returnData) {
-      res.status(200).json(returnData);
-    } else sendError(res, 500, "No data found");
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetTestsLast5Days(req, res) {
-  try {
-    let validWeekdays = getvalidWeekDays();
-
-    let resData = await Report.find({ $or: validWeekdays, is_test: true });
-
-    let returnData = resData.reduce((acc, entry) => {
-      // Find existing entry for the marketer
-      const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name,
-      );
-
-      if (existingEntry) {
-        // Update existing entry with new data
-        existingEntry.tests_count += 1;
-      } else {
-        // Create a new entry if the marketer doesn't exist in the result array
-        acc.push({
-          marketer_name: entry.marketer_name,
-          tests_count: 1,
-        });
-      }
-
-      return acc;
-    }, []);
-
-    if (resData && returnData) {
-      res.status(200).json(returnData);
-    } else sendError(res, 500, "No data found");
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetProspectsLast5Days(req, res) {
-  try {
-    let validWeekdays = getvalidWeekDays();
-
-    let resData = await Report.find({ $or: validWeekdays, is_prospected: true });
-
-    let returnData = resData.reduce((acc, entry) => {
-      // Find existing entry for the marketer
-      const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name,
-      );
-
-      if (existingEntry) {
-        // Update existing entry with new data
-        existingEntry.prospects_count += 1;
-      } else {
-        // Create a new entry if the marketer doesn't exist in the result array
-        acc.push({
-          marketer_name: entry.marketer_name,
-          prospects_count: 1,
-        });
-      }
-
-      return acc;
-    }, []);
-
-    console.log(returnData)
 
     if (resData && returnData) {
       res.status(200).json(returnData);
@@ -392,6 +234,7 @@ async function handleGetNearestFollowUps(req, res) {
           // Create a new entry if the marketer doesn't exist in the result array
           acc.push({
             marketer_name: entry.marketer_name,
+            followup_date: entry.followup_date,
             followups_count: 1,
           });
         }
@@ -414,22 +257,23 @@ async function handleGetNearestFollowUps(req, res) {
   }
 }
 
-
 async function handleFinishFollowup(req, res) {
   try {
-    let followupDataId = req.headers.id
+    let followupDataId = req.headers.id;
 
-    let resData = await Report.findByIdAndUpdate(followupDataId, { followup_done: true })
-
+    let resData = await Report.findByIdAndUpdate(followupDataId, {
+      followup_done: true,
+    });
 
     if (resData) {
-      res.status(200).json({ message: "Succesfully updated the followup status" })
+      res
+        .status(200)
+        .json({ message: "Succesfully updated the followup status" });
     } else {
-      sendError(res, 500, "Unable to update the followup status")
+      sendError(res, 500, "Unable to update the followup status");
     }
-
   } catch (e) {
-    sendError(res, 500, e.message)
+    sendError(res, 500, e.message);
   }
 }
 
@@ -442,18 +286,12 @@ export default async function handle(req, res) {
         await handleGetAllMarketers(req, res);
       } else if (req.headers.getallreports) {
         await handleGetAllReports(req, res);
-      } else if (req.headers.getdailyreports) {
-        await handleGetDailyReports(req, res);
       } else if (req.headers.getdailyreportslast5days) {
         await handleGetDailyReportsLast5Days(req, res);
       } else if (req.headers.getnearestfollowups) {
         await handleGetNearestFollowUps(req, res);
       } else if (req.headers.finishfollowup) {
         await handleFinishFollowup(req, res);
-      } else if (req.headers.gettestslast5days) {
-        await handleGetTestsLast5Days(req, res);
-      } else if (req.headers.getprospectslast5days) {
-        await handleGetProspectsLast5Days(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
@@ -462,8 +300,6 @@ export default async function handle(req, res) {
     case "POST":
       if (req.headers.newreport) {
         await handleNewReport(req, res);
-      } else if (req.headers.dailyreport) {
-        await handleDailyReport(req, res);
       } else {
         sendError(res, 400, "Not a valid POST request");
       }
