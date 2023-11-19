@@ -311,14 +311,6 @@ export default function Navbar({ navFor, shortNote }) {
                   Call Reports
                 </Link>
               </li>
-              <li>
-                <Link
-                  className={`dropdown-item ${styles.dropitem}`}
-                  href="/crm/daily-reports-database"
-                >
-                  Daily Reports
-                </Link>
-              </li>
             </ul>
           </li>
         ) : null}

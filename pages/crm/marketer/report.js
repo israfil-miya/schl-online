@@ -321,7 +321,6 @@ export default function DailyReport() {
             </div>
             <div className="">
               <div className="form-check">
-                {/* Checkbox input */}
                 <input
                   type="checkbox"
                   id="myCheckbox"
@@ -335,7 +334,6 @@ export default function DailyReport() {
                   }
                 />
 
-                {/* Label for the checkbox */}
                 <label htmlFor="myCheckbox" className="form-check-label">
                   Test Job
                 </label>
@@ -343,7 +341,6 @@ export default function DailyReport() {
             </div>
             <div className="mb-3">
               <div className="form-check">
-                {/* Checkbox input */}
                 <input
                   type="checkbox"
                   id="myCheckbox2"
@@ -357,7 +354,6 @@ export default function DailyReport() {
                   }
                 />
 
-                {/* Label for the checkbox */}
                 <label htmlFor="myCheckbox" className="form-check-label">
                   Prospecting
                 </label>

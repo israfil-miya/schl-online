@@ -530,9 +530,7 @@ export default function Browse() {
                         {order.status === "Finished" ? "Redo" : "Finish"}
                       </button>
                     </td>
-                  ) : (
-                    <></>
-                  )}
+                  ) : null}
 
                   {session.user.role == "manager" ? (
                     // Default state

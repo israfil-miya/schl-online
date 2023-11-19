@@ -33,9 +33,7 @@ function yyyyMmDdtoISODate(yyyyMmDd) {
       throw new Error("Invalid date: Resulting date is NaN");
     }
 
-    // Convert to ISODate format
     const isoDate = date.toISOString();
-    // console.log(`Converted ${ddMmYyyy} to ISODate: ${isoDate}`);
     return isoDate;
   } catch (error) {
     console.error(`Error converting ${ddMmYyyy} to ISODate: ${error.message}`);
@@ -73,8 +71,19 @@ async function handleGetAllReports(req, res) {
   try {
     const page = req.headers.page || 1;
 
-    let { country, company_name, category, marketer_name, fromdate, todate } =
-      req.headers;
+    let {
+      country,
+      company_name,
+      category,
+      marketer_name,
+      fromdate,
+      todate,
+      test,
+      prospect,
+    } = req.headers;
+
+    test = test === "true" ? true : false;
+    prospect = prospect === "true" ? true : false;
 
     const ITEMS_PER_PAGE = 20; // Number of items per page
 
@@ -84,17 +93,15 @@ async function handleGetAllReports(req, res) {
     if (company_name) query.company_name = company_name;
     if (category) query.category = category;
     if (marketer_name) query.marketer_name = marketer_name;
+    if (test) query.is_test = test;
+    if (prospect) query.is_prospected = prospect;
     if (fromdate || todate) {
-      query.createdAt = {};
+      query.calling_date = {};
       if (fromdate) {
-        // Set the $gte filter for the start of the day
-        query.createdAt.$gte = new Date(yyyyMmDdtoISODate(fromdate));
+        query.calling_date.$gte = fromdate;
       }
       if (todate) {
-        // Set the $lte filter for the end of the day
-        const toTimeDate = new Date(yyyyMmDdtoISODate(todate));
-        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
-        query.createdAt.$lte = toTimeDate;
+        query.calling_date.$lte = todate;
       }
     }
 
@@ -116,7 +123,7 @@ async function handleGetAllReports(req, res) {
         reports = await Report.find(query)
           .skip(skip)
           .limit(ITEMS_PER_PAGE)
-          .sort({ updatedAt: -1 });
+          .sort({ calling_date: -1 });
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
 
@@ -162,8 +169,6 @@ const getvalidWeekDays = () => {
 async function handleGetDailyReportsLast5Days(req, res) {
   try {
     let validWeekdays = getvalidWeekDays();
-
-    console.log(validWeekdays);
 
     let resData = await Report.find({ $or: validWeekdays });
 
@@ -260,10 +265,18 @@ async function handleGetNearestFollowUps(req, res) {
 async function handleFinishFollowup(req, res) {
   try {
     let followupDataId = req.headers.id;
+    let updatedByName = req.headers.updated_by || null;
 
-    let resData = await Report.findByIdAndUpdate(followupDataId, {
-      followup_done: true,
-    });
+    let resData = await Report.findByIdAndUpdate(
+      followupDataId,
+      {
+        updated_by: updatedByName,
+        followup_done: true,
+      },
+      {
+        new: true,
+      },
+    );
 
     if (resData) {
       res
@@ -274,6 +287,41 @@ async function handleFinishFollowup(req, res) {
     }
   } catch (e) {
     sendError(res, 500, e.message);
+  }
+}
+
+async function handleEditReport(req, res) {
+  try {
+    let data = req.body;
+    const updated_by = req.headers.name;
+    data = { ...data, updated_by };
+
+    const resData = await Report.findByIdAndUpdate(data._id, data, {
+      new: true,
+    });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No report found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleGetReportById(req, res) {
+  try {
+    let data = req.headers;
+
+    const resData = await Report.findById(data.id).lean();
+
+    if (!resData) sendError(res, 400, "No report found with the id");
+    else res.status(200).json(resData);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
   }
 }
 
@@ -292,6 +340,8 @@ export default async function handle(req, res) {
         await handleGetNearestFollowUps(req, res);
       } else if (req.headers.finishfollowup) {
         await handleFinishFollowup(req, res);
+      } else if (req.headers.getreportbyid) {
+        await handleGetReportById(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
@@ -300,6 +350,8 @@ export default async function handle(req, res) {
     case "POST":
       if (req.headers.newreport) {
         await handleNewReport(req, res);
+      } else if (req.headers.editreport) {
+        await handleEditReport(req, res);
       } else {
         sendError(res, 400, "Not a valid POST request");
       }

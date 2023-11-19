@@ -22,6 +22,10 @@ export default function Report(props) {
 
   const [marketersList, setMarketersList] = useState([]);
 
+  const [manageData, setManageData] = useState({});
+
+  const [editedBy, setEditedBy] = useState("");
+
   const [filters, setFilters] = useState({
     country: "",
     company_name: "",
@@ -29,6 +33,8 @@ export default function Report(props) {
     fromdate: "",
     todate: "",
     marketer_name: "",
+    test: false,
+    prospect: false,
   });
 
   const [reports, setReports] = useState([]);
@@ -123,6 +129,57 @@ export default function Report(props) {
     }
   };
 
+  async function deleteReport() {
+    let result;
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          req_type: "Report Delete",
+          req_by: session.user.name,
+          id: manageData._id,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    result = await res.json();
+    if (!result.error) {
+      toast.success("Request sent for approval");
+    }
+  }
+
+  async function editReport() {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options = {
+      method: "POST",
+      body: JSON.stringify(manageData),
+      headers: {
+        "Content-Type": "application/json",
+        editreport: true,
+        name: session.user?.name,
+      },
+    };
+
+    try {
+      const result = await fetchApi(url, options);
+
+      if (!result.error) {
+        toast.success("Edited the report data");
+
+        if (!isFiltered) await getAllReports();
+        else await getAllReportsFiltered();
+      } else {
+        toast.error("Something gone wrong!");
+      }
+    } catch (error) {
+      console.error("Error editing report:", error);
+      toast.error("Error editing report");
+    }
+  }
+
   function handlePrevious() {
     setPage((p) => {
       if (p === 1) return p;
@@ -191,6 +248,39 @@ export default function Report(props) {
               <label htmlFor="floatingSelectGrid">Marketer filter</label>
             </div>
             <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
+              <div
+                style={{ display: "flex", alignItems: "center" }}
+                className="filter_stats_of me-3"
+              >
+                <input
+                  type="checkbox"
+                  id="myCheckbox"
+                  className="form-check-input"
+                  checked={filters.test}
+                  onChange={(e) =>
+                    setFilters({ ...filters, test: !filters.test })
+                  }
+                />
+
+                <label htmlFor="myCheckbox" className="form-check-label">
+                  Test Job
+                </label>
+
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={filters.prospect}
+                  onChange={(e) =>
+                    setFilters({ ...filters, prospect: !filters.prospect })
+                  }
+                />
+
+                <label htmlFor="myCheckbox" className="form-check-label">
+                  Prospecting
+                </label>
+              </div>
+
               <div
                 className="filter_time me-3"
                 style={{ display: "flex", alignItems: "center" }}
@@ -329,6 +419,7 @@ export default function Report(props) {
                   <th>LinkedIn</th>
                   <th>Test</th>
                   <th>Prospected</th>
+                  <th>Manage</th>
                 </tr>
               </thead>
               <tbody>
@@ -357,7 +448,35 @@ export default function Report(props) {
                       <td className="text-wrap">{item.calling_status}</td>
                       <td>{item.linkedin}</td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
-                      <td>{item.is_prospected ? "Yes" : "No"}</td>
+                      <td>
+                        {item.is_prospected
+                          ? `Yes (${item.followup_done ? "Done" : "Pending"})`
+                          : "No"}
+                      </td>
+                      <td
+                        className="align-middle"
+                        style={{ textAlign: "center" }}
+                      >
+                        <button
+                          onClick={() => {
+                            setManageData(item);
+                            setEditedBy(item.updated_by ?? "");
+                          }}
+                          className="btn btn-sm btn-outline-primary me-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editModal"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setManageData({ _id: item._id })}
+                          className="btn btn-sm btn-outline-danger me-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteModal"
+                        >
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
@@ -372,6 +491,391 @@ export default function Report(props) {
           </div>
         </div>
       </div>
+
+      <div
+        className="modal fade"
+        id="editModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Edit Report Data
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="calling_date" className="form-label">
+                  Calling Date
+                </label>
+                <input
+                  disabled
+                  value={manageData.calling_date}
+                  type="date"
+                  className="form-control"
+                  id="calling_date"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="followup_date" className="form-label">
+                  Followup Date
+                </label>
+                <input
+                  value={manageData.followup_date}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      followup_date: e.target.value,
+                    }))
+                  }
+                  type="date"
+                  className="form-control"
+                  id="followup_date"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="country" className="form-label">
+                  Country
+                </label>
+                <input
+                  value={manageData.country}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      country: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="country"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="website" className="form-label">
+                  Website
+                </label>
+                <input
+                  value={manageData.website}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      website: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="website"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="category" className="form-label">
+                  Category
+                </label>
+                <input
+                  value={manageData.category}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      category: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="category"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="company_name" className="form-label">
+                  Company Name
+                </label>
+                <input
+                  value={manageData.company_name}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      company_name: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="company_name"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contact_person" className="form-label">
+                  Contact Person
+                </label>
+                <input
+                  value={manageData.contact_person}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      contact_person: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="contact_person"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="designation" className="form-label">
+                  Designation
+                </label>
+                <input
+                  value={manageData.designation}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      designation: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="designation"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contact_number" className="form-label">
+                  Contact Number
+                </label>
+                <input
+                  value={manageData.contact_number}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      contact_number: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="contact_number"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email_address" className="form-label">
+                  Email Address
+                </label>
+                <input
+                  value={manageData.email_address}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      email_address: e.target.value,
+                    }))
+                  }
+                  type="email"
+                  className="form-control"
+                  id="email_address"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="calling_status" className="form-label">
+                  Calling Status
+                </label>
+                <input
+                  value={manageData.calling_status}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      calling_status: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="calling_status"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email_status" className="form-label">
+                  Email Status
+                </label>
+                <input
+                  value={manageData.email_status}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      email_status: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="email_status"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="feedback" className="form-label">
+                  Feedback
+                </label>
+                <textarea
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      feedback: e.target.value,
+                    }))
+                  }
+                  value={manageData.feedback}
+                  type="text"
+                  className="form-control"
+                  id="feedback"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="linkedin" className="form-label">
+                  LinkedIn
+                </label>
+                <input
+                  value={manageData.linkedin}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      linkedin: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="linkedin"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="leads_taken_feedback" className="form-label">
+                  Leads Taken Feedback
+                </label>
+                <textarea
+                  value={manageData.leads_taken_feedback}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      leads_taken_feedback: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="leads_taken_feedback"
+                />
+              </div>
+
+              <div className="">
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    id="myCheckbox"
+                    className="form-check-input"
+                    checked={manageData.is_test}
+                    onChange={(e) =>
+                      setManageData({
+                        ...manageData,
+                        is_test: !manageData.is_test,
+                      })
+                    }
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Test Job
+                  </label>
+                </div>
+              </div>
+              <div className="mb-3">
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    id="myCheckbox2"
+                    className="form-check-input"
+                    checked={manageData.is_prospected}
+                    onChange={(e) =>
+                      setManageData({
+                        ...manageData,
+                        is_prospected: !manageData.is_prospected,
+                      })
+                    }
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Prospecting
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer p-1">
+              {editedBy ? (
+                <div className="d-flex justify-content-start align-items-center me-auto text-body-secondary">
+                  <span className="me-1">Last updated by </span>
+
+                  <span className="fw-medium">{editedBy}</span>
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                onClick={editReport}
+                type="button"
+                data-bs-dismiss="modal"
+                className="btn btn-sm btn-outline-primary"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="modal fade"
+        id="deleteModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Delete Report Confirmation
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>Do you really want to delete this report?</p>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                No
+              </button>
+              <button
+                onClick={deleteReport}
+                type="button"
+                className="btn btn-sm btn-outline-danger"
+                data-bs-dismiss="modal"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <style jsx>
         {`
           .table {

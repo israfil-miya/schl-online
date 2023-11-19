@@ -13,6 +13,7 @@ async function fetchApi(url, options) {
 export default function Followup() {
   const router = useRouter();
   const { name } = router.query;
+  const { data: session } = useSession();
 
   const [nearestFollowUps, setNearestFollowUps] = useState([]);
 
@@ -30,6 +31,7 @@ export default function Followup() {
       method: "GET",
       headers: {
         finishfollowup: true,
+        updated_by: session.user.name,
         id: manageData._id,
         "Content-Type": "application/json",
       },
@@ -75,7 +77,7 @@ export default function Followup() {
       <Navbar navFor="crm" shortNote={name + " - FOLLOWUP"} />
       <div className="followup-list my-5 text-nowrap">
         <h5 className="bg-light text-center p-2 mb-3 border">
-          Closest Followups
+          Available Followups
         </h5>
 
         <table className="table table-hover">
@@ -94,6 +96,8 @@ export default function Followup() {
               <th>Email Address</th>
               <th>Calling Status</th>
               <th>LinkedIn</th>
+              <th>Test</th>
+              <th>Prospected</th>
               <th>Finish</th>
             </tr>
           </thead>
@@ -123,6 +127,8 @@ export default function Followup() {
                     <td>{item.email_address}</td>
                     <td>{item.calling_status}</td>
                     <td>{item.linkedin}</td>
+                    <td>{item.is_test ? "Yes" : "No"}</td>
+                    <td>{item.is_prospected ? "Yes" : "No"}</td>
                     <td
                       className="align-middle"
                       style={{ textAlign: "center" }}

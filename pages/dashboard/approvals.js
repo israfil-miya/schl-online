@@ -8,15 +8,13 @@ import Navbar from "../../components/navbar";
 export default function Approvals() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [usersApprovals, setUsersApprovals] = useState([]);
-  const [ordersApprovals, setOrdersApprovals] = useState([]);
-  const [clientsApprovals, setClientsApprovals] = useState([]);
 
   const [approvals, setApprovals] = useState([]);
 
   const [orderInfo, setOrderInfo] = useState({});
   const [userInfo, setUserInfo] = useState({});
   const [clientInfo, setClientInfo] = useState({});
+  const [reportData, setReportData] = useState({});
   const [manageData, setManageData] = useState({});
   const [modalTempStore, setModalTempStore] = useState({});
 
@@ -122,6 +120,31 @@ export default function Approvals() {
     } catch (error) {
       console.error("Error fetching client info:", error);
       toast.error("Error retrieving client info");
+    }
+  }
+
+  async function GetReportById(id) {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getreportbyid: true,
+          id,
+        },
+      };
+
+      const resData = await fetchApi(url, options);
+
+      if (!resData.error) {
+        setReportData(resData);
+      } else {
+        toast.error("Unable to retrieve report data");
+      }
+    } catch (error) {
+      console.error("Error fetching report data:", error);
+      toast.error("Error retrieving report data");
     }
   }
 
@@ -274,6 +297,8 @@ export default function Approvals() {
                                 ? GetOrdersById(approveReq.id)
                                 : approveReq.req_type.split(" ")[0] == "User"
                                 ? GetUsersById(approveReq.id)
+                                : approveReq.req_type.split(" ")[0] == "Report"
+                                ? GetReportById(approveReq.id)
                                 : null;
                             }}
                             className="btn btn-sm btn-outline-primary"
@@ -285,6 +310,8 @@ export default function Approvals() {
                                 ? "#editModal"
                                 : approveReq.req_type.split(" ")[0] == "User"
                                 ? "#editModal1"
+                                : approveReq.req_type.split(" ")[0] == "Report"
+                                ? "#editModal3"
                                 : null
                             }
                           >
@@ -613,6 +640,133 @@ export default function Approvals() {
 
       <div
         className="modal fade"
+        id="editModal1"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                User Info
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Name
+                </label>
+                <input
+                  required
+                  value={userInfo.name}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Password
+                </label>
+                <input
+                  required
+                  value={userInfo.password}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Role
+                </label>
+
+                <select
+                  className="form-select"
+                  id="floatingSelect"
+                  required
+                  value={userInfo.role}
+                  disabled
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                  <option value="super">Super</option>
+                  <option value="manager">Manager</option>
+                  <option value="marketer">Marketer</option>
+                </select>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Joining Date
+                </label>
+                <input
+                  value={userInfo.joining_date}
+                  disabled
+                  type="date"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Phone
+                </label>
+                <input
+                  value={userInfo.phone}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Email
+                </label>
+                <input
+                  value={userInfo.email}
+                  disabled
+                  type="email"
+                  className="form-control"
+                />
+              </div>
+
+              {userInfo.role == "marketer" && (
+                <div className="marketr-exclusive">
+                  <div className="mb-3">
+                    <label htmlFor="date" className="form-label">
+                      Company Provided Name
+                    </label>
+                    <input
+                      value={userInfo.company_provided_name}
+                      disabled
+                      type="text"
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="modal fade"
         id="editModal2"
         tabIndex="-1"
         aria-hidden="true"
@@ -795,15 +949,15 @@ export default function Approvals() {
 
       <div
         className="modal fade"
-        id="editModal1"
+        id="editModal3"
         tabIndex="-1"
         aria-hidden="true"
       >
-        <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                User Info
+                Edit Report Data
               </h1>
               <button
                 type="button"
@@ -814,98 +968,216 @@ export default function Approvals() {
             </div>
             <div className="modal-body">
               <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Name
+                <label htmlFor="calling_date" className="form-label">
+                  Calling Date
                 </label>
                 <input
-                  required
-                  value={userInfo.name}
                   disabled
+                  value={reportData.calling_date}
                   type="text"
                   className="form-control"
+                  id="calling_date"
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Password
+                <label htmlFor="followup_date" className="form-label">
+                  Followup Date
                 </label>
                 <input
-                  required
-                  value={userInfo.password}
-                  disabled
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Role
-                </label>
-
-                <select
-                  className="form-select"
-                  id="floatingSelect"
-                  required
-                  value={userInfo.role}
-                  disabled
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                  <option value="super">Super</option>
-                  <option value="manager">Manager</option>
-                  <option value="marketer">Marketer</option>
-                </select>
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Joining Date
-                </label>
-                <input
-                  value={userInfo.joining_date}
+                  value={reportData.followup_date}
                   disabled
                   type="date"
                   className="form-control"
+                  id="followup_date"
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Phone
+                <label htmlFor="country" className="form-label">
+                  Country
                 </label>
                 <input
-                  value={userInfo.phone}
+                  value={reportData.country}
                   disabled
                   type="text"
                   className="form-control"
+                  id="country"
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Email
+                <label htmlFor="website" className="form-label">
+                  Website
                 </label>
                 <input
-                  value={userInfo.email}
+                  value={reportData.website}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="website"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="category" className="form-label">
+                  Category
+                </label>
+                <input
+                  value={reportData.category}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="category"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="company_name" className="form-label">
+                  Company Name
+                </label>
+                <input
+                  value={reportData.company_name}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="company_name"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contact_person" className="form-label">
+                  Contact Person
+                </label>
+                <input
+                  value={reportData.contact_person}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="contact_person"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="designation" className="form-label">
+                  Designation
+                </label>
+                <input
+                  value={reportData.designation}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="designation"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contact_number" className="form-label">
+                  Contact Number
+                </label>
+                <input
+                  value={reportData.contact_number}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="contact_number"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email_address" className="form-label">
+                  Email Address
+                </label>
+                <input
+                  value={reportData.email_address}
                   disabled
                   type="email"
                   className="form-control"
+                  id="email_address"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="calling_status" className="form-label">
+                  Calling Status
+                </label>
+                <input
+                  value={reportData.calling_status}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="calling_status"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email_status" className="form-label">
+                  Email Status
+                </label>
+                <input
+                  value={reportData.email_status}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="email_status"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="feedback" className="form-label">
+                  Feedback
+                </label>
+                <textarea
+                  disabled
+                  value={reportData.feedback}
+                  type="text"
+                  className="form-control"
+                  id="feedback"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="linkedin" className="form-label">
+                  LinkedIn
+                </label>
+                <input
+                  value={reportData.linkedin}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="linkedin"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="leads_taken_feedback" className="form-label">
+                  Leads Taken Feedback
+                </label>
+                <textarea
+                  value={reportData.leads_taken_feedback}
+                  disabled
+                  type="text"
+                  className="form-control"
+                  id="leads_taken_feedback"
                 />
               </div>
 
-              {userInfo.role == "marketer" && (
-                <div className="marketr-exclusive">
-                  <div className="mb-3">
-                    <label htmlFor="date" className="form-label">
-                      Company Provided Name
-                    </label>
-                    <input
-                      value={userInfo.company_provided_name}
-                      disabled
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
+              <div className="">
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    id="myCheckbox"
+                    className="form-check-input"
+                    checked={reportData.is_test}
+                    disabled
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Test Job
+                  </label>
                 </div>
-              )}
+              </div>
+              <div className="mb-3">
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    id="myCheckbox2"
+                    className="form-check-input"
+                    checked={reportData.is_prospected}
+                    disabled
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Prospecting
+                  </label>
+                </div>
+              </div>
             </div>
             <div className="modal-footer p-1">
               <button

@@ -18,6 +18,10 @@ const ReportSchema = new mongoose.Schema(
     feedback: String,
     linkedin: String,
     leads_taken_feedback: String,
+    updated_by: {
+      type: String,
+      default: null,
+    },
     followup_done: {
       type: Boolean,
       default: false,

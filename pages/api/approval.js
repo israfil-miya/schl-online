@@ -2,6 +2,7 @@ import Approval from "../../db/Approvals";
 import User from "../../db/Users";
 import Order from "../../db/Orders";
 import Client from "../../db/Clients";
+import Report from "../../db/Reports";
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -132,6 +133,24 @@ async function handleResponse(req, res) {
 
     if (data.req_type == "Client Delete") {
       const resData = await Client.findByIdAndDelete(data.id);
+      const updateApprovaL = await Approval.findByIdAndUpdate(
+        data._id,
+        {
+          checked_by: data.checked_by,
+          is_rejected: false,
+        },
+        { new: true },
+      );
+
+      if (resData) {
+        console.log(resData);
+        res.status(200).json(updateApprovaL);
+      } else {
+        sendError(res, 400, "Unable to send request");
+      }
+    }
+    if (data.req_type == "Report Delete") {
+      const resData = await Report.findByIdAndDelete(data.id);
       const updateApprovaL = await Approval.findByIdAndUpdate(
         data._id,
         {
