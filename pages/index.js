@@ -258,6 +258,31 @@ export async function getServerSideProps(context) {
     };
   }
 
+
+
+
+  // code for redirect if not logged in
+  if (!session || (session.user.role != "admin" && session.user.role != "super" && session.user.role != "manager")) {
+
+    if(session.user.role == "marketer")
+
+    return {
+      redirect: {
+        destination:
+          "/crm/marketers",
+        permanent: true,
+      },
+    };
+
+    return {
+      redirect: {
+        destination:
+          "/?error=You need Manager/Admin/Super role to access the page",
+        permanent: true,
+      },
+    };
+  }
+
   const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
     method: "GET",
     headers: {
