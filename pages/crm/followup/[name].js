@@ -79,81 +79,82 @@ export default function Followup() {
         <h5 className="bg-light text-center p-2 mb-3 border">
           Available Followups
         </h5>
-
-        <table className="table table-hover">
-          <thead>
-            <tr className="table-dark">
-              <th>#</th>
-              <th>Calling Date</th>
-              <th>Followup Date</th>
-              <th>Country</th>
-              <th>Website</th>
-              <th>Category</th>
-              <th>Company Name</th>
-              <th>Contact Person</th>
-              <th>Designation</th>
-              <th>Contact Number</th>
-              <th>Email Address</th>
-              <th>Calling Status</th>
-              <th>LinkedIn</th>
-              <th>Test</th>
-              <th>Prospected</th>
-              <th>Finish</th>
-            </tr>
-          </thead>
-          <tbody>
-            {nearestFollowUps?.length !== 0 ? (
-              nearestFollowUps?.map((item, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>
-                      {item.calling_date
-                        ? convertToDDMMYYYY(item.calling_date)
-                        : ""}
-                    </td>
-                    <td>
-                      {item.followup_date
-                        ? convertToDDMMYYYY(item.followup_date)
-                        : ""}
-                    </td>
-                    <td>{item.country}</td>
-                    <td>{item.website}</td>
-                    <td>{item.category}</td>
-                    <td>{item.company_name}</td>
-                    <td>{item.contact_person}</td>
-                    <td>{item.designation}</td>
-                    <td>{item.contact_number}</td>
-                    <td>{item.email_address}</td>
-                    <td>{item.calling_status}</td>
-                    <td>{item.linkedin}</td>
-                    <td>{item.is_test ? "Yes" : "No"}</td>
-                    <td>{item.is_prospected ? "Yes" : "No"}</td>
-                    <td
-                      className="align-middle"
-                      style={{ textAlign: "center" }}
-                    >
-                      <button
-                        onClick={() => setManageData(item)}
-                        className="btn btn-sm btn-outline-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#finishModal"
-                      >
-                        Finish
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr key={0}>
-                <td colSpan="13" className=" align-center text-center">
-                  No Followups To Show.
-                </td>
+        <div style={{ overflowX: "auto" }} className="text-nowrap">
+          <table className="table table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Calling Date</th>
+                <th>Followup Date</th>
+                <th>Country</th>
+                <th>Website</th>
+                <th>Category</th>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Designation</th>
+                <th>Contact Number</th>
+                <th>Email Address</th>
+                <th>Calling Status</th>
+                <th>LinkedIn</th>
+                <th>Test</th>
+                <th>Prospected</th>
+                <th>Finish</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {nearestFollowUps?.length !== 0 ? (
+                nearestFollowUps?.map((item, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>
+                        {item.calling_date
+                          ? convertToDDMMYYYY(item.calling_date)
+                          : ""}
+                      </td>
+                      <td>
+                        {item.followup_date
+                          ? convertToDDMMYYYY(item.followup_date)
+                          : ""}
+                      </td>
+                      <td>{item.country}</td>
+                      <td className="text-wrap">{item.website}</td>
+                      <td>{item.category}</td>
+                      <td>{item.company_name}</td>
+                      <td>{item.contact_person}</td>
+                      <td>{item.designation}</td>
+                      <td>{item.contact_number}</td>
+                      <td>{item.email_address}</td>
+                      <td className="text-wrap" style={{ minWidth: '400px' }}>{item.calling_status}</td>
+                      <td>{item.linkedin}</td>
+                      <td>{item.is_test ? "Yes" : "No"}</td>
+                      <td>{item.is_prospected ? "Yes" : "No"}</td>
+                      <td
+                        className="align-middle"
+                        style={{ textAlign: "center" }}
+                      >
+                        <button
+                          onClick={() => setManageData(item)}
+                          className="btn btn-sm btn-outline-primary"
+                          data-bs-toggle="modal"
+                          data-bs-target="#finishModal"
+                        >
+                          Finish
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr key={0}>
+                  <td colSpan="13" className=" align-center text-center">
+                    No Followups To Show.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div
