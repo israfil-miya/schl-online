@@ -326,6 +326,46 @@ async function handleGetReportById(req, res) {
 }
 
 
+async function handleGetDailyReportsToday(req, res) {
+  try {
+    const today = moment().utc().format('YYYY-MM-DD')
+
+    let resData = await Report.find({ calling_date: today });
+
+    let returnData = resData.reduce((acc, entry) => {
+      // Find existing entry for the marketer
+      const existingEntry = acc.find(
+        (item) => item.marketer_name === entry.marketer_name,
+      );
+
+      if (existingEntry) {
+        // Update existing entry with new data
+        existingEntry.data.total_calls_made += 1;
+        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
+        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+      } else {
+        // Create a new entry if the marketer doesn't exist in the result array
+        acc.push({
+          marketer_name: entry.marketer_name,
+          data: {
+            total_calls_made: 1,
+            total_prospects: entry.is_prospected ? 1 : 0,
+            total_test_jobs: entry.is_test ? 1 : 0,
+          },
+        });
+      }
+
+      return acc;
+    }, []);
+
+    if (resData && returnData) {
+      res.status(200).json(returnData);
+    } else sendError(res, 500, "No data found");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 
 
 
@@ -346,6 +386,8 @@ export default async function handle(req, res) {
         await handleFinishFollowup(req, res);
       } else if (req.headers.getreportbyid) {
         await handleGetReportById(req, res);
+      } else if (req.headers.getdailyreportstoday) {
+        await handleGetDailyReportsToday(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

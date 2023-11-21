@@ -16,6 +16,7 @@ export default function Marketers(props) {
   const { data: session } = useSession();
   const [marketersList, setMarketersList] = useState([]);
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
+  const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState();
 
   const [availableFollowUps, setAvailableFollowUps] = useState([]);
 
@@ -71,14 +72,13 @@ export default function Marketers(props) {
         <tr key={index}>
           <td
             style={{
-              minWidth: "40px",
-              maxWidth: "40px",
+              maxWidth: "5px",
               padding: "0px 0px 0px 5px",
               backgroundColor: "#212529",
               color: "#fff",
             }}
           >
-            {FiveDayReportOfMarketer.marketer_name}
+            {index+1}. {FiveDayReportOfMarketer.marketer_name}
           </td>
           <td className="text-center" style={{ padding: "0px" }}>
             {FiveDayReportOfMarketer.data.total_calls_made}
@@ -94,14 +94,78 @@ export default function Marketers(props) {
     });
 
     parsedTableRows.push(
-      <tr>
+      <tr className="table-secondary">
         <th
           style={{
-            minWidth: "40px",
-            maxWidth: "40px",
+            maxWidth: "5px",
             padding: "0px 0px 0px 5px",
-            backgroundColor: "#212529",
-            color: "#fff",
+          }}
+        >
+          Total
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_calls_made}
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_prospects}
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_test_jobs}
+        </th>
+      </tr>,
+    );
+
+    return parsedTableRows;
+  };
+  const createTodayReportStatusTable = () => {
+    let parsedTableRows = [];
+    let total_calls_made = 0;
+    let total_test_jobs = 0;
+    let total_prospects = 0;
+
+    props?.todayReportStatus.map((TodayReportOfMarketer, index) => {
+      total_calls_made += parseInt(
+        TodayReportOfMarketer.data.total_calls_made,
+      )
+        ? parseInt(TodayReportOfMarketer.data.total_calls_made)
+        : 0;
+      total_test_jobs += parseInt(TodayReportOfMarketer.data.total_test_jobs)
+        ? parseInt(TodayReportOfMarketer.data.total_test_jobs)
+        : 0;
+      total_prospects += parseInt(TodayReportOfMarketer.data.total_prospects)
+        ? parseInt(TodayReportOfMarketer.data.total_prospects)
+        : 0;
+      parsedTableRows.push(
+        <tr key={index}>
+          <td
+            style={{
+              maxWidth: "5px",
+              padding: "0px 0px 0px 5px",
+              backgroundColor: "#212529",
+              color: "#fff",
+            }}
+          >
+            {index+1}. {TodayReportOfMarketer.marketer_name}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {TodayReportOfMarketer.data.total_calls_made}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {TodayReportOfMarketer.data.total_prospects}
+          </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {TodayReportOfMarketer.data.total_test_jobs}
+          </td>
+        </tr>,
+      );
+    });
+
+    parsedTableRows.push(
+      <tr className="table-secondary">
+        <th
+          style={{
+            maxWidth: "5px",
+            padding: "0px 0px 0px 5px",
           }}
         >
           Total
@@ -123,6 +187,7 @@ export default function Marketers(props) {
 
   useEffect(() => {
     setDailyReportStatusRowHtml(createDailyReportStatusTable());
+    setTodayReportStatusRowHtml(createTodayReportStatusTable());
     setAvailableFollowUps(props.availableFollowUps);
     getMarketers();
   }, []);
@@ -168,6 +233,45 @@ export default function Marketers(props) {
           </table>
         </div>
 
+        <div className="today-report-status mt-3">
+          <h5 className="bg-light text-center p-2 mb-3 border">
+            Daily Report Status (Today)
+          </h5>
+
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}>Name</th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Calls
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Prospects
+                </th>
+
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Tests
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {todayReportStatusRowHtml?.map((tableRow, index) => tableRow)}
+            </tbody>
+          </table>
+        </div>
+
         <div className="daily-report-status mt-3">
           <h5 className="bg-light text-center p-2 mb-3 border">
             Daily Report Status (Last Five Business Days)
@@ -176,7 +280,8 @@ export default function Marketers(props) {
           <table className="table table-bordered table-hover">
             <thead>
               <tr>
-                <th style={{ backgroundColor: "#212529", color: "#fff" }}></th>
+              <th className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}>Name</th>
 
                 <th
                   className="text-center"
@@ -344,15 +449,25 @@ export async function getServerSideProps(context) {
         getnearestfollowups: true,
       },
     };
+    const url2 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+    const options2 = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getdailyreportstoday: true,
+      },
+    };
 
     let res = await fetchApi(url, options);
     let res1 = await fetchApi(url1, options1);
+    let res2 = await fetchApi(url2, options2);
 
     if (!res.error && !res1.error) {
       return {
         props: {
           dailyReportStatus: res,
           availableFollowUps: res1,
+          todayReportStatus: res2
         },
       };
     } else {
