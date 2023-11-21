@@ -125,7 +125,9 @@ export default function Followup() {
                       <td>{item.designation}</td>
                       <td>{item.contact_number}</td>
                       <td>{item.email_address}</td>
-                      <td className="text-wrap" style={{ minWidth: '400px' }}>{item.calling_status}</td>
+                      <td className="text-wrap" style={{ minWidth: "400px" }}>
+                        {item.calling_status}
+                      </td>
                       <td>{item.linkedin}</td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
                       <td>{item.is_prospected ? "Yes" : "No"}</td>

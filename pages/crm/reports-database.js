@@ -445,7 +445,9 @@ export default function Report(props) {
                       <td>{item.designation}</td>
                       <td>{item.contact_number}</td>
                       <td>{item.email_address}</td>
-                      <td className="text-wrap" style={{ minWidth: '400px' }}>{item.calling_status}</td>
+                      <td className="text-wrap" style={{ minWidth: "400px" }}>
+                        {item.calling_status}
+                      </td>
 
                       <td className="text-wrap">{item.linkedin}</td>
                       <td>{item.is_test ? "Yes" : "No"}</td>

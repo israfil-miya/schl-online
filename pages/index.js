@@ -258,18 +258,13 @@ export async function getServerSideProps(context) {
     };
   }
 
-
-
-
-    if(session.user.role == "marketer")
+  if (session.user.role == "marketer")
     return {
       redirect: {
-        destination:
-          "/crm/marketers",
+        destination: "/crm/marketers",
         permanent: true,
       },
     };
-
 
   const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
     method: "GET",

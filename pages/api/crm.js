@@ -325,10 +325,9 @@ async function handleGetReportById(req, res) {
   }
 }
 
-
 async function handleGetDailyReportsToday(req, res) {
   try {
-    const today = moment().utc().format('YYYY-MM-DD')
+    const today = moment().utc().format("YYYY-MM-DD");
 
     let resData = await Report.find({ calling_date: today });
 
@@ -366,8 +365,6 @@ async function handleGetDailyReportsToday(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
-
 
 export default async function handle(req, res) {
   const { method } = req;

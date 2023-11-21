@@ -78,7 +78,7 @@ export default function Marketers(props) {
               color: "#fff",
             }}
           >
-            {index+1}. {FiveDayReportOfMarketer.marketer_name}
+            {index + 1}. {FiveDayReportOfMarketer.marketer_name}
           </td>
           <td className="text-center" style={{ padding: "0px" }}>
             {FiveDayReportOfMarketer.data.total_calls_made}
@@ -124,9 +124,7 @@ export default function Marketers(props) {
     let total_prospects = 0;
 
     props?.todayReportStatus.map((TodayReportOfMarketer, index) => {
-      total_calls_made += parseInt(
-        TodayReportOfMarketer.data.total_calls_made,
-      )
+      total_calls_made += parseInt(TodayReportOfMarketer.data.total_calls_made)
         ? parseInt(TodayReportOfMarketer.data.total_calls_made)
         : 0;
       total_test_jobs += parseInt(TodayReportOfMarketer.data.total_test_jobs)
@@ -145,7 +143,7 @@ export default function Marketers(props) {
               color: "#fff",
             }}
           >
-            {index+1}. {TodayReportOfMarketer.marketer_name}
+            {index + 1}. {TodayReportOfMarketer.marketer_name}
           </td>
           <td className="text-center" style={{ padding: "0px" }}>
             {TodayReportOfMarketer.data.total_calls_made}
@@ -241,8 +239,12 @@ export default function Marketers(props) {
           <table className="table table-bordered table-hover">
             <thead>
               <tr>
-                <th className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}>Name</th>
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Name
+                </th>
 
                 <th
                   className="text-center"
@@ -280,8 +282,12 @@ export default function Marketers(props) {
           <table className="table table-bordered table-hover">
             <thead>
               <tr>
-              <th className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}>Name</th>
+                <th
+                  className="text-center"
+                  style={{ backgroundColor: "#212529", color: "#fff" }}
+                >
+                  Name
+                </th>
 
                 <th
                   className="text-center"
@@ -467,7 +473,7 @@ export async function getServerSideProps(context) {
         props: {
           dailyReportStatus: res,
           availableFollowUps: res1,
-          todayReportStatus: res2
+          todayReportStatus: res2,
         },
       };
     } else {
