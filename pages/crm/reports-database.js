@@ -262,7 +262,7 @@ export default function Report(props) {
                   }
                 />
 
-                <label htmlFor="myCheckbox" className="form-check-label">
+                <label htmlFor="myCheckbox" className="form-check-label ms-1">
                   Test Job
                 </label>
 
@@ -276,7 +276,7 @@ export default function Report(props) {
                   }
                 />
 
-                <label htmlFor="myCheckbox" className="form-check-label">
+                <label htmlFor="myCheckbox" className="form-check-label ms-1">
                   Prospecting
                 </label>
               </div>
@@ -438,15 +438,16 @@ export default function Report(props) {
                           : ""}
                       </td>
                       <td>{item.country}</td>
-                      <td>{item.website}</td>
+                      <td className="text-wrap">{item.website}</td>
                       <td>{item.category}</td>
                       <td>{item.company_name}</td>
                       <td>{item.contact_person}</td>
                       <td>{item.designation}</td>
                       <td>{item.contact_number}</td>
                       <td>{item.email_address}</td>
-                      <td className="text-wrap">{item.calling_status}</td>
-                      <td>{item.linkedin}</td>
+                      <td className="text-wrap" style={{ minWidth: '400px' }}>{item.calling_status}</td>
+
+                      <td className="text-wrap">{item.linkedin}</td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
                       <td>
                         {item.is_prospected
@@ -681,7 +682,7 @@ export default function Report(props) {
                 <label htmlFor="calling_status" className="form-label">
                   Calling Status
                 </label>
-                <input
+                <textarea
                   value={manageData.calling_status}
                   onChange={(e) =>
                     setManageData((prevData) => ({
@@ -698,7 +699,7 @@ export default function Report(props) {
                 <label htmlFor="email_status" className="form-label">
                   Email Status
                 </label>
-                <input
+                <textarea
                   value={manageData.email_status}
                   onChange={(e) =>
                     setManageData((prevData) => ({

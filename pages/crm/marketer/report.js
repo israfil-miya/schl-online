@@ -247,7 +247,7 @@ export default function DailyReport() {
               <label htmlFor="calling_status" className="form-label">
                 Calling Status
               </label>
-              <input
+              <textarea
                 value={reportData.calling_status}
                 onChange={(e) =>
                   setReportData({
@@ -264,7 +264,7 @@ export default function DailyReport() {
               <label htmlFor="email_status" className="form-label">
                 Email Status
               </label>
-              <input
+              <textarea
                 value={reportData.email_status}
                 onChange={(e) =>
                   setReportData({ ...reportData, email_status: e.target.value })

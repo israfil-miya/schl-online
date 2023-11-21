@@ -1091,7 +1091,7 @@ export default function Approvals() {
                 <label htmlFor="calling_status" className="form-label">
                   Calling Status
                 </label>
-                <input
+                <textarea
                   value={reportData.calling_status}
                   disabled
                   type="text"
@@ -1103,7 +1103,7 @@ export default function Approvals() {
                 <label htmlFor="email_status" className="form-label">
                   Email Status
                 </label>
-                <input
+                <textarea
                   value={reportData.email_status}
                   disabled
                   type="text"
