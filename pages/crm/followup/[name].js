@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Navbar from "../../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
+import CallingStatusTd from "../../../components/calling-status-td";
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -123,21 +124,24 @@ export default function Followup() {
                       <td>{item.company_name}</td>
                       <td>{item.contact_person}</td>
                       <td>{item.designation}</td>
-                      <td>{item.contact_number}</td>
-                      <td>{item.email_address}</td>
-                      <td className="text-wrap" style={{ minWidth: "400px" }}>
-                        {item.calling_status}
-                      </td>
+                      <td className="text-wrap">{item.contact_number}</td>
+                      <td className="text-wrap">{item.email_address}</td>
+                      <CallingStatusTd data={item.calling_status} />
+
                       <td>{item.linkedin}</td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
-                      <td>{item.is_prospected ? "Yes" : "No"}</td>
+                      <td>
+                        {item.is_prospected
+                          ? `Yes (${item.followup_done ? "Done" : "Pending"})`
+                          : "No"}
+                      </td>
                       <td
                         className="align-middle"
                         style={{ textAlign: "center" }}
                       >
                         <button
                           onClick={() => setManageData(item)}
-                          className="btn btn-sm btn-outline-primary"
+                          className="btn btn-sm mx-2 btn-outline-primary"
                           data-bs-toggle="modal"
                           data-bs-target="#finishModal"
                         >

@@ -168,20 +168,6 @@ async function handleResponse(req, res) {
       }
     }
   }
-
-  // try {
-  //   const resData = await Approval.create(data);
-
-  //   if (resData) {
-  //     console.log(resData)
-  //     res.status(200).json(resData);
-  //   } else {
-  //     sendError(res, 400, "Unable to send request");
-  //   }
-  // } catch (e) {
-  //   console.error(e);
-  //   sendError(res, 500, "An error occurred");
-  // }
 }
 
 async function handleGetAllApprovals(req, res) {

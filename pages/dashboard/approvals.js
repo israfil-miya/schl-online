@@ -1100,30 +1100,6 @@ export default function Approvals() {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="email_status" className="form-label">
-                  Email Status
-                </label>
-                <textarea
-                  value={reportData.email_status}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="email_status"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="feedback" className="form-label">
-                  Feedback
-                </label>
-                <textarea
-                  disabled
-                  value={reportData.feedback}
-                  type="text"
-                  className="form-control"
-                  id="feedback"
-                />
-              </div>
-              <div className="mb-3">
                 <label htmlFor="linkedin" className="form-label">
                   LinkedIn
                 </label>
@@ -1133,18 +1109,6 @@ export default function Approvals() {
                   type="text"
                   className="form-control"
                   id="linkedin"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="leads_taken_feedback" className="form-label">
-                  Leads Taken Feedback
-                </label>
-                <textarea
-                  value={reportData.leads_taken_feedback}
-                  disabled
-                  type="text"
-                  className="form-control"
-                  id="leads_taken_feedback"
                 />
               </div>
 

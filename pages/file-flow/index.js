@@ -111,7 +111,7 @@ export default function Statistics() {
                 key={index}
               >
                 <Link
-                target="_blank"
+                  target="_blank"
                   href={
                     data.isoDate
                       ? `/file-flow/country-file-flow?country=${country}&date=${data.isoDate}`

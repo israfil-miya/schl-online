@@ -14,10 +14,7 @@ const ReportSchema = new mongoose.Schema(
     contact_number: String,
     email_address: String,
     calling_status: String,
-    email_status: String,
-    feedback: String,
     linkedin: String,
-    leads_taken_feedback: String,
     updated_by: {
       type: String,
       default: null,

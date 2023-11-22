@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
+import CallingStatusTd from "../../components/calling-status-td";
+import Link from "next/link";
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -438,18 +440,42 @@ export default function Report(props) {
                           : ""}
                       </td>
                       <td>{item.country}</td>
-                      <td className="text-wrap">{item.website}</td>
-                      <td>{item.category}</td>
-                      <td>{item.company_name}</td>
-                      <td>{item.contact_person}</td>
-                      <td>{item.designation}</td>
-                      <td>{item.contact_number}</td>
-                      <td>{item.email_address}</td>
-                      <td className="text-wrap" style={{ minWidth: "400px" }}>
-                        {item.calling_status}
+                      <td>
+                        {item.website.length
+                          ? item.website
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((websiteLink) => (
+                                <p className="text-primary m-0 p-0 link">
+                                  <Link target="_blank" href={websiteLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
+                          : "No link provided"}
                       </td>
+                      <td>{item.category}</td>
+                      <td className="text-wrap">{item.company_name}</td>
+                      <td className="text-wrap">{item.contact_person}</td>
+                      <td>{item.designation}</td>
+                      <td className="text-wrap">{item.contact_number}</td>
+                      <td className="text-wrap">{item.email_address}</td>
+                      <CallingStatusTd data={item.calling_status} />
 
-                      <td className="text-wrap">{item.linkedin}</td>
+                      <td>
+                        {item.linkedin.length
+                          ? item.linkedin
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((linkedinLink) => (
+                                <p className="text-primary m-0 p-0 link">
+                                  <Link target="_blank" href={linkedinLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
+                          : "No link provided"}
+                      </td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
                       <td>
                         {item.is_prospected
@@ -698,40 +724,6 @@ export default function Report(props) {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="email_status" className="form-label">
-                  Email Status
-                </label>
-                <textarea
-                  value={manageData.email_status}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      email_status: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="email_status"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="feedback" className="form-label">
-                  Feedback
-                </label>
-                <textarea
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      feedback: e.target.value,
-                    }))
-                  }
-                  value={manageData.feedback}
-                  type="text"
-                  className="form-control"
-                  id="feedback"
-                />
-              </div>
-              <div className="mb-3">
                 <label htmlFor="linkedin" className="form-label">
                   LinkedIn
                 </label>
@@ -746,23 +738,6 @@ export default function Report(props) {
                   type="text"
                   className="form-control"
                   id="linkedin"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="leads_taken_feedback" className="form-label">
-                  Leads Taken Feedback
-                </label>
-                <textarea
-                  value={manageData.leads_taken_feedback}
-                  onChange={(e) =>
-                    setManageData((prevData) => ({
-                      ...prevData,
-                      leads_taken_feedback: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="leads_taken_feedback"
                 />
               </div>
 
@@ -885,9 +860,15 @@ export default function Report(props) {
             font-size: 15px;
           }
 
+          .link:hover {
+            cursor: pointer;
+            text-decoration: underline;
+            color: rgba(0, 0, 0, 0.7);
+          }
+
           th,
           td {
-            padding: 2.5px 5px;
+            padding: 2.5px 10px;
           }
         `}
       </style>
