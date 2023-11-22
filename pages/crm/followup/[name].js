@@ -4,6 +4,7 @@ import Navbar from "../../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
 import CallingStatusTd from "../../../components/calling-status-td";
+import Link from "next/link";
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -118,23 +119,50 @@ export default function Followup() {
                           ? convertToDDMMYYYY(item.followup_date)
                           : ""}
                       </td>
+
                       <td>{item.country}</td>
-                      <td className="text-wrap">{item.website}</td>
+                      <td>
+                        {item.website.length
+                          ? item.website
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((websiteLink) => (
+                                <p className="text-primary m-0 p-0 link">
+                                  <Link target="_blank" href={websiteLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
+                          : "No link provided"}
+                      </td>
                       <td>{item.category}</td>
-                      <td>{item.company_name}</td>
-                      <td>{item.contact_person}</td>
+                      <td className="text-wrap">{item.company_name}</td>
+                      <td className="text-wrap">{item.contact_person}</td>
                       <td>{item.designation}</td>
                       <td className="text-wrap">{item.contact_number}</td>
                       <td className="text-wrap">{item.email_address}</td>
                       <CallingStatusTd data={item.calling_status} />
-
-                      <td>{item.linkedin}</td>
+                      <td>
+                        {item.linkedin.length
+                          ? item.linkedin
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((linkedinLink) => (
+                                <p className="text-primary m-0 p-0 link">
+                                  <Link target="_blank" href={linkedinLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
+                          : "No link provided"}
+                      </td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
                       <td>
                         {item.is_prospected
                           ? `Yes (${item.followup_done ? "Done" : "Pending"})`
                           : "No"}
                       </td>
+
                       <td
                         className="align-middle"
                         style={{ textAlign: "center" }}
