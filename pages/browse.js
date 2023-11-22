@@ -437,8 +437,7 @@ export default function Browse() {
               <th>Comment</th>
               <th>Type</th>
               <th>Status</th>
-              {session.user.role == "admin" ||
-                (session.user.role == "super" && <th>Manage</th>)}
+              <th>Manage</th>
             </tr>
           </thead>
           <tbody>
@@ -535,19 +534,36 @@ export default function Browse() {
                   {session.user.role == "manager" ? (
                     // Default state
 
-                    <td>
+                    <td
+                      className="align-middle"
+                      style={{ textAlign: "center" }}
+                    >
                       <button
-                        onClick={() =>
+                        onClick={() => {
                           setManageData({
-                            _id: order._id,
-                            production: order.production,
-                            qc1: order.qc1,
-                            comment: order.comment,
-                          })
-                        }
-                        className="btn btn-sm btn-outline-primary me-1"
+                            _id: order._id ?? "",
+                            client_code: order.client_code ?? "",
+                            client_name: order.client_name ?? "",
+                            folder: order.folder ?? "",
+                            quantity: order.quantity ?? "",
+                            download_date:
+                              convertToYYYYMMDD(order.download_date) ?? "",
+                            delivery_date:
+                              convertToYYYYMMDD(order.delivery_date) ?? "",
+                            delivery_bd_time: order.delivery_bd_time ?? "",
+                            task: order.task ?? "",
+                            et: order.et ?? "",
+                            production: order.production ?? "",
+                            qc1: order.qc1 ?? "",
+                            comment: order.comment ?? "",
+                            status: order.status ?? "",
+                            type: order.type ?? "",
+                          });
+                          setEditedBy(order.updated_by ?? "");
+                        }}
+                        className="btn btn-sm mx-2 btn-outline-primary"
                         data-bs-toggle="modal"
-                        data-bs-target="#editModal0"
+                        data-bs-target="#editModal"
                       >
                         Edit
                       </button>

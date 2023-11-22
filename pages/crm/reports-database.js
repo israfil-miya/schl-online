@@ -439,6 +439,7 @@ export default function Report(props) {
                           ? convertToDDMMYYYY(item.followup_date)
                           : ""}
                       </td>
+
                       <td>{item.country}</td>
                       <td>
                         {item.website.length
@@ -461,7 +462,6 @@ export default function Report(props) {
                       <td className="text-wrap">{item.contact_number}</td>
                       <td className="text-wrap">{item.email_address}</td>
                       <CallingStatusTd data={item.calling_status} />
-
                       <td>
                         {item.linkedin.length
                           ? item.linkedin
@@ -482,6 +482,7 @@ export default function Report(props) {
                           ? `Yes (${item.followup_done ? "Done" : "Pending"})`
                           : "No"}
                       </td>
+
                       <td
                         className="align-middle"
                         style={{ textAlign: "center" }}
