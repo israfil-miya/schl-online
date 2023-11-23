@@ -76,19 +76,14 @@ export default function Report(props) {
           getallreports: true,
           isfilter: true,
           ...filters,
-          page
+          page,
         },
       };
-      console.log({getallreports: true,
-        isfilter: true,
-        ...filters,
-        page
-      })
 
       const list = await fetchApi(url, options);
 
       if (!list.error) {
-        console.log(list)
+        console.log(list);
         setReports(list);
         setIsFiltered(1);
       } else {
@@ -208,14 +203,27 @@ export default function Report(props) {
   }, []);
 
   useEffect(() => {
+    setPage(1);
     if (!isFiltered) getAllReports();
     if (reports) setPageCount(reports?.pagination?.pageCount);
   }, [reports?.pagination?.pageCount]);
 
   useEffect(() => {
+    if (reports?.pagination?.pageCount == 1) return;
+
     if (!isFiltered) getAllReports();
     else getAllReportsFiltered();
   }, [page]);
+
+  /*
+  Future Note:
+  This page has pagination bugs corrected.
+  Others page's pagination need to be like this, other pages still contains the pagination bugs.
+
+  Changes made in files to correct the bug:
+    1. api/crm
+    2. crm/reports-database
+  */
 
   return (
     <>
@@ -455,7 +463,10 @@ export default function Report(props) {
                               .split(" ")
                               .filter((item) => item.length)
                               .map((websiteLink, index) => (
-                                <p key={index} className="text-primary m-0 p-0 link">
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
                                   <Link target="_blank" href={websiteLink}>
                                     Click here to visit
                                   </Link>
@@ -476,7 +487,10 @@ export default function Report(props) {
                               .split(" ")
                               .filter((item) => item.length)
                               .map((linkedinLink, index) => (
-                                <p key={index} className="text-primary m-0 p-0 link">
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
                                   <Link target="_blank" href={linkedinLink}>
                                     Click here to visit
                                   </Link>

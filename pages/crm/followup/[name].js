@@ -127,7 +127,10 @@ export default function Followup() {
                               .split(" ")
                               .filter((item) => item.length)
                               .map((websiteLink, link) => (
-                                <p key={index} className="text-primary m-0 p-0 link">
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
                                   <Link target="_blank" href={websiteLink}>
                                     Click here to visit
                                   </Link>
@@ -148,7 +151,10 @@ export default function Followup() {
                               .split(" ")
                               .filter((item) => item.length)
                               .map((linkedinLink, index) => (
-                                <p key={index} className="text-primary m-0 p-0 link">
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
                                   <Link target="_blank" href={linkedinLink}>
                                     Click here to visit
                                   </Link>

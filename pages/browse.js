@@ -266,8 +266,6 @@ export default function Browse() {
   }, [orders?.pagination?.pageCount]);
 
   useEffect(() => {
-    if(orders?.pagination?.pageCount == 1) return 
-    
     if (!isFiltered) GetAllOrders();
     else filteredData();
   }, [page]);

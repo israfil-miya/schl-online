@@ -119,22 +119,20 @@ async function handleGetAllReports(req, res) {
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
 
       let reports;
-      
 
       if (req.headers.notpaginated) reports = await Report.find({});
       else {
-        if(pageCount==1) {
+        if (pageCount == 1) {
           reports = await Report.find(query)
-          .limit(ITEMS_PER_PAGE)
-          .sort({ calling_date: -1 });
+            .limit(ITEMS_PER_PAGE)
+            .sort({ calling_date: -1 });
         } else {
           reports = await Report.find(query)
-          .skip(skip)
-          .limit(ITEMS_PER_PAGE)
-          .sort({ calling_date: -1 });
+            .skip(skip)
+            .limit(ITEMS_PER_PAGE)
+            .sort({ calling_date: -1 });
         }
       }
-      
 
       res.status(200).json({
         pagination: {
