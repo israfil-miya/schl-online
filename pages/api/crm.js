@@ -54,6 +54,7 @@ const handleGetAllMarketers = async (req, res) => {
 const handleNewReport = async (req, res) => {
   try {
     const data = req.body;
+    console.log(data.calling_status);
     const resData = await Report.create(data);
 
     if (resData) {

@@ -1,4 +1,16 @@
-import { useState } from "react";
+import React, { useState } from "react";
+
+const replaceNewlineWithBr = (text) => {
+  const lines = text.split("\n");
+  const truncatedText = lines.slice(0, 1).join(""); // Display only the first line
+  const remainingLines = lines.slice(1);
+
+  return (
+    truncatedText +
+    (remainingLines.length > 0 ? "<br/>" : "") +
+    remainingLines.join("<br/>")
+  );
+};
 
 const CallingStatusTd = ({ data }) => {
   const [showFullText, setShowFullText] = useState(false);
@@ -11,9 +23,11 @@ const CallingStatusTd = ({ data }) => {
     <>
       <td className="text-wrap" style={{ minWidth: "400px" }}>
         {showFullText ? (
-          <span>{data}</span>
+          <span
+            dangerouslySetInnerHTML={{ __html: replaceNewlineWithBr(data) }}
+          />
         ) : (
-          <span>
+          <span className="text-nowrap">
             {data.length <= 50 ? data : data.substring(0, 50).trim() + "..."}
           </span>
         )}
