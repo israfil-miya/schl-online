@@ -116,16 +116,25 @@ async function handleGetAllReports(req, res) {
 
       const count = await Report.countDocuments(query);
 
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
+
       let reports;
+      
 
       if (req.headers.notpaginated) reports = await Report.find({});
-      else
-        reports = await Report.find(query)
+      else {
+        if(pageCount==1) {
+          reports = await Report.find(query)
+          .limit(ITEMS_PER_PAGE)
+          .sort({ calling_date: -1 });
+        } else {
+          reports = await Report.find(query)
           .skip(skip)
           .limit(ITEMS_PER_PAGE)
           .sort({ calling_date: -1 });
-
-      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+        }
+      }
+      
 
       res.status(200).json({
         pagination: {

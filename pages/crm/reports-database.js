@@ -65,6 +65,7 @@ export default function Report(props) {
       toast.error("Error retrieving reports");
     }
   }
+
   async function getAllReportsFiltered() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
@@ -75,12 +76,19 @@ export default function Report(props) {
           getallreports: true,
           isfilter: true,
           ...filters,
+          page
         },
       };
+      console.log({getallreports: true,
+        isfilter: true,
+        ...filters,
+        page
+      })
 
       const list = await fetchApi(url, options);
 
       if (!list.error) {
+        console.log(list)
         setReports(list);
         setIsFiltered(1);
       } else {
