@@ -246,8 +246,8 @@ export async function getServerSideProps(context) {
 
   if (
     process.env.NODE_ENV !== "development" &&
-    session.user.role !== "super" &&
-    session.user.role !== "admin" &&
+    session?.user.role !== "super" &&
+    session?.user.role !== "admin" &&
     !ALLOWED_IPS?.includes(ip)
   ) {
     return {
@@ -258,7 +258,7 @@ export async function getServerSideProps(context) {
     };
   }
 
-  if (session.user.role == "marketer")
+  if (session?.user.role == "marketer")
     return {
       redirect: {
         destination: "/crm/marketers",

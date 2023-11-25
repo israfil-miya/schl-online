@@ -5,6 +5,7 @@ import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
 import CallingStatusTd from "../../components/calling-status-td";
 import Link from "next/link";
+const moment = require("moment-timezone");
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -21,10 +22,31 @@ export default function Report(props) {
   const [pageCount, setPageCount] = useState(0);
 
   const [isFiltered, setIsFiltered] = useState(0);
+  const [isRecall, setIsRecall] = useState(0);
 
   const [marketersList, setMarketersList] = useState([]);
 
-  const [manageData, setManageData] = useState({});
+  const [manageData, setManageData] = useState({
+    _id: "",
+    marketer_id: "",
+    marketer_name: "",
+    calling_date: "",
+    followup_date: "",
+    country: "",
+    website: "",
+    category: "",
+    company_name: "",
+    contact_person: "",
+    contact_number: "",
+    email_address: "",
+    calling_status: "",
+    linkedin: "",
+    calling_date_history: [],
+    updated_by: "",
+    followup_done: false,
+    is_test: false,
+    is_prospected: false,
+  });
 
   const [editedBy, setEditedBy] = useState("");
 
@@ -157,19 +179,151 @@ export default function Report(props) {
   }
 
   async function editReport() {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options = {
-      method: "POST",
-      body: JSON.stringify(manageData),
-      headers: {
-        "Content-Type": "application/json",
-        editreport: true,
-        name: session.user?.name,
-      },
-    };
-
     try {
-      const result = await fetchApi(url, options);
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      let options;
+
+      let submitData = manageData;
+
+      if (isRecall) {
+        console.log("|| RECALL CALLED ||");
+        const today = moment().utc().format("YYYY-MM-DD");
+
+        options = {
+          method: "POST",
+          body: JSON.stringify({
+            ...manageData,
+            calling_date_history: manageData.calling_date_history.includes(
+              today,
+            )
+              ? manageData.calling_date_history
+              : [...manageData.calling_date_history, today],
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            editreport: true,
+            name: session.user?.name,
+          },
+        };
+
+        if (
+          reports.items.find(
+            (data) => data.followup_date == today && data._id == submitData._id,
+          )
+        ) {
+          console.log("RECALL ACCEPTED");
+          console.log(submitData);
+
+          const result = await fetchApi(url, options);
+
+          setManageData({
+            _id: "",
+            marketer_id: "",
+            marketer_name: "",
+            calling_date: "",
+            followup_date: "",
+            country: "",
+            website: "",
+            category: "",
+            company_name: "",
+            contact_person: "",
+            contact_number: "",
+            email_address: "",
+            calling_status: "",
+            linkedin: "",
+            calling_date_history: [],
+            updated_by: "",
+            followup_done: false,
+            is_test: false,
+            is_prospected: false,
+          });
+          setIsRecall(0);
+
+          if (!result.error) {
+            toast.success("Edited the report data");
+
+            if (!isFiltered) await getAllReports();
+            else await getAllReportsFiltered();
+          } else {
+            toast.error("Something gone wrong!");
+          }
+
+          // return
+        } else {
+          console.log("RECALL REJECTED");
+
+          const submitData = {
+            req_type: "Report Edit",
+            req_by: session.user.name,
+            id: manageData._id,
+            ...manageData,
+            calling_date_history: manageData.calling_date_history.includes(
+              today,
+            )
+              ? manageData.calling_date_history
+              : [...manageData.calling_date_history, today],
+            updated_by: session.user?.name,
+          };
+
+          delete submitData._id;
+
+          console.log("THIS IS THE SUBMIT DATA: ", submitData);
+
+          const result = await fetch(
+            process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+            {
+              method: "POST",
+              body: JSON.stringify(submitData),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          setManageData({
+            _id: "",
+            marketer_id: "",
+            marketer_name: "",
+            calling_date: "",
+            followup_date: "",
+            country: "",
+            website: "",
+            category: "",
+            company_name: "",
+            contact_person: "",
+            contact_number: "",
+            email_address: "",
+            calling_status: "",
+            linkedin: "",
+            calling_date_history: [],
+            updated_by: "",
+            followup_done: false,
+            is_test: false,
+            is_prospected: false,
+          });
+          setIsRecall(0);
+
+          if (!result.error) {
+            toast.success(
+              "Today is not the followup date of the report to recall, an approval request has been sent to admin",
+            );
+          } else {
+            toast.error("Something gone wrong!");
+          }
+        }
+
+        return;
+      }
+
+      options = {
+        method: "POST",
+        body: JSON.stringify(submitData),
+        headers: {
+          "Content-Type": "application/json",
+          editreport: true,
+          name: session.user?.name,
+        },
+      };
 
       if (!result.error) {
         toast.success("Edited the report data");
@@ -183,6 +337,27 @@ export default function Report(props) {
       console.error("Error editing report:", error);
       toast.error("Error editing report");
     }
+    setManageData({
+      _id: "",
+      marketer_id: "",
+      marketer_name: "",
+      calling_date: "",
+      followup_date: "",
+      country: "",
+      website: "",
+      category: "",
+      company_name: "",
+      contact_person: "",
+      contact_number: "",
+      email_address: "",
+      calling_status: "",
+      linkedin: "",
+      calling_date_history: [],
+      updated_by: "",
+      followup_done: false,
+      is_test: false,
+      is_prospected: false,
+    });
   }
 
   function handlePrevious() {
@@ -219,7 +394,7 @@ export default function Report(props) {
   Future Note:
   This page has pagination bugs corrected.
   Others page's pagination need to be like this, other pages still contains the pagination bugs.
-
+  
   Changes made in files to correct the bug:
     1. api/crm
     2. crm/reports-database
@@ -424,6 +599,7 @@ export default function Report(props) {
                 <tr className="table-dark">
                   <th>#</th>
                   <th>Calling Date</th>
+                  <th>Marketer</th>
                   <th>Followup Date</th>
                   <th>Country</th>
                   <th>Website</th>
@@ -450,6 +626,7 @@ export default function Report(props) {
                           ? convertToDDMMYYYY(item.calling_date)
                           : ""}
                       </td>
+                      <td>{item.marketer_name}</td>
                       <td>
                         {item.followup_date
                           ? convertToDDMMYYYY(item.followup_date)
@@ -511,8 +688,30 @@ export default function Report(props) {
                       >
                         <button
                           onClick={() => {
-                            setManageData(item);
-                            setEditedBy(item.updated_by ?? "");
+                            setIsRecall(0);
+                            setManageData({
+                              _id: item._id || "",
+                              marketer_id: item.marketer_id || "",
+                              marketer_name: item.marketer_name || "",
+                              calling_date: item.calling_date || "",
+                              followup_date: item.followup_date || "",
+                              country: item.country || "",
+                              website: item.website || "",
+                              category: item.category || "",
+                              company_name: item.company_name || "",
+                              contact_person: item.contact_person || "",
+                              contact_number: item.contact_number || "",
+                              email_address: item.email_address || "",
+                              calling_status: item.calling_status || "",
+                              linkedin: item.linkedin || "",
+                              calling_date_history:
+                                item.calling_date_history || [],
+                              updated_by: item.updated_by || "",
+                              followup_done: item.followup_done || false,
+                              is_test: item.is_test || false,
+                              is_prospected: item.is_prospected || false,
+                            });
+                            setEditedBy(item.updated_by || "");
                           }}
                           className="btn btn-sm btn-outline-primary me-1"
                           data-bs-toggle="modal"
@@ -566,7 +765,7 @@ export default function Report(props) {
             <div className="modal-body">
               <div className="mb-3">
                 <label htmlFor="calling_date" className="form-label">
-                  Calling Date
+                  First Calling Date
                 </label>
                 <input
                   disabled
@@ -575,6 +774,35 @@ export default function Report(props) {
                   className="form-control"
                   id="calling_date"
                 />
+              </div>
+              <div className="mb-1">
+                <label htmlFor="calling_date" className="form-label">
+                  Calling Date History
+                </label>
+                <textarea
+                  disabled
+                  value={manageData.calling_date_history
+                    ?.map((date) => `${convertToDDMMYYYY(date)}`)
+                    .join("\n")}
+                  type="date"
+                  className="form-control"
+                  id="calling_date"
+                />
+              </div>
+              <div className="mb-3">
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    id="myCheckbox"
+                    className="form-check-input"
+                    checked={isRecall}
+                    onChange={(e) => setIsRecall((prevData) => !prevData)}
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Recall
+                  </label>
+                </div>
               </div>
               <div className="mb-3">
                 <label htmlFor="followup_date" className="form-label">

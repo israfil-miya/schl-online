@@ -167,6 +167,33 @@ async function handleResponse(req, res) {
         sendError(res, 400, "Unable to send request");
       }
     }
+    if (data.req_type == "Report Edit") {
+      let editData = { ...data };
+      delete editData.id;
+      delete editData.req_by;
+      delete editData.req_type;
+      delete editData._id;
+
+      const resData = await Report.findByIdAndUpdate(data.id, editData, {
+        new: true,
+      });
+
+      const updateApprovaL = await Approval.findByIdAndUpdate(
+        data._id,
+        {
+          checked_by: data.checked_by,
+          is_rejected: false,
+        },
+        { new: true },
+      );
+
+      if (resData) {
+        console.log(resData);
+        res.status(200).json(updateApprovaL);
+      } else {
+        sendError(res, 400, "Unable to send request");
+      }
+    }
   }
 }
 

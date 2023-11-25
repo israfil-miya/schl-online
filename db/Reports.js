@@ -10,11 +10,11 @@ const ReportSchema = new mongoose.Schema(
     category: String,
     company_name: String,
     contact_person: String,
-    designation: String,
     contact_number: String,
     email_address: String,
     calling_status: String,
     linkedin: String,
+    calling_date_history: [String],
     updated_by: {
       type: String,
       default: null,

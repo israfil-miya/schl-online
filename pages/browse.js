@@ -541,25 +541,25 @@ export default function Browse() {
                       <button
                         onClick={() => {
                           setManageData({
-                            _id: order._id ?? "",
-                            client_code: order.client_code ?? "",
-                            client_name: order.client_name ?? "",
-                            folder: order.folder ?? "",
-                            quantity: order.quantity ?? "",
+                            _id: order._id || "",
+                            client_code: order.client_code || "",
+                            client_name: order.client_name || "",
+                            folder: order.folder || "",
+                            quantity: order.quantity || "",
                             download_date:
-                              convertToYYYYMMDD(order.download_date) ?? "",
+                              convertToYYYYMMDD(order.download_date) || "",
                             delivery_date:
-                              convertToYYYYMMDD(order.delivery_date) ?? "",
-                            delivery_bd_time: order.delivery_bd_time ?? "",
-                            task: order.task ?? "",
-                            et: order.et ?? "",
-                            production: order.production ?? "",
-                            qc1: order.qc1 ?? "",
-                            comment: order.comment ?? "",
-                            status: order.status ?? "",
-                            type: order.type ?? "",
+                              convertToYYYYMMDD(order.delivery_date) || "",
+                            delivery_bd_time: order.delivery_bd_time || "",
+                            task: order.task || "",
+                            et: order.et || "",
+                            production: order.production || "",
+                            qc1: order.qc1 || "",
+                            comment: order.comment || "",
+                            status: order.status || "",
+                            type: order.type || "",
                           });
-                          setEditedBy(order.updated_by ?? "");
+                          setEditedBy(order.updated_by || "");
                         }}
                         className="btn btn-sm mx-2 btn-outline-primary"
                         data-bs-toggle="modal"
