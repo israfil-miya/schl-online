@@ -424,8 +424,6 @@ export async function getServerSideProps(context) {
     };
   }
 
-  
-
   // code for redirect if not logged in
   if (
     !session ||
