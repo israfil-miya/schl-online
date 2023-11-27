@@ -35,7 +35,7 @@ function isoDateToDdMmYyyy(isoDate) {
   return `${day}-${month}-${year}`;
 }
 
-export default function Home({ orders, ordersRedo, ip }) {
+export default function Home({ orders, ordersRedo }) {
   const router = useRouter();
   let { error, success } = router.query;
 
@@ -54,10 +54,6 @@ export default function Home({ orders, ordersRedo, ip }) {
   };
 
   useEffect(() => {
-
-console.error("THIS IS IP: ", ip)
-
-
     if (error) {
       toast.error(error, {
         toastId: "error",
@@ -240,14 +236,12 @@ export async function getServerSideProps(context) {
       : req?.headers["x-forwarded-for"] || req?.ip;
 
   if (!ip) {
-    // return {
-    //   redirect: {
-    //     destination: "/forbidden",
-    //     permanent: false,
-    //   },
-    // };
-
-    console.log("This executed 0011")
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
   }
 
   if (
@@ -256,18 +250,12 @@ export async function getServerSideProps(context) {
     session?.user.role !== "admin" &&
     !ALLOWED_IPS?.includes(ip)
   ) {
-    // return {
-    //   redirect: {
-    //     destination: "/forbidden",
-    //     permanent: false,
-    //   },
-    // };
-
-
-
-
-    console.log("This executed 0022")
-
+    return {
+      redirect: {
+        destination: "/forbidden",
+        permanent: false,
+      },
+    };
   }
 
   if (session?.user.role == "marketer")
@@ -294,5 +282,5 @@ export async function getServerSideProps(context) {
   });
   const orders = await res.json();
   const ordersRedo = await res2.json();
-  return { props: { orders, ordersRedo, ip } };
+  return { props: { orders, ordersRedo } };
 }
