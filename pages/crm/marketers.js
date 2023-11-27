@@ -402,6 +402,9 @@ export async function getServerSideProps(context) {
       : req?.headers["x-forwarded-for"] || req?.ip;
 
   if (!ip) {
+
+    console.log("Redirection to forbidden 1")
+
     return {
       redirect: {
         destination: "/forbidden",
@@ -416,6 +419,7 @@ export async function getServerSideProps(context) {
     session.user.role !== "admin" &&
     !ALLOWED_IPS?.includes(ip)
   ) {
+    console.log("Redirection to forbidden 2")
     return {
       redirect: {
         destination: "/forbidden",
@@ -423,6 +427,8 @@ export async function getServerSideProps(context) {
       },
     };
   }
+
+
 
   // code for redirect if not logged in
   if (
