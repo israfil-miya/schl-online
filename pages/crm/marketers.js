@@ -403,7 +403,7 @@ export async function getServerSideProps(context) {
 
   if (!ip) {
 
-    console.log("Redirection to forbidden 1")
+    console.error("Redirection to forbidden 1")
 
     return {
       redirect: {
@@ -419,7 +419,7 @@ export async function getServerSideProps(context) {
     session.user.role !== "admin" &&
     !ALLOWED_IPS?.includes(ip)
   ) {
-    console.log("Redirection to forbidden 2")
+    console.error("Redirection to forbidden 2")
     return {
       redirect: {
         destination: "/forbidden",
