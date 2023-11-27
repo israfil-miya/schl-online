@@ -35,7 +35,7 @@ function isoDateToDdMmYyyy(isoDate) {
   return `${day}-${month}-${year}`;
 }
 
-export default function Home({ orders, ordersRedo }) {
+export default function Home({ orders, ordersRedo, ip }) {
   const router = useRouter();
   let { error, success } = router.query;
 
@@ -54,6 +54,12 @@ export default function Home({ orders, ordersRedo }) {
   };
 
   useEffect(() => {
+
+
+toast.error(ip)
+
+
+
     if (error) {
       toast.error(error, {
         toastId: "error",
@@ -236,12 +242,14 @@ export async function getServerSideProps(context) {
       : req?.headers["x-forwarded-for"] || req?.ip;
 
   if (!ip) {
-    return {
-      redirect: {
-        destination: "/forbidden",
-        permanent: false,
-      },
-    };
+    // return {
+    //   redirect: {
+    //     destination: "/forbidden",
+    //     permanent: false,
+    //   },
+    // };
+
+    console.error("Redirect to forbidden 1")
   }
 
   if (
@@ -250,12 +258,13 @@ export async function getServerSideProps(context) {
     session?.user.role !== "admin" &&
     !ALLOWED_IPS?.includes(ip)
   ) {
-    return {
-      redirect: {
-        destination: "/forbidden",
-        permanent: false,
-      },
-    };
+    // return {
+    //   redirect: {
+    //     destination: "/forbidden",
+    //     permanent: false,
+    //   },
+    // };
+    console.error("Redirect to forbidden 1")
   }
 
   if (session?.user.role == "marketer")
@@ -282,5 +291,5 @@ export async function getServerSideProps(context) {
   });
   const orders = await res.json();
   const ordersRedo = await res2.json();
-  return { props: { orders, ordersRedo } };
+  return { props: { orders, ordersRedo, ip: req?.ip } };
 }
