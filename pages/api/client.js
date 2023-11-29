@@ -41,10 +41,10 @@ async function handleGetAllClient(req, res) {
     const ITEMS_PER_PAGE = 20; // Number of items per page
 
     let query = {};
-    if (country) query.country = country;
-    if (clientcode) query.client_code = clientcode;
-    if (contactperson) query.contact_person = contactperson;
-    if (marketer) query.marketer = marketer;
+    if (country) query.country = { $regex: country, $options: "i" };
+    if (clientcode) query.client_code = { $regex: clientcode, $options: "i" };
+    if (contactperson) query.contact_person = { $regex: contactperson, $options: "i" };
+    if (marketer) query.marketer = { $regex: marketer, $options: "i" };
 
     console.log(query);
 
