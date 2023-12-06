@@ -170,7 +170,7 @@ export default function Report(props) {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
     result = await res.json();
     if (!result.error) {
@@ -194,7 +194,7 @@ export default function Report(props) {
           body: JSON.stringify({
             ...manageData,
             calling_date_history: manageData.calling_date_history.includes(
-              today,
+              today
             )
               ? manageData.calling_date_history
               : [...manageData.calling_date_history, today],
@@ -208,7 +208,7 @@ export default function Report(props) {
 
         if (
           reports.items.find(
-            (data) => data.followup_date == today && data._id == submitData._id,
+            (data) => data.followup_date == today && data._id == submitData._id
           )
         ) {
           console.log("RECALL ACCEPTED");
@@ -258,7 +258,7 @@ export default function Report(props) {
             id: manageData._id,
             ...manageData,
             calling_date_history: manageData.calling_date_history.includes(
-              today,
+              today
             )
               ? manageData.calling_date_history
               : [...manageData.calling_date_history, today],
@@ -277,7 +277,7 @@ export default function Report(props) {
               headers: {
                 "Content-Type": "application/json",
               },
-            },
+            }
           );
 
           setManageData({
@@ -305,7 +305,7 @@ export default function Report(props) {
 
           if (!result.error) {
             toast.success(
-              "Today is not the followup date of the report to recall, an approval request has been sent to admin",
+              "Today is not the followup date of the report to recall, an approval request has been sent to admin"
             );
           } else {
             toast.error("Something gone wrong!");
@@ -1175,25 +1175,8 @@ export async function getServerSideProps(context) {
       },
     };
   } else {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getdailyreportslast5days: true,
-      },
+    return {
+      props: {},
     };
-
-    let res = await fetchApi(url, options);
-
-    if (!res.error) {
-      return {
-        props: { dailyReportStatus: res },
-      };
-    } else {
-      return {
-        props: {},
-      };
-    }
   }
 }

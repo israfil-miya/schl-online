@@ -116,26 +116,19 @@ async function handleGetAllReports(req, res) {
     else {
       const skip = (page - 1) * ITEMS_PER_PAGE;
 
-      const count = await Report.countDocuments(query);
-
-      const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
-
-      let reports;
-
-      if (req.headers.notpaginated) reports = await Report.find({});
-      else {
-        if (pageCount == 1) {
-          reports = await Report.find(query)
-            .limit(ITEMS_PER_PAGE)
-            .sort({ calling_date: -1 });
-        } else {
-          reports = await Report.find(query)
+      const countPromise = Report.countDocuments(query);
+      const reportsPromise = req.headers.notpaginated
+        ? Report.find({}).lean()
+        : Report.find(query)
+            .sort({ calling_date: -1 })
             .skip(skip)
             .limit(ITEMS_PER_PAGE)
-            .sort({ calling_date: -1 });
-        }
-      }
-
+            .lean(); // Use lean() for faster queries if you don't need Mongoose documents
+  
+      const [count, reports] = await Promise.all([countPromise, reportsPromise]);
+  
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
+  
       res.status(200).json({
         pagination: {
           count,

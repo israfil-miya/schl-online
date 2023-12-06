@@ -6,6 +6,7 @@ const ReportSchema = new mongoose.Schema(
     calling_date: String,
     followup_date: String,
     country: String,
+    designation: String,
     website: String,
     category: String,
     company_name: String,
