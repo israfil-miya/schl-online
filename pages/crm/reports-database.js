@@ -408,157 +408,9 @@ export default function Report(props) {
         navFor={session.user.role == "marketer" ? "call-reports" : "crm"}
       />
       <div className="containter">
-        <div className="daily-report my-5">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <div className=" mx-2 form-floating">
-              <select
-                required
-                onChange={(e) =>
-                  setFilters({ ...filters, marketer_name: e.target.value })
-                }
-                className="form-select"
-                id="floatingSelectGrid"
-              >
-                <option
-                  value={""}
-                  defaultValue={true}
-                  className="text-body-secondary"
-                >
-                  Select a marketer
-                </option>
-                {marketersList?.map((marketer, index) => {
-                  return (
-                    <>
-                      <option key={index}>{marketer?.marketer_name}</option>
-                    </>
-                  );
-                })}
-              </select>
-              <label htmlFor="floatingSelectGrid">Marketer filter</label>
-            </div>
-            <div className="mb-3 p-3 bg-light rounded border d-flex justify-content-center">
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_stats_of me-3"
-              >
-                <input
-                  type="checkbox"
-                  id="myCheckbox"
-                  className="form-check-input"
-                  checked={filters.test}
-                  onChange={(e) =>
-                    setFilters({ ...filters, test: !filters.test })
-                  }
-                />
-
-                <label htmlFor="myCheckbox" className="form-check-label ms-1">
-                  Test Job
-                </label>
-
-                <input
-                  type="checkbox"
-                  id="myCheckbox2"
-                  className="form-check-input"
-                  checked={filters.prospect}
-                  onChange={(e) =>
-                    setFilters({ ...filters, prospect: !filters.prospect })
-                  }
-                />
-
-                <label htmlFor="myCheckbox" className="form-check-label ms-1">
-                  Prospecting
-                </label>
-              </div>
-
-              <div
-                className="filter_time me-3"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <strong>Date: </strong>
-                <input
-                  type="date"
-                  className="form-control mx-2 custom-input"
-                  value={filters.fromdate}
-                  onChange={(e) =>
-                    setFilters({ ...filters, fromdate: e.target.value })
-                  }
-                />
-                <span> To </span>
-                <input
-                  type="date"
-                  className="form-control ms-2 custom-input"
-                  value={filters.todate}
-                  onChange={(e) =>
-                    setFilters({ ...filters, todate: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_folder me-3"
-              >
-                <strong>Country: </strong>
-                <input
-                  type="text"
-                  placeholder="Country"
-                  className="form-control ms-2 custom-input"
-                  value={filters.country}
-                  onChange={(e) =>
-                    setFilters({ ...filters, country: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_task me-3"
-              >
-                <strong>Category: </strong>
-                <input
-                  type="text"
-                  placeholder="Category"
-                  className="form-control ms-2 custom-input"
-                  value={filters.category}
-                  onChange={(e) =>
-                    setFilters({ ...filters, category: e.target.value })
-                  }
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center" }}
-                className="filter_task me-3"
-              >
-                <strong>Company: </strong>
-                <input
-                  type="text"
-                  placeholder="Company Name"
-                  className="form-control ms-2 custom-input"
-                  value={filters.company_name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, company_name: e.target.value })
-                  }
-                />
-              </div>
-
-              <button
-                onClick={getAllReportsFiltered}
-                className="btn ms-4 btn-sm btn-outline-primary"
-              >
-                Search
-              </button>
-            </div>
-          </div>
-
+        <div className="d-flex mt-3">
           {reports?.items?.length !== 0 && (
-            <div className="container mb-5">
+            <div className="container">
               <div
                 className="float-end"
                 style={{ display: "flex", alignItems: "center" }}
@@ -591,157 +443,167 @@ export default function Report(props) {
                     Next
                   </button>
                 </div>
+                <button
+                  type="button"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#offcanvasNavbar"
+                  aria-controls="offcanvasNavbar"
+                  aria-label="Toggle navigation"
+                  className="btn m-2 btn-sm btn-outline-primary"
+                >
+                  Filter
+                </button>
               </div>
             </div>
           )}
+        </div>
 
-          <div style={{ overflowX: "auto" }} className="text-nowrap">
-            <table className="table table-bordered table-hover">
-              <thead>
-                <tr className="table-dark">
-                  <th>#</th>
-                  <th>Calling Date</th>
-                  <th>Marketer</th>
-                  <th>Followup Date</th>
-                  <th>Country</th>
-                  <th>Website</th>
-                  <th>Category</th>
-                  <th>Company Name</th>
-                  <th>Contact Person</th>
-                  <th>Designation</th>
-                  <th>Contact Number</th>
-                  <th>Email Address</th>
-                  <th>Calling Status</th>
-                  <th>LinkedIn</th>
-                  <th>Test</th>
-                  <th>Prospected</th>
-                  <th>Manage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reports?.items?.length ? (
-                  reports?.items?.map((item, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>
-                        {item.calling_date
-                          ? convertToDDMMYYYY(item.calling_date)
-                          : ""}
-                      </td>
-                      <td>{item.marketer_name}</td>
-                      <td>
-                        {item.followup_date
-                          ? convertToDDMMYYYY(item.followup_date)
-                          : ""}
-                      </td>
+        <div style={{ overflowX: "auto" }} className="text-nowrap">
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Calling Date</th>
+                <th>Marketer</th>
+                <th>Followup Date</th>
+                <th>Country</th>
+                <th>Website</th>
+                <th>Category</th>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Designation</th>
+                <th>Contact Number</th>
+                <th>Email Address</th>
+                <th>Calling Status</th>
+                <th>LinkedIn</th>
+                <th>Test</th>
+                <th>Prospected</th>
+                <th>Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports?.items?.length ? (
+                reports?.items?.map((item, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>
+                      {item.calling_date
+                        ? convertToDDMMYYYY(item.calling_date)
+                        : ""}
+                    </td>
+                    <td>{item.marketer_name}</td>
+                    <td>
+                      {item.followup_date
+                        ? convertToDDMMYYYY(item.followup_date)
+                        : ""}
+                    </td>
 
-                      <td>{item.country}</td>
-                      <td>
-                        {item.website.length
-                          ? item.website
-                              .split(" ")
-                              .filter((item) => item.length)
-                              .map((websiteLink, index) => (
-                                <p
-                                  key={index}
-                                  className="text-primary m-0 p-0 link"
-                                >
-                                  <Link target="_blank" href={websiteLink}>
-                                    Click here to visit
-                                  </Link>
-                                </p>
-                              ))
-                          : "No link provided"}
-                      </td>
-                      <td>{item.category}</td>
-                      <td className="text-wrap">{item.company_name}</td>
-                      <td className="text-wrap">{item.contact_person}</td>
-                      <td>{item.designation}</td>
-                      <td className="text-wrap">{item.contact_number}</td>
-                      <td className="text-wrap">{item.email_address}</td>
-                      <CallingStatusTd data={item.calling_status} />
-                      <td>
-                        {item.linkedin.length
-                          ? item.linkedin
-                              .split(" ")
-                              .filter((item) => item.length)
-                              .map((linkedinLink, index) => (
-                                <p
-                                  key={index}
-                                  className="text-primary m-0 p-0 link"
-                                >
-                                  <Link target="_blank" href={linkedinLink}>
-                                    Click here to visit
-                                  </Link>
-                                </p>
-                              ))
-                          : "No link provided"}
-                      </td>
-                      <td>{item.is_test ? "Yes" : "No"}</td>
-                      <td>
-                        {item.is_prospected
-                          ? `Yes (${item.followup_done ? "Done" : "Pending"})`
-                          : "No"}
-                      </td>
+                    <td>{item.country}</td>
+                    <td>
+                      {item.website.length
+                        ? item.website
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((websiteLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={websiteLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
+                        : "No link provided"}
+                    </td>
+                    <td>{item.category}</td>
+                    <td className="text-wrap">{item.company_name}</td>
+                    <td className="text-wrap">{item.contact_person}</td>
+                    <td>{item.designation}</td>
+                    <td className="text-wrap">{item.contact_number}</td>
+                    <td className="text-wrap">{item.email_address}</td>
+                    <CallingStatusTd data={item.calling_status} />
+                    <td>
+                      {item.linkedin.length
+                        ? item.linkedin
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((linkedinLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={linkedinLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
+                        : "No link provided"}
+                    </td>
+                    <td>{item.is_test ? "Yes" : "No"}</td>
+                    <td>
+                      {item.is_prospected
+                        ? `Yes (${item.followup_done ? "Done" : "Pending"})`
+                        : "No"}
+                    </td>
 
-                      <td
-                        className="align-middle"
-                        style={{ textAlign: "center" }}
+                    <td
+                      className="align-middle"
+                      style={{ textAlign: "center" }}
+                    >
+                      <button
+                        onClick={() => {
+                          setIsRecall(0);
+                          setManageData({
+                            _id: item._id || "",
+                            marketer_id: item.marketer_id || "",
+                            marketer_name: item.marketer_name || "",
+                            calling_date: item.calling_date || "",
+                            followup_date: item.followup_date || "",
+                            country: item.country || "",
+                            website: item.website || "",
+                            category: item.category || "",
+                            company_name: item.company_name || "",
+                            contact_person: item.contact_person || "",
+                            contact_number: item.contact_number || "",
+                            email_address: item.email_address || "",
+                            calling_status: item.calling_status || "",
+                            linkedin: item.linkedin || "",
+                            calling_date_history:
+                              item.calling_date_history || [],
+                            updated_by: item.updated_by || "",
+                            followup_done: item.followup_done || false,
+                            is_test: item.is_test || false,
+                            is_prospected: item.is_prospected || false,
+                          });
+                          setEditedBy(item.updated_by || "");
+                        }}
+                        className="btn btn-sm btn-outline-primary me-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editModal"
                       >
-                        <button
-                          onClick={() => {
-                            setIsRecall(0);
-                            setManageData({
-                              _id: item._id || "",
-                              marketer_id: item.marketer_id || "",
-                              marketer_name: item.marketer_name || "",
-                              calling_date: item.calling_date || "",
-                              followup_date: item.followup_date || "",
-                              country: item.country || "",
-                              website: item.website || "",
-                              category: item.category || "",
-                              company_name: item.company_name || "",
-                              contact_person: item.contact_person || "",
-                              contact_number: item.contact_number || "",
-                              email_address: item.email_address || "",
-                              calling_status: item.calling_status || "",
-                              linkedin: item.linkedin || "",
-                              calling_date_history:
-                                item.calling_date_history || [],
-                              updated_by: item.updated_by || "",
-                              followup_done: item.followup_done || false,
-                              is_test: item.is_test || false,
-                              is_prospected: item.is_prospected || false,
-                            });
-                            setEditedBy(item.updated_by || "");
-                          }}
-                          className="btn btn-sm btn-outline-primary me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#editModal"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setManageData({ _id: item._id })}
-                          className="btn btn-sm btn-outline-danger me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#deleteModal"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr key={0}>
-                    <td colSpan="16" className=" align-center text-center">
-                      No Reports To Show.
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setManageData({ _id: item._id })}
+                        className="btn btn-sm btn-outline-danger me-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr key={0}>
+                  <td colSpan="16" className=" align-center text-center">
+                    No Reports To Show.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -1103,6 +965,185 @@ export default function Report(props) {
                 Yes
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="offcanvas offcanvas-end"
+        tabindex="-1"
+        id="offcanvasNavbar"
+        aria-labelledby="offcanvasNavbarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
+            Search reports
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div className="d-grid gap-2">
+            <div className="row">
+              <div className="col">
+                <label className="fw-bold" htmlFor="floatingSelectGrid">
+                  Marketer name
+                </label>
+                <select
+                  required
+                  onChange={(e) =>
+                    setFilters({ ...filters, marketer_name: e.target.value })
+                  }
+                  className="form-select"
+                  id="floatingSelectGrid"
+                >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select a marketer
+                  </option>
+                  {marketersList?.map((marketer, index) => {
+                    return (
+                      <>
+                        <option key={index}>{marketer?.marketer_name}</option>
+                      </>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="datePicker">
+                  Date picker
+                </label>
+                <div id="datePicker" className="input-group">
+                  <input
+                    type="date"
+                    id="fromDate"
+                    className="form-control custom-input"
+                    value={filters.fromdate}
+                    onChange={(e) =>
+                      setFilters({ ...filters, fromdate: e.target.value })
+                    }
+                  />
+                  <span className="input-group-text">to</span>
+                  <input
+                    type="date"
+                    id="toDate"
+                    className="form-control custom-input"
+                    value={filters.todate}
+                    onChange={(e) =>
+                      setFilters({ ...filters, todate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Country name
+                </label>
+                <input
+                  value={filters.country}
+                  onChange={(e) =>
+                    setFilters({ ...filters, country: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Category
+                </label>
+                <input
+                  value={filters.category}
+                  onChange={(e) =>
+                    setFilters({ ...filters, category: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Company name
+                </label>
+                <input
+                  value={filters.company_name}
+                  onChange={(e) =>
+                    setFilters({ ...filters, company_name: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox"
+                  className="form-check-input"
+                  checked={filters.test}
+                  onChange={(e) =>
+                    setFilters({ ...filters, test: !filters.test })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Test Job
+                </label>
+              </div>
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={filters.prospect}
+                  onChange={(e) =>
+                    setFilters({ ...filters, prospect: !filters.prospect })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Prospecting
+                </label>
+              </div>
+            </div>
+
+            <button
+              onClick={getAllReportsFiltered}
+              className="btn btn-outline-primary"
+            >
+              Search
+            </button>
           </div>
         </div>
       </div>
