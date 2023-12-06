@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 export default function ForbiddenPage() {
   return (
@@ -13,6 +14,7 @@ export default function ForbiddenPage() {
               <p className="lead">
                 This website can only be accessed from the office.
               </p>
+              <p>Go to <Link className="text-primary" href="/login">Login Page</Link></p>
             </div>
           </div>
         </div>
