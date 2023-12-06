@@ -120,15 +120,19 @@ async function handleGetAllReports(req, res) {
       const reportsPromise = req.headers.notpaginated
         ? Report.find({}).lean()
         : Report.find(query)
+            .lean()
             .sort({ calling_date: -1 })
             .skip(skip)
-            .limit(ITEMS_PER_PAGE)
-            .lean(); // Use lean() for faster queries if you don't need Mongoose documents
-  
-      const [count, reports] = await Promise.all([countPromise, reportsPromise]);
-  
+            .limit(ITEMS_PER_PAGE);
+      // Use lean() for faster queries if you don't need Mongoose documents
+
+      const [count, reports] = await Promise.all([
+        countPromise,
+        reportsPromise,
+      ]);
+
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
-  
+
       res.status(200).json({
         pagination: {
           count,
@@ -188,7 +192,7 @@ async function handleGetNearestFollowUps(req, res) {
       let returnData = resData.reduce((acc, entry) => {
         // Find existing entry for the marketer
         const existingEntry = acc.find(
-          (item) => item.marketer_name === entry.marketer_name,
+          (item) => item.marketer_name === entry.marketer_name
         );
 
         if (existingEntry) {
@@ -234,7 +238,7 @@ async function handleFinishFollowup(req, res) {
       },
       {
         new: true,
-      },
+      }
     );
 
     if (resData) {
@@ -295,7 +299,7 @@ async function handleGetDailyReportsToday(req, res) {
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
       const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name,
+        (item) => item.marketer_name === entry.marketer_name
       );
 
       if (existingEntry) {
@@ -336,7 +340,7 @@ async function handleGetDailyReportsLast5Days(req, res) {
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
       const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name,
+        (item) => item.marketer_name === entry.marketer_name
       );
 
       if (existingEntry) {

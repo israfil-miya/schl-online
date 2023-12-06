@@ -199,7 +199,7 @@ async function handleResponse(req, res) {
 
 async function handleGetAllApprovals(req, res) {
   try {
-    const resData = await Approval.find({}).sort({
+    const resData = await Approval.find({}).lean().sort({
       updatedAt: -1,
       checked_by: 1,
     }); // Sort by "checked_by" ascending, "_id" as tiebreaker

@@ -325,6 +325,8 @@ export default function Report(props) {
         },
       };
 
+      const result = await fetchApi(url, options);
+
       if (!result.error) {
         toast.success("Edited the report data");
 
