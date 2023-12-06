@@ -222,8 +222,8 @@ export default function Statistics() {
               statsOf == "Files"
                 ? data.fileQuantity
                 : statsOf == "Orders"
-                ? data.orderQuantity
-                : null,
+                  ? data.orderQuantity
+                  : null,
             ),
             backgroundColor: "#efa438",
             borderColor: "black",
@@ -238,8 +238,8 @@ export default function Statistics() {
               statsOf == "Files"
                 ? data.filePending
                 : statsOf == "Orders"
-                ? data.orderPending
-                : null,
+                  ? data.orderPending
+                  : null,
             ),
             backgroundColor: "#466cdb",
             borderColor: "black",
@@ -269,8 +269,8 @@ export default function Statistics() {
             statsOf == "Files"
               ? data.fileQuantity
               : statsOf == "Orders"
-              ? data.orderQuantity
-              : null,
+                ? data.orderQuantity
+                : null,
           ),
           backgroundColor: ordersQP.map((data) => {
             const month = new Date(data.date).getMonth();

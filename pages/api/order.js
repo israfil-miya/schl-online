@@ -125,8 +125,6 @@ async function handleGetAllOrderPaginated(req, res) {
   // Put all your query params in here
   const query = {};
 
-  
-
   try {
     const skip = (page - 1) * ITEMS_PER_PAGE; // Calculate the number of items to skip
 

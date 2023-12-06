@@ -82,6 +82,7 @@ async function handleGetAllReports(req, res) {
       todate,
       test,
       prospect,
+      generalsearchstring,
     } = req.headers;
 
     test = test === "true" ? true : false;
@@ -91,12 +92,13 @@ async function handleGetAllReports(req, res) {
 
     let query = {};
 
-    if (country) query.country = country;
-    if (company_name) query.company_name = company_name;
-    if (category) query.category = category;
-    if (marketer_name) query.marketer_name = marketer_name;
+    if (country) query.country = { $regex: country, $options: "i" };
+    if (company_name) query.company_name = { $regex: company_name, $options: "i" };
+    if (category) query.category = { $regex: category, $options: "i" };
+    if (marketer_name) query.marketer_name = { $regex: marketer_name, $options: "i" };
     if (test) query.is_test = test;
     if (prospect) query.is_prospected = prospect;
+
     if (fromdate || todate) {
       query.calling_date = {};
       if (fromdate) {
@@ -107,29 +109,42 @@ async function handleGetAllReports(req, res) {
       }
     }
 
-    if (
-      Object.keys(query).length === 0 &&
-      query.constructor === Object &&
-      req.headers.isfilter == true
-    )
+    let searchQuery = { ...query };
+
+    if (!query && req.headers.isfilter == true && !generalsearchstring) {
       sendError(res, 400, "No filter applied");
-    else {
+    } else {
       const skip = (page - 1) * ITEMS_PER_PAGE;
 
-      const countPromise = Report.countDocuments(query);
+      if (generalsearchstring) {
+        searchQuery = {
+          $or: [
+            { country: { $regex: generalsearchstring, $options: "i" } },
+            { company_name: { $regex: generalsearchstring, $options: "i" } },
+            { category: { $regex: generalsearchstring, $options: "i" } },
+            { marketer_name: { $regex: generalsearchstring, $options: "i" } },
+            { designation: { $regex: generalsearchstring, $options: "i" } },
+            { website: { $regex: generalsearchstring, $options: "i" } },
+            { contact_person: { $regex: generalsearchstring, $options: "i" } },
+            { contact_number: { $regex: generalsearchstring, $options: "i" } },
+            { calling_status: { $regex: generalsearchstring, $options: "i" } },
+            { email_address: { $regex: generalsearchstring, $options: "i" } },
+            { linkedin: { $regex: generalsearchstring, $options: "i" } },
+          ],
+        };
+      }
+
+      const countPromise = Report.countDocuments(searchQuery);
       const reportsPromise = req.headers.notpaginated
         ? Report.find({}).lean()
-        : Report.find(query)
-            .lean()
-            .sort({ calling_date: -1 })
-            .skip(skip)
-            .limit(ITEMS_PER_PAGE);
-      // Use lean() for faster queries if you don't need Mongoose documents
+        : Report.aggregate([
+            { $match: searchQuery },
+            { $sort: { calling_date: -1 } },
+            { $skip: skip },
+            { $limit: ITEMS_PER_PAGE },
+          ]);
 
-      const [count, reports] = await Promise.all([
-        countPromise,
-        reportsPromise,
-      ]);
+      const [count, reports] = await Promise.all([countPromise, reportsPromise]);
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
 
@@ -192,7 +207,7 @@ async function handleGetNearestFollowUps(req, res) {
       let returnData = resData.reduce((acc, entry) => {
         // Find existing entry for the marketer
         const existingEntry = acc.find(
-          (item) => item.marketer_name === entry.marketer_name
+          (item) => item.marketer_name === entry.marketer_name,
         );
 
         if (existingEntry) {
@@ -238,7 +253,7 @@ async function handleFinishFollowup(req, res) {
       },
       {
         new: true,
-      }
+      },
     );
 
     if (resData) {
@@ -299,7 +314,7 @@ async function handleGetDailyReportsToday(req, res) {
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
       const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name
+        (item) => item.marketer_name === entry.marketer_name,
       );
 
       if (existingEntry) {
@@ -340,7 +355,7 @@ async function handleGetDailyReportsLast5Days(req, res) {
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
       const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name
+        (item) => item.marketer_name === entry.marketer_name,
       );
 
       if (existingEntry) {

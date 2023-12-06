@@ -43,7 +43,8 @@ async function handleGetAllClient(req, res) {
     let query = {};
     if (country) query.country = { $regex: country, $options: "i" };
     if (clientcode) query.client_code = { $regex: clientcode, $options: "i" };
-    if (contactperson) query.contact_person = { $regex: contactperson, $options: "i" };
+    if (contactperson)
+      query.contact_person = { $regex: contactperson, $options: "i" };
     if (marketer) query.marketer = { $regex: marketer, $options: "i" };
 
     console.log(query);

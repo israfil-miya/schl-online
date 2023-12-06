@@ -306,12 +306,13 @@ export default function Approvals() {
                               approveReq.req_type.split(" ")[0] == "Client"
                                 ? GetClientsById(approveReq.id)
                                 : approveReq.req_type.split(" ")[0] == "Task"
-                                ? GetOrdersById(approveReq.id)
-                                : approveReq.req_type.split(" ")[0] == "User"
-                                ? GetUsersById(approveReq.id)
-                                : approveReq.req_type.split(" ")[0] == "Report"
-                                ? GetReportById(approveReq.id)
-                                : null;
+                                  ? GetOrdersById(approveReq.id)
+                                  : approveReq.req_type.split(" ")[0] == "User"
+                                    ? GetUsersById(approveReq.id)
+                                    : approveReq.req_type.split(" ")[0] ==
+                                        "Report"
+                                      ? GetReportById(approveReq.id)
+                                      : null;
                             }}
                             className="btn btn-sm btn-outline-primary"
                             data-bs-toggle="modal"
@@ -319,12 +320,13 @@ export default function Approvals() {
                               approveReq.req_type.split(" ")[0] == "Client"
                                 ? "#editModal0"
                                 : approveReq.req_type.split(" ")[0] == "Task"
-                                ? "#editModal"
-                                : approveReq.req_type.split(" ")[0] == "User"
-                                ? "#editModal1"
-                                : approveReq.req_type.split(" ")[0] == "Report"
-                                ? "#editModal4"
-                                : null
+                                  ? "#editModal"
+                                  : approveReq.req_type.split(" ")[0] == "User"
+                                    ? "#editModal1"
+                                    : approveReq.req_type.split(" ")[0] ==
+                                        "Report"
+                                      ? "#editModal4"
+                                      : null
                             }
                           >
                             View
@@ -337,8 +339,8 @@ export default function Approvals() {
                               approveReq.req_type.split(" ")[0] == "User"
                                 ? setUserData(approveReq)
                                 : approveReq.req_type.split(" ")[0] == "Report"
-                                ? setReportData(approveReq)
-                                : null;
+                                  ? setReportData(approveReq)
+                                  : null;
                             }}
                             className="btn btn-sm btn-outline-primary"
                             data-bs-toggle="modal"
@@ -346,8 +348,8 @@ export default function Approvals() {
                               approveReq.req_type.split(" ")[0] == "User"
                                 ? "#editModal2"
                                 : approveReq.req_type.split(" ")[0] == "Report"
-                                ? "#editModal3"
-                                : null
+                                  ? "#editModal3"
+                                  : null
                             }
                           >
                             View

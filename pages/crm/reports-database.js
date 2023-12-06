@@ -59,7 +59,9 @@ export default function Report(props) {
     marketer_name: "",
     test: false,
     prospect: false,
+    generalsearchstring: "",
   });
+
 
   const [reports, setReports] = useState([]);
 
@@ -170,7 +172,7 @@ export default function Report(props) {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     result = await res.json();
     if (!result.error) {
@@ -194,7 +196,7 @@ export default function Report(props) {
           body: JSON.stringify({
             ...manageData,
             calling_date_history: manageData.calling_date_history.includes(
-              today
+              today,
             )
               ? manageData.calling_date_history
               : [...manageData.calling_date_history, today],
@@ -208,7 +210,7 @@ export default function Report(props) {
 
         if (
           reports.items.find(
-            (data) => data.followup_date == today && data._id == submitData._id
+            (data) => data.followup_date == today && data._id == submitData._id,
           )
         ) {
           console.log("RECALL ACCEPTED");
@@ -258,7 +260,7 @@ export default function Report(props) {
             id: manageData._id,
             ...manageData,
             calling_date_history: manageData.calling_date_history.includes(
-              today
+              today,
             )
               ? manageData.calling_date_history
               : [...manageData.calling_date_history, today],
@@ -277,7 +279,7 @@ export default function Report(props) {
               headers: {
                 "Content-Type": "application/json",
               },
-            }
+            },
           );
 
           setManageData({
@@ -305,7 +307,7 @@ export default function Report(props) {
 
           if (!result.error) {
             toast.success(
-              "Today is not the followup date of the report to recall, an approval request has been sent to admin"
+              "Today is not the followup date of the report to recall, an approval request has been sent to admin",
             );
           } else {
             toast.error("Something gone wrong!");
@@ -409,16 +411,15 @@ export default function Report(props) {
       />
       <div className="containter">
         <div className="d-flex mt-3">
-          {reports?.items?.length !== 0 && (
-            <div className="container">
-              <div
-                className="float-end"
-                style={{ display: "flex", alignItems: "center" }}
-              >
+          <div className="container">
+            <div
+              className="float-end"
+              style={{ display: "flex", alignItems: "center" }}
+            >
                 <span className="me-3">
                   Page{" "}
                   <strong>
-                    {page}/{pageCount}
+                    {reports?.items?.length !== 0 ? page : 0}/{pageCount}
                   </strong>
                 </span>
                 <div
@@ -437,25 +438,26 @@ export default function Report(props) {
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-secondary"
-                    disabled={page === pageCount}
+                    disabled={page === pageCount || pageCount === 0}
                     onClick={handleNext}
                   >
                     Next
                   </button>
                 </div>
-                <button
-                  type="button"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#offcanvasNavbar"
-                  aria-controls="offcanvasNavbar"
-                  aria-label="Toggle navigation"
-                  className="btn m-2 btn-sm btn-outline-primary"
-                >
-                  Filter
-                </button>
-              </div>
+
+              <button
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar"
+                aria-label="Toggle navigation"
+                className="btn m-2 btn-sm btn-outline-primary"
+              >
+                Filter
+              </button>
             </div>
-          )}
+          </div>
+
         </div>
 
         <div style={{ overflowX: "auto" }} className="text-nowrap">
@@ -502,18 +504,18 @@ export default function Report(props) {
                     <td>
                       {item.website.length
                         ? item.website
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((websiteLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={websiteLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
+                          .split(" ")
+                          .filter((item) => item.length)
+                          .map((websiteLink, index) => (
+                            <p
+                              key={index}
+                              className="text-primary m-0 p-0 link"
+                            >
+                              <Link target="_blank" href={websiteLink}>
+                                Click here to visit
+                              </Link>
+                            </p>
+                          ))
                         : "No link provided"}
                     </td>
                     <td>{item.category}</td>
@@ -526,18 +528,18 @@ export default function Report(props) {
                     <td>
                       {item.linkedin.length
                         ? item.linkedin
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((linkedinLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={linkedinLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
+                          .split(" ")
+                          .filter((item) => item.length)
+                          .map((linkedinLink, index) => (
+                            <p
+                              key={index}
+                              className="text-primary m-0 p-0 link"
+                            >
+                              <Link target="_blank" href={linkedinLink}>
+                                Click here to visit
+                              </Link>
+                            </p>
+                          ))
                         : "No link provided"}
                     </td>
                     <td>{item.is_test ? "Yes" : "No"}</td>
@@ -1144,6 +1146,36 @@ export default function Report(props) {
             >
               Search
             </button>
+
+
+
+            <div className="general-search-field d-grid gap-2 my-5">
+              <div className="row">
+                <div className="col">
+                  <label className="fw-semibold" htmlFor="floatingInput">
+                    General search text
+                  </label>
+                  <input
+                    value={filters.generalsearchstring}
+                    onChange={(e) =>
+                      setFilters({ ...filters, generalsearchstring: e.target.value })
+                    }
+                    type="text"
+                    className="form-control"
+                    id="floatingInput"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={getAllReportsFiltered}
+                className="btn btn-outline-primary"
+              >
+                General Search
+              </button>
+            </div>
+
+
           </div>
         </div>
       </div>
