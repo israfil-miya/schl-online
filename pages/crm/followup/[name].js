@@ -303,7 +303,7 @@ export default function Followup() {
                       >
                         <button
                           onClick={() => setManageData(item)}
-                          className="btn btn-sm mx-2 btn-outline-success"
+                          className="btn btn-sm me-1 btn-outline-success"
                           data-bs-toggle="modal"
                           data-bs-target="#finishModal"
                         >
@@ -315,7 +315,7 @@ export default function Followup() {
                             setManageData(item);
                             setEditedBy(item.updated_by || "");
                           }}
-                          className="btn btn-sm btn-outline-primary mx-2"
+                          className="btn btn-sm btn-outline-primary me-1"
                           data-bs-toggle="modal"
                           data-bs-target="#editModal"
                         >
@@ -327,7 +327,7 @@ export default function Followup() {
                 })
               ) : (
                 <tr key={0}>
-                  <td colSpan="15" className=" align-center text-center">
+                  <td colSpan="16" className="text-center">
                     No Followups To Show.
                   </td>
                 </tr>
