@@ -975,7 +975,7 @@ export default function Report(props) {
 
       <div
         className="offcanvas offcanvas-end"
-        tabindex="-1"
+        tabIndex="-1"
         id="offcanvasNavbar"
         aria-labelledby="offcanvasNavbarLabel"
       >
