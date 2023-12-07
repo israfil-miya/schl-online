@@ -14,11 +14,11 @@ async function fetchApi(url, options) {
 export default function Marketers(props) {
   const router = useRouter();
   const { data: session } = useSession();
-  const [marketersList, setMarketersList] = useState([]);
-  const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState();
-  const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState();
 
-  const [availableFollowUps, setAvailableFollowUps] = useState([]);
+  const [marketersList, setMarketersList] = useState([]);
+  const [availableFollowups, setAvailableFollowups] = useState([]);
+  const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState([]);
+  const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState([]);
 
   const getMarketers = async () => {
     try {
@@ -36,11 +36,93 @@ export default function Marketers(props) {
       if (!list.error) {
         setMarketersList(list);
       } else {
-        toast.error("Unable to retrieve file list", { toastId: "error1" });
+        toast.error("Unable to retrieve marketers list", { toastId: "error1" });
       }
     } catch (error) {
-      console.error("Error fetching file list:", error);
-      toast.error("Error retrieving file list", { toastId: "error3" });
+      console.error("Error fetching marketers list:", error);
+      toast.error("Error retrieving marketers list", { toastId: "error3" });
+    }
+  };
+
+  const getAvailableFollowups = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getnearestfollowups: true,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        setAvailableFollowups(list);
+      } else {
+        toast.error("Unable to retrieve followup list", { toastId: "error1" });
+      }
+    } catch (error) {
+      console.error("Error fetching followup list:", error);
+      toast.error("Error retrieving followup list", { toastId: "error3" });
+    }
+  };
+
+  const getDailyReportStatus = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getdailyreportslast5days: true,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        return list;
+      } else {
+        toast.error("Unable to retrieve daily report status list", {
+          toastId: "error1",
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching daily report status list:", error);
+      toast.error("Error retrieving daily report status list", {
+        toastId: "error3",
+      });
+    }
+  };
+
+  const getTodayReportStatus = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getdailyreportstoday: true,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        return list;
+      } else {
+        toast.error("Unable to retrieve today report status list", {
+          toastId: "error1",
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching today report status list:", error);
+      toast.error("Error retrieving today report status list", {
+        toastId: "error3",
+      });
     }
   };
 
@@ -50,13 +132,15 @@ export default function Marketers(props) {
     return `${day}-${month}-${year}`;
   };
 
-  const createDailyReportStatusTable = () => {
+  const createDailyReportStatusTable = async () => {
     let parsedTableRows = [];
     let total_calls_made = 0;
     let total_test_jobs = 0;
     let total_prospects = 0;
 
-    props?.dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
+    let dailyReportStatus = await getDailyReportStatus();
+
+    dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
       total_calls_made += parseInt(
         FiveDayReportOfMarketer.data.total_calls_made,
       )
@@ -115,15 +199,18 @@ export default function Marketers(props) {
       </tr>,
     );
 
-    return parsedTableRows;
+    setDailyReportStatusRowHtml(parsedTableRows);
   };
-  const createTodayReportStatusTable = () => {
+
+  const createTodayReportStatusTable = async () => {
     let parsedTableRows = [];
     let total_calls_made = 0;
     let total_test_jobs = 0;
     let total_prospects = 0;
 
-    props?.todayReportStatus.map((TodayReportOfMarketer, index) => {
+    let todayReportStatus = await getTodayReportStatus();
+
+    todayReportStatus.map((TodayReportOfMarketer, index) => {
       total_calls_made += parseInt(TodayReportOfMarketer.data.total_calls_made)
         ? parseInt(TodayReportOfMarketer.data.total_calls_made)
         : 0;
@@ -180,196 +267,202 @@ export default function Marketers(props) {
       </tr>,
     );
 
-    return parsedTableRows;
+    setTodayReportStatusRowHtml(parsedTableRows);
   };
 
   useEffect(() => {
-    setDailyReportStatusRowHtml(createDailyReportStatusTable());
-    setTodayReportStatusRowHtml(createTodayReportStatusTable());
-    setAvailableFollowUps(props.availableFollowUps);
+    createDailyReportStatusTable();
+    createTodayReportStatusTable();
+    getAvailableFollowups();
     getMarketers();
   }, []);
   return (
     <>
       <Navbar navFor={session.user.role == "marketer" ? "marketers" : "crm"} />
-      <div className="container">
-        <div className="marketers-list my-5">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Marketers List
-          </h5>
+      {marketersList.length > 0 &&
+      dailyReportStatusRowHtml.length > 0 &&
+      availableFollowups.length > 0 ? (
+        <div className="container">
+          <div className="marketers-list my-5">
+            <h5 className="bg-light text-center p-2 mb-3 border">
+              Marketers List
+            </h5>
 
-          <table className="table table-hover">
-            <thead>
-              <tr className="table-dark">
-                <th>#</th>
-                <th>Real Name</th>
-                <th>Company Name</th>
-                <th>Joining Date</th>
-                <th>Phone</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {marketersList?.length !== 0 &&
-                marketersList?.map((marketer, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td className="">{marketer.name}</td>
-                      <td>{marketer.company_provided_name}</td>
-                      <td>
-                        {marketer.joining_date
-                          ? convertToDDMMYYYY(marketer.joining_date)
-                          : ""}
-                      </td>
-                      <td>{marketer.phone}</td>
-                      <td>{marketer.email}</td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="today-report-status mt-3">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Daily Report Status (Today)
-          </h5>
-
-          <table className="table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Name
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Calls
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Prospects
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Tests
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {todayReportStatusRowHtml?.map((tableRow, index) => tableRow)}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="daily-report-status mt-3">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Daily Report Status (Last Five Business Days)
-          </h5>
-
-          <table className="table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Name
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Calls
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Prospects
-                </th>
-
-                <th
-                  className="text-center"
-                  style={{ backgroundColor: "#212529", color: "#fff" }}
-                >
-                  Tests
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="followup-list my-5 text-nowrap">
-          <h5 className="bg-light text-center p-2 mb-3 border">
-            Available Followups
-          </h5>
-
-          <table className="table table-hover">
-            <thead>
-              <tr className="table-dark">
-                <th>#</th>
-                <th>Marketer Name</th>
-                <th>Remaining Followup</th>
-                <th>Nearest Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {availableFollowUps?.length !== 0 ? (
-                availableFollowUps?.map((followupdata, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td className="marketer_name text-decoration-underline">
-                        <Link
-                          target="_blank"
-                          href={
-                            process.env.NEXT_PUBLIC_BASE_URL +
-                            "/crm/followup/" +
-                            followupdata.marketer_name
-                          }
-                        >
-                          {followupdata.marketer_name}
-                        </Link>
-                      </td>
-
-                      <td className="text-wrap">
-                        {followupdata.followups_count}
-                      </td>
-                      <td className="text-wrap">
-                        {convertToDDMMYYYY(followupdata.followup_date)}
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td className="text-center" colSpan="3">
-                    No avaiable followup
-                  </td>
+            <table className="table table-hover">
+              <thead>
+                <tr className="table-dark">
+                  <th>#</th>
+                  <th>Real Name</th>
+                  <th>Company Name</th>
+                  <th>Joining Date</th>
+                  <th>Phone</th>
+                  <th>Email</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {marketersList?.length !== 0 &&
+                  marketersList?.map((marketer, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td className="">{marketer.name}</td>
+                        <td>{marketer.company_provided_name}</td>
+                        <td>
+                          {marketer.joining_date
+                            ? convertToDDMMYYYY(marketer.joining_date)
+                            : ""}
+                        </td>
+                        <td>{marketer.phone}</td>
+                        <td>{marketer.email}</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="today-report-status mt-3">
+            <h5 className="bg-light text-center p-2 mb-3 border">
+              Daily Report Status (Today)
+            </h5>
+
+            <table className="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Name
+                  </th>
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Calls
+                  </th>
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Prospects
+                  </th>
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Tests
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {todayReportStatusRowHtml?.map((tableRow, index) => tableRow)}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="daily-report-status mt-3">
+            <h5 className="bg-light text-center p-2 mb-3 border">
+              Daily Report Status (Last Five Business Days)
+            </h5>
+
+            <table className="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Name
+                  </th>
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Calls
+                  </th>
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Prospects
+                  </th>
+
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Tests
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="followup-list my-5 text-nowrap">
+            <h5 className="bg-light text-center p-2 mb-3 border">
+              Available Followups
+            </h5>
+
+            <table className="table table-hover">
+              <thead>
+                <tr className="table-dark">
+                  <th>#</th>
+                  <th>Marketer Name</th>
+                  <th>Remaining Followup</th>
+                  <th>Nearest Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {availableFollowups?.length !== 0 ? (
+                  availableFollowups?.map((followupdata, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td className="marketer_name text-decoration-underline">
+                          <Link
+                            target="_blank"
+                            href={
+                              process.env.NEXT_PUBLIC_BASE_URL +
+                              "/crm/followup/" +
+                              followupdata.marketer_name
+                            }
+                          >
+                            {followupdata.marketer_name}
+                          </Link>
+                        </td>
+
+                        <td className="text-wrap">
+                          {followupdata.followups_count}
+                        </td>
+                        <td className="text-wrap">
+                          {convertToDDMMYYYY(followupdata.followup_date)}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td className="text-center" colSpan="3">
+                      No avaiable followup
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="text-center my-3">Loading...</p>
+      )}
 
       <style jsx>
         {`
@@ -438,48 +531,8 @@ export async function getServerSideProps(context) {
       },
     };
   } else {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getdailyreportslast5days: true,
-      },
+    return {
+      props: {},
     };
-
-    const url1 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options1 = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getnearestfollowups: true,
-      },
-    };
-    const url2 = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-    const options2 = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getdailyreportstoday: true,
-      },
-    };
-
-    let res = await fetchApi(url, options);
-    let res1 = await fetchApi(url1, options1);
-    let res2 = await fetchApi(url2, options2);
-
-    if (!res.error && !res1.error) {
-      return {
-        props: {
-          dailyReportStatus: res,
-          availableFollowUps: res1,
-          todayReportStatus: res2,
-        },
-      };
-    } else {
-      return {
-        props: {},
-      };
-    }
   }
 }

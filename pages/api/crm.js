@@ -93,9 +93,11 @@ async function handleGetAllReports(req, res) {
     let query = {};
 
     if (country) query.country = { $regex: country, $options: "i" };
-    if (company_name) query.company_name = { $regex: company_name, $options: "i" };
+    if (company_name)
+      query.company_name = { $regex: company_name, $options: "i" };
     if (category) query.category = { $regex: category, $options: "i" };
-    if (marketer_name) query.marketer_name = { $regex: marketer_name, $options: "i" };
+    if (marketer_name)
+      query.marketer_name = { $regex: marketer_name, $options: "i" };
     if (test) query.is_test = test;
     if (prospect) query.is_prospected = prospect;
 
@@ -144,7 +146,10 @@ async function handleGetAllReports(req, res) {
             { $limit: ITEMS_PER_PAGE },
           ]);
 
-      const [count, reports] = await Promise.all([countPromise, reportsPromise]);
+      const [count, reports] = await Promise.all([
+        countPromise,
+        reportsPromise,
+      ]);
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
 

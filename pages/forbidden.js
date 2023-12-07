@@ -14,7 +14,12 @@ export default function ForbiddenPage() {
               <p className="lead">
                 This website can only be accessed from the office.
               </p>
-              <p>Go to <Link className="text-primary" href="/login">Login Page</Link></p>
+              <p>
+                Go to{" "}
+                <Link className="text-primary" href="/login">
+                  Login Page
+                </Link>
+              </p>
             </div>
           </div>
         </div>

@@ -33,6 +33,7 @@ export default function Report(props) {
     calling_date: "",
     followup_date: "",
     country: "",
+    designation: "",
     website: "",
     category: "",
     company_name: "",
@@ -61,7 +62,6 @@ export default function Report(props) {
     prospect: false,
     generalsearchstring: "",
   });
-
 
   const [reports, setReports] = useState([]);
 
@@ -188,7 +188,7 @@ export default function Report(props) {
       let submitData = manageData;
 
       if (isRecall) {
-        console.log("|| RECALL CALLED ||");
+        // console.log("|| RECALL CALLED ||");
         const today = moment().utc().format("YYYY-MM-DD");
 
         options = {
@@ -213,8 +213,8 @@ export default function Report(props) {
             (data) => data.followup_date == today && data._id == submitData._id,
           )
         ) {
-          console.log("RECALL ACCEPTED");
-          console.log(submitData);
+          // console.log("RECALL ACCEPTED");
+          // console.log(submitData);
 
           const result = await fetchApi(url, options);
 
@@ -225,6 +225,7 @@ export default function Report(props) {
             calling_date: "",
             followup_date: "",
             country: "",
+            designation: "",
             website: "",
             category: "",
             company_name: "",
@@ -252,7 +253,7 @@ export default function Report(props) {
 
           // return
         } else {
-          console.log("RECALL REJECTED");
+          // console.log("RECALL REJECTED");
 
           const submitData = {
             req_type: "Report Edit",
@@ -269,7 +270,7 @@ export default function Report(props) {
 
           delete submitData._id;
 
-          console.log("THIS IS THE SUBMIT DATA: ", submitData);
+          // console.log("THIS IS THE SUBMIT DATA: ", submitData);
 
           const result = await fetch(
             process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
@@ -289,6 +290,7 @@ export default function Report(props) {
             calling_date: "",
             followup_date: "",
             country: "",
+            designation: "",
             website: "",
             category: "",
             company_name: "",
@@ -416,34 +418,34 @@ export default function Report(props) {
               className="float-end"
               style={{ display: "flex", alignItems: "center" }}
             >
-                <span className="me-3">
-                  Page{" "}
-                  <strong>
-                    {reports?.items?.length !== 0 ? page : 0}/{pageCount}
-                  </strong>
-                </span>
-                <div
-                  className="btn-group"
-                  role="group"
-                  aria-label="Basic outlined example"
+              <span className="me-3">
+                Page{" "}
+                <strong>
+                  {reports?.items?.length !== 0 ? page : 0}/{pageCount}
+                </strong>
+              </span>
+              <div
+                className="btn-group"
+                role="group"
+                aria-label="Basic outlined example"
+              >
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === 1}
+                  onClick={handlePrevious}
                 >
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    disabled={page === 1}
-                    onClick={handlePrevious}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    disabled={page === pageCount || pageCount === 0}
-                    onClick={handleNext}
-                  >
-                    Next
-                  </button>
-                </div>
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === pageCount || pageCount === 0}
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
+              </div>
 
               <button
                 type="button"
@@ -457,7 +459,6 @@ export default function Report(props) {
               </button>
             </div>
           </div>
-
         </div>
 
         <div style={{ overflowX: "auto" }} className="text-nowrap">
@@ -504,18 +505,18 @@ export default function Report(props) {
                     <td>
                       {item.website.length
                         ? item.website
-                          .split(" ")
-                          .filter((item) => item.length)
-                          .map((websiteLink, index) => (
-                            <p
-                              key={index}
-                              className="text-primary m-0 p-0 link"
-                            >
-                              <Link target="_blank" href={websiteLink}>
-                                Click here to visit
-                              </Link>
-                            </p>
-                          ))
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((websiteLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={websiteLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
                         : "No link provided"}
                     </td>
                     <td>{item.category}</td>
@@ -528,18 +529,18 @@ export default function Report(props) {
                     <td>
                       {item.linkedin.length
                         ? item.linkedin
-                          .split(" ")
-                          .filter((item) => item.length)
-                          .map((linkedinLink, index) => (
-                            <p
-                              key={index}
-                              className="text-primary m-0 p-0 link"
-                            >
-                              <Link target="_blank" href={linkedinLink}>
-                                Click here to visit
-                              </Link>
-                            </p>
-                          ))
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((linkedinLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={linkedinLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
                         : "No link provided"}
                     </td>
                     <td>{item.is_test ? "Yes" : "No"}</td>
@@ -563,6 +564,7 @@ export default function Report(props) {
                             calling_date: item.calling_date || "",
                             followup_date: item.followup_date || "",
                             country: item.country || "",
+                            designation: item.designation || "",
                             website: item.website || "",
                             category: item.category || "",
                             company_name: item.company_name || "",
@@ -1147,8 +1149,6 @@ export default function Report(props) {
               Search
             </button>
 
-
-
             <div className="general-search-field d-grid gap-2 my-5">
               <div className="row">
                 <div className="col">
@@ -1158,7 +1158,10 @@ export default function Report(props) {
                   <input
                     value={filters.generalsearchstring}
                     onChange={(e) =>
-                      setFilters({ ...filters, generalsearchstring: e.target.value })
+                      setFilters({
+                        ...filters,
+                        generalsearchstring: e.target.value,
+                      })
                     }
                     type="text"
                     className="form-control"
@@ -1174,8 +1177,6 @@ export default function Report(props) {
                 General Search
               </button>
             </div>
-
-
           </div>
         </div>
       </div>
