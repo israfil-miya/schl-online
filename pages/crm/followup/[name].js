@@ -327,7 +327,7 @@ export default function Followup() {
                 })
               ) : (
                 <tr key={0}>
-                  <td colSpan="13" className=" align-center text-center">
+                  <td colSpan="15" className=" align-center text-center">
                     No Followups To Show.
                   </td>
                 </tr>
