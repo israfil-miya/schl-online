@@ -118,7 +118,7 @@ export default function Create() {
 
     return (
         <>
-            <Navbar navFor="admin" />
+            <Navbar navFor="dashboard" />
 
             <div className="container my-5">
                 <div className="add-user">
