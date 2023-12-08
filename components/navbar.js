@@ -181,6 +181,7 @@ export default function Navbar({ navFor, shortNote }) {
                   Users
                 </Link>
               </li>
+
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
@@ -227,6 +228,35 @@ export default function Navbar({ navFor, shortNote }) {
                   Approvals
                 </Link>
               </li>
+
+
+
+              <li className="dropdown-submenu">
+                <li
+                  className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+                >
+                  User
+                </li>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/dashboard/user/create"
+                    >
+                      Create
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/dashboard/user/users-database"
+                    >
+                      View
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+
               <li className="dropdown-submenu">
                 <li
                   className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
@@ -247,7 +277,7 @@ export default function Navbar({ navFor, shortNote }) {
                       className={`dropdown-item ${styles.dropitem}`}
                       href="/dashboard/invoice/browse"
                     >
-                      Browse
+                      view
                     </Link>
                   </li>
                 </ul>

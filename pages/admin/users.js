@@ -128,11 +128,13 @@ export default function Users() {
     setRole("");
     setCompanyProvidedName("");
   };
+
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
     if (year.length != 4) return dateString;
     return `${day}-${month}-${year}`;
   };
+
   async function deleteUser(deleteUserData) {
     if (
       (session.user.role == "admin" &&

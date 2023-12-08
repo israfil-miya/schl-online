@@ -15,19 +15,45 @@ const UserSchema = new mongoose.Schema({
   },
   company_provided_name: {
     type: String,
-    required: true,
   },
   joining_date: {
     type: String,
-    required: true,
   },
   phone: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
-    required: true,
+  },
+  code: {
+    type: String,
+  },
+  real_first_name: {
+    type: String,
+  },
+  real_last_name: {
+    type: String,
+  },
+  birth_date: {
+    type: String,
+  },
+  nid: {
+    type: Number,
+  },
+  blood_group: {
+    type: String,
+  },
+  designation: {
+    type: String,
+  },
+  department: {
+    type: String,
+  },
+  base_salary: {
+    type: Number,
+  },
+  note: {
+    type: String,
   },
 });
 
