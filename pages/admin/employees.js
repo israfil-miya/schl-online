@@ -27,15 +27,17 @@ export default function Create() {
   const AddNewUser = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/employee", {
-      method: "POST",
-      body: JSON.stringify(newEmployeeData),
-      headers: {
-        newemployee: true,
-        "Content-Type": "application/json",
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "/api/employee",
+      {
+        method: "POST",
+        body: JSON.stringify(newEmployeeData),
+        headers: {
+          newemployee: true,
+          "Content-Type": "application/json",
+        },
       },
-    });
-
+    );
 
     let result = await res.json();
 
@@ -64,7 +66,6 @@ export default function Create() {
     });
   };
 
-
   return (
     <>
       <Navbar navFor="admin" />
@@ -73,8 +74,8 @@ export default function Create() {
         <div className="add-user">
           <h5 className="py-3">Add new employee</h5>
           <form onSubmit={AddNewUser} id="inputForm">
-       {/* Employee Code */}
-       <div className="mb-3">
+            {/* Employee Code */}
+            <div className="mb-3">
               <label htmlFor="date" className="form-label">
                 Employee ID
               </label>
@@ -108,7 +109,6 @@ export default function Create() {
                 className="form-control"
               />
             </div>
-
 
             {/* Joining Date */}
             <div className="mb-3">
@@ -163,7 +163,6 @@ export default function Create() {
                 className="form-control"
               />
             </div>
-
 
             {/* NID Number */}
             <div className="mb-3">
@@ -255,10 +254,6 @@ export default function Create() {
               />
             </div>
 
-
-
-
-
             {/* Base Salary */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -277,7 +272,6 @@ export default function Create() {
               />
             </div>
 
-                        
             {/* Base Salary */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -296,7 +290,6 @@ export default function Create() {
               />
             </div>
 
-            
             {/* Base Salary */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -315,7 +308,6 @@ export default function Create() {
               />
             </div>
 
-
             {/* Note*/}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -332,10 +324,6 @@ export default function Create() {
                 className="form-control"
               />
             </div>
-
-
-     
-
 
             <button type="submit" className="btn btn-sm btn-outline-primary">
               Submit

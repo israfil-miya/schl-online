@@ -1,11 +1,11 @@
-import React from 'react'
-import Navbar from '../../components/navbar'
+import React from "react";
+import Navbar from "../../components/navbar";
 
 export default function EmployeeDatabsse() {
   return (
     <>
-      <Navbar navFor="dashboard"/>
+      <Navbar navFor="dashboard" />
       <h4>EMPLOYEE DATABASE (UNDER CONSTRUCTION)</h4>
     </>
-  )
+  );
 }

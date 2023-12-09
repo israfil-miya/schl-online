@@ -78,7 +78,7 @@ async function handleResponse(req, res) {
         password: data.password,
         role: data.role,
       };
-      
+
       if (data.company_provided_name)
         insertdata.company_provided_name = data.company_provided_name;
 

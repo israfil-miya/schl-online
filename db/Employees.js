@@ -1,55 +1,58 @@
 import mongoose from "mongoose";
-const EmployeeSchema = new mongoose.Schema({
+const EmployeeSchema = new mongoose.Schema(
+  {
     e_id: {
-        type: String,
+      type: String,
     },
     real_name: {
-        type: String,
+      type: String,
     },
     joining_date: {
-        type: String,
+      type: String,
     },
     phone: {
-        type: String,
+      type: String,
     },
     email: {
-        type: String,
+      type: String,
     },
 
     birth_date: {
-        type: String,
+      type: String,
     },
     nid: {
-        type: Number,
+      type: Number,
     },
     blood_group: {
-        type: String,
+      type: String,
     },
     designation: {
-        type: String,
+      type: String,
     },
     department: {
-        type: String,
+      type: String,
     },
     base_salary: {
-        type: Number,
+      type: Number,
     },
     bonus_eid_ul_fitr: {
-        type: String,
-        default: function () {
-            return this.base_salary / 2;
-        }
+      type: String,
+      default: function () {
+        return this.base_salary / 2;
+      },
     },
     bonus_eid_ul_adha: {
-        type: String,
-        default: function () {
-            return this.base_salary / 2;
-        }
+      type: String,
+      default: function () {
+        return this.base_salary / 2;
+      },
     },
     note: {
-        type: String,
+      type: String,
     },
+  },
+  { timestamps: true },
+);
 
-}, { timestamps: true });
-
-module.exports = mongoose.models.Employee || mongoose.model("Employee", EmployeeSchema);
+module.exports =
+  mongoose.models.Employee || mongoose.model("Employee", EmployeeSchema);

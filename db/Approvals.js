@@ -17,8 +17,6 @@ const ApprovalSchema = new mongoose.Schema(
       default: false,
     },
 
-
-
     name: {
       required: true,
       type: String,
@@ -35,9 +33,6 @@ const ApprovalSchema = new mongoose.Schema(
     company_provided_name: {
       type: String,
     },
-
-
-
 
     marketer_id: String,
 
@@ -84,7 +79,6 @@ const ApprovalSchema = new mongoose.Schema(
       default: false,
     },
 
-    
     id: {
       type: String,
     },

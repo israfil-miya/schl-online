@@ -9,7 +9,6 @@ export default function Users() {
   const router = useRouter();
   const [users, setUsers] = useState([]);
 
-
   const [newUserData, setNewUserData] = useState({
     name: "",
     password: "",
@@ -54,7 +53,10 @@ export default function Users() {
   const AddNewUser = async (e) => {
     e.preventDefault();
 
-    if (session.user.role == "admin" && (newUserData.role == "super" || newUserData.role == "admin")) {
+    if (
+      session.user.role == "admin" &&
+      (newUserData.role == "super" || newUserData.role == "admin")
+    ) {
       toast.error("You don't have the permission");
       return;
     }
@@ -81,7 +83,7 @@ export default function Users() {
           body: JSON.stringify({
             req_type: "User Create",
             req_by: session.user.name,
-            ...newUserData
+            ...newUserData,
           }),
           headers: {
             "Content-Type": "application/json",
@@ -105,7 +107,7 @@ export default function Users() {
       password: "",
       role: "user",
       company_provided_name: "",
-    })
+    });
   };
 
   async function deleteUser(deleteUserData) {
@@ -130,7 +132,7 @@ export default function Users() {
           req_type: "User Delete",
           req_by: session.user.name,
           id: deleteUserData._id,
-          ...deleteUserData
+          ...deleteUserData,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -199,7 +201,6 @@ export default function Users() {
         <div className="add-user">
           <h5 className="py-3">Add New User</h5>
           <form onSubmit={AddNewUser} id="inputForm">
-
             {/* Login Name */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -313,7 +314,7 @@ export default function Users() {
                       <td>{user.name}</td>
                       <td>
                         {(user.role == "super" || user.role == "admin") &&
-                          session.user.role != "super"
+                        session.user.role != "super"
                           ? "XXXXXX"
                           : user.password}
                       </td>

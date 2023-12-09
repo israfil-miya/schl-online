@@ -32,14 +32,10 @@ async function handleNewUser(req, res) {
   const data = req.body;
 
   try {
-    const userData = await User.findOneAndUpdate(
-      { name: data.name },
-      data,
-      {
-        new: true,
-        upsert: true,
-      },
-    );
+    const userData = await User.findOneAndUpdate({ name: data.name }, data, {
+      new: true,
+      upsert: true,
+    });
 
     if (userData) {
       res.status(200).json(userData);
