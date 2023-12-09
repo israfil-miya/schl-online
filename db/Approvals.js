@@ -17,42 +17,56 @@ const ApprovalSchema = new mongoose.Schema(
       default: false,
     },
 
+
+
     name: {
+      required: true,
       type: String,
+      unique: true,
     },
     password: {
       type: String,
+      required: true,
     },
     role: {
       type: String,
+      required: true,
     },
     company_provided_name: {
       type: String,
     },
-    joining_date: {
-      type: String,
-    },
-    phone: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
+
+
+
 
     marketer_id: String,
+
     marketer_name: String,
+
     calling_date: String,
+
     followup_date: String,
+
     country: String,
+
     website: String,
+
     category: String,
+
     company_name: String,
+
     contact_person: String,
+
     contact_number: String,
+
     email_address: String,
+
     calling_status: String,
+
     linkedin: String,
+
     calling_date_history: [String],
+
     updated_by: {
       type: String,
       default: null,
@@ -70,6 +84,7 @@ const ApprovalSchema = new mongoose.Schema(
       default: false,
     },
 
+    
     id: {
       type: String,
     },

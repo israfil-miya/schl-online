@@ -7,25 +7,19 @@ import Navbar from "../../components/navbar";
 export default function Users() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [users, setUsers] = useState(null);
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [companyProvidedName, setCompanyProvidedName] = useState("");
-  const [joiningDate, setJoiningDate] = useState("");
-  const [editUserData, setEditUserData] = useState({});
-  const [manageData, setManageData] = useState({
-    _id: "",
+  const [users, setUsers] = useState([]);
+
+
+  const [newUserData, setNewUserData] = useState({
     name: "",
     password: "",
-    role: "",
-    phone: "",
-    email: "",
+    role: "user",
     company_provided_name: "",
-    joining_date: "",
   });
+
+  const [editUserData, setEditUserData] = useState({}); // info of the person who is editing the user data
+
+  const [manageData, setManageData] = useState({});
 
   async function fetchUserData(url, options) {
     const res = await fetch(url, options);
@@ -60,7 +54,7 @@ export default function Users() {
   const AddNewUser = async (e) => {
     e.preventDefault();
 
-    if (session.user.role == "admin" && (role == "super" || role == "admin")) {
+    if (session.user.role == "admin" && (newUserData.role == "super" || newUserData.role == "admin")) {
       toast.error("You don't have the permission");
       return;
     }
@@ -69,15 +63,7 @@ export default function Users() {
     if (session.user.role == "super") {
       const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/user", {
         method: "POST",
-        body: JSON.stringify({
-          name,
-          password,
-          role,
-          phone,
-          email,
-          company_provided_name: companyProvidedName,
-          joining_date: joiningDate,
-        }),
+        body: JSON.stringify(newUserData),
         headers: {
           "Content-Type": "application/json",
         },
@@ -95,13 +81,7 @@ export default function Users() {
           body: JSON.stringify({
             req_type: "User Create",
             req_by: session.user.name,
-            name,
-            password,
-            role,
-            phone,
-            email,
-            company_provided_name: companyProvidedName,
-            joining_date: joiningDate,
+            ...newUserData
           }),
           headers: {
             "Content-Type": "application/json",
@@ -120,19 +100,12 @@ export default function Users() {
       router.replace("/admin?error=" + result.message);
     }
 
-    setName("");
-    setPassword("");
-    setJoiningDate("");
-    setPhone("");
-    setEmail("");
-    setRole("");
-    setCompanyProvidedName("");
-  };
-
-  const convertToDDMMYYYY = (dateString) => {
-    const [year, month, day] = dateString.split("-");
-    if (year.length != 4) return dateString;
-    return `${day}-${month}-${year}`;
+    setNewUserData({
+      name: "",
+      password: "",
+      role: "user",
+      company_provided_name: "",
+    })
   };
 
   async function deleteUser(deleteUserData) {
@@ -157,6 +130,7 @@ export default function Users() {
           req_type: "User Delete",
           req_by: session.user.name,
           id: deleteUserData._id,
+          ...deleteUserData
         }),
         headers: {
           "Content-Type": "application/json",
@@ -225,30 +199,46 @@ export default function Users() {
         <div className="add-user">
           <h5 className="py-3">Add New User</h5>
           <form onSubmit={AddNewUser} id="inputForm">
+
+            {/* Login Name */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
-                Name
+                Login Name
               </label>
               <input
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={newUserData.name}
+                onChange={(e) =>
+                  setNewUserData((prevData) => ({
+                    ...prevData,
+                    name: e.target.value,
+                  }))
+                }
                 type="text"
                 className="form-control"
               />
             </div>
+
+            {/* Login Password */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
-                Password
+                Login Password
               </label>
               <input
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={newUserData.password}
+                onChange={(e) =>
+                  setNewUserData((prevData) => ({
+                    ...prevData,
+                    password: e.target.value,
+                  }))
+                }
                 type="text"
                 className="form-control"
               />
             </div>
+
+            {/* Role */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
                 Role
@@ -258,8 +248,13 @@ export default function Users() {
                 className="form-select"
                 id="floatingSelect"
                 required
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
+                value={newUserData.role}
+                onChange={(e) =>
+                  setNewUserData((prevData) => ({
+                    ...prevData,
+                    role: e.target.value,
+                  }))
+                }
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
@@ -268,42 +263,9 @@ export default function Users() {
                 <option value="marketer">Marketer</option>
               </select>
             </div>
-            <div className="mb-3">
-              <label htmlFor="date" className="form-label">
-                Joining Date
-              </label>
-              <input
-                value={joiningDate}
-                onChange={(e) => setJoiningDate(e.target.value)}
-                type="date"
-                className="form-control"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="date" className="form-label">
-                Phone
-              </label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                type="text"
-                assword
-                className="form-control"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="date" className="form-label">
-                Email
-              </label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                className="form-control"
-              />
-            </div>
 
-            {role == "marketer" && (
+            {/* Company Provided Name */}
+            {newUserData.role == "marketer" && (
               <div className="marketr-exclusive">
                 <div className="mb-3">
                   <label htmlFor="date" className="form-label">
@@ -311,8 +273,13 @@ export default function Users() {
                   </label>
                   <input
                     required
-                    value={companyProvidedName}
-                    onChange={(e) => setCompanyProvidedName(e.target.value)}
+                    value={newUserData.company_provided_name}
+                    onChange={(e) =>
+                      setNewUserData((prevData) => ({
+                        ...prevData,
+                        company_provided_name: e.target.value,
+                      }))
+                    }
                     type="text"
                     className="form-control"
                   />
@@ -326,7 +293,7 @@ export default function Users() {
           </form>
         </div>
         <div className="user-list my-5">
-          <h5 className="py-3">List of User</h5>
+          <h5 className="py-3">users list</h5>
           <table className="table p-3 table-hover">
             <thead>
               <tr className="table-dark">
@@ -334,9 +301,6 @@ export default function Users() {
                 <th>Name</th>
                 <th>Password</th>
                 <th>Role</th>
-                <th>Joining Date</th>
-                <th>Phone</th>
-                <th>Email</th>
                 <th>Manage</th>
               </tr>
             </thead>
@@ -349,18 +313,11 @@ export default function Users() {
                       <td>{user.name}</td>
                       <td>
                         {(user.role == "super" || user.role == "admin") &&
-                        session.user.role != "super"
+                          session.user.role != "super"
                           ? "XXXXXX"
                           : user.password}
                       </td>
                       <td>{user.role}</td>
-                      <td>
-                        {user.joining_date
-                          ? convertToDDMMYYYY(user.joining_date)
-                          : ""}
-                      </td>
-                      <td>{user.phone}</td>
-                      <td>{user.email}</td>
                       <td>
                         <button
                           onClick={() => {
@@ -388,174 +345,125 @@ export default function Users() {
             </tbody>
           </table>
         </div>
-        <div
-          className="modal fade"
-          id="editModal"
-          tabIndex="-1"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                  Edit user
-                </h1>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
+      </div>
+
+      <div
+        className="modal fade"
+        id="editModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Edit user
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Name
+                </label>
+                <input
+                  required
+                  value={manageData.name}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      name: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
               </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Name
-                  </label>
-                  <input
-                    required
-                    value={manageData.name}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        name: e.target.value,
-                      }))
-                    }
-                    type="text"
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Password
-                  </label>
-                  <input
-                    required
-                    value={manageData.password}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        password: e.target.value,
-                      }))
-                    }
-                    type="text"
-                    className="form-control"
-                  />
-                </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Password
+                </label>
+                <input
+                  required
+                  value={manageData.password}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      password: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
 
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Role
-                  </label>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Role
+                </label>
 
-                  <select
-                    className="form-select"
-                    id="floatingSelect"
-                    required
-                    value={manageData.role}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        role: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="super">Super</option>
-                    <option value="manager">Manager</option>
-                    <option value="marketer">Marketer</option>
-                  </select>
-                </div>
+                <select
+                  className="form-select"
+                  id="floatingSelect"
+                  required
+                  value={manageData.role}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      role: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                  <option value="super">Super</option>
+                  <option value="manager">Manager</option>
+                  <option value="marketer">Marketer</option>
+                </select>
+              </div>
 
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Joining Date
-                  </label>
-                  <input
-                    value={manageData.joining_date}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        joining_date: e.target.value,
-                      }))
-                    }
-                    type="date"
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Phone
-                  </label>
-                  <input
-                    value={manageData.phone}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        phone: e.target.value,
-                      }))
-                    }
-                    type="text"
-                    assword
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    value={manageData.email}
-                    onChange={(e) =>
-                      setManageData((prevData) => ({
-                        ...prevData,
-                        email: e.target.value,
-                      }))
-                    }
-                    type="email"
-                    className="form-control"
-                  />
-                </div>
-
-                {manageData.role == "marketer" && (
-                  <div className="marketr-exclusive">
-                    <div className="mb-3">
-                      <label htmlFor="date" className="form-label">
-                        Company Provided Name
-                      </label>
-                      <input
-                        required
-                        value={manageData.company_provided_name}
-                        onChange={(e) =>
-                          setManageData((prevData) => ({
-                            ...prevData,
-                            company_provided_name: e.target.value,
-                          }))
-                        }
-                        type="text"
-                        className="form-control"
-                      />
-                    </div>
+              {manageData.role == "marketer" && (
+                <div className="marketr-exclusive">
+                  <div className="mb-3">
+                    <label htmlFor="date" className="form-label">
+                      Company Provided Name
+                    </label>
+                    <input
+                      required
+                      value={manageData.company_provided_name}
+                      onChange={(e) =>
+                        setManageData((prevData) => ({
+                          ...prevData,
+                          company_provided_name: e.target.value,
+                        }))
+                      }
+                      type="text"
+                      className="form-control"
+                    />
                   </div>
-                )}
-              </div>
-              <div className="modal-footer p-1">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-secondary"
-                  data-bs-dismiss="modal"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={editUser}
-                  type="button"
-                  className="btn btn-sm btn-outline-primary"
-                >
-                  Submit
-                </button>
-              </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                onClick={editUser}
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+              >
+                Submit
+              </button>
             </div>
           </div>
         </div>

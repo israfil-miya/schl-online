@@ -31,21 +31,10 @@ async function handleSignIn(req, res) {
 async function handleNewUser(req, res) {
   const data = req.body;
 
-  let insertdata = {
-    name: data.name,
-    password: data.password,
-    role: data.role,
-  };
-  if (data.phone) insertdata.phone = data.phone;
-  if (data.email) insertdata.email = data.email;
-  if (data.company_provided_name)
-    insertdata.company_provided_name = data.company_provided_name;
-  if (data.joining_date) insertdata.joining_date = data.joining_date;
-
   try {
     const userData = await User.findOneAndUpdate(
       { name: data.name },
-      insertdata,
+      data,
       {
         new: true,
         upsert: true,
@@ -53,18 +42,9 @@ async function handleNewUser(req, res) {
     );
 
     if (userData) {
-      res.status(200).json({
-        id: userData._id,
-        password: userData.password,
-        name: userData.name,
-        role: userData.role,
-        company_provided_name: userData.company_provided_name,
-        joining_date: userData.joining_date,
-        phone: userData.phone,
-        email: userData.email,
-      });
+      res.status(200).json(userData);
     } else {
-      sendError(res, 400, "No account found");
+      sendError(res, 400, "Unable to create account");
     }
   } catch (e) {
     console.error(e);

@@ -724,40 +724,6 @@ export default function Approvals() {
                 </select>
               </div>
 
-              <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Joining Date
-                </label>
-                <input
-                  value={userInfo.joining_date}
-                  disabled
-                  type="date"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Phone
-                </label>
-                <input
-                  value={userInfo.phone}
-                  disabled
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="date" className="form-label">
-                  Email
-                </label>
-                <input
-                  value={userInfo.email}
-                  disabled
-                  type="email"
-                  className="form-control"
-                />
-              </div>
-
               {userInfo.role == "marketer" && (
                 <div className="marketr-exclusive">
                   <div className="mb-3">
@@ -865,58 +831,6 @@ export default function Approvals() {
                   <option value="marketer">Marketer</option>
                 </select>
               </div>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="date" className="form-label">
-                Joining Date
-              </label>
-              <input
-                required
-                value={userData.joiningdate}
-                onChange={(e) =>
-                  setUserData((prevData) => ({
-                    ...prevData,
-                    joiningdate: e.target.value,
-                  }))
-                }
-                type="date"
-                className="form-control"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="date" className="form-label">
-                Phone
-              </label>
-              <input
-                required
-                value={userData.phone}
-                onChange={(e) =>
-                  setUserData((prevData) => ({
-                    ...prevData,
-                    phone: e.target.value,
-                  }))
-                }
-                type="text"
-                className="form-control"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="date" className="form-label">
-                Email
-              </label>
-              <input
-                required
-                value={userData.email}
-                onChange={(e) =>
-                  setUserData((prevData) => ({
-                    ...prevData,
-                    email: e.target.value,
-                  }))
-                }
-                type="text"
-                className="form-control"
-              />
             </div>
 
             {userData.role == "marketer" && (

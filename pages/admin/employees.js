@@ -1,0 +1,348 @@
+import React from "react";
+import { getSession, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import Navbar from "../../components/navbar";
+import { toast } from "sonner";
+
+export default function Create() {
+  const { data: session } = useSession();
+
+  const [newEmployeeData, setNewEmployeeData] = useState({
+    e_id: "",
+    real_name: "",
+    joining_date: "",
+    phone: "",
+    email: "",
+    birth_date: "",
+    nid: 0,
+    blood_group: "",
+    designation: "",
+    department: "",
+    base_salary: 0,
+    bonus_eid_ul_fitr: 0,
+    bonus_eid_ul_adha: 0,
+    note: "",
+  });
+
+  const AddNewUser = async (e) => {
+    e.preventDefault();
+
+    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/employee", {
+      method: "POST",
+      body: JSON.stringify(newEmployeeData),
+      headers: {
+        newemployee: true,
+        "Content-Type": "application/json",
+      },
+    });
+
+
+    let result = await res.json();
+
+    if (!result.error) {
+      toast.success("Created new employee");
+    } else {
+      console.error(result.error);
+      toast.success("Unable to create employee");
+    }
+
+    setNewEmployeeData({
+      e_id: "",
+      real_name: "",
+      joining_date: "",
+      phone: "",
+      email: "",
+      birth_date: "",
+      nid: 0,
+      blood_group: "",
+      designation: "",
+      department: "",
+      base_salary: 0,
+      bonus_eid_ul_fitr: 0,
+      bonus_eid_ul_adha: 0,
+      note: "",
+    });
+  };
+
+
+  return (
+    <>
+      <Navbar navFor="dashboard" />
+
+      <div className="container my-5">
+        <div className="add-user">
+          <h5 className="py-3">Add new employee</h5>
+          <form onSubmit={AddNewUser} id="inputForm">
+       {/* Employee Code */}
+       <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Employee ID
+              </label>
+              <input
+                value={newEmployeeData.e_id}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    e_id: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            {/* Full Name */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Full Name
+              </label>
+              <input
+                value={newEmployeeData.real_name}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    real_name: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+
+            {/* Joining Date */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Joining Date
+              </label>
+              <input
+                value={newEmployeeData.joining_date}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    joining_date: e.target.value,
+                  }))
+                }
+                type="date"
+                className="form-control"
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Phone
+              </label>
+              <input
+                value={newEmployeeData.phone}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    phone: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            {/* Email */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Email
+              </label>
+              <input
+                value={newEmployeeData.email}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    email: e.target.value,
+                  }))
+                }
+                type="email"
+                className="form-control"
+              />
+            </div>
+
+
+            {/* NID Number */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                NID Number
+              </label>
+              <input
+                value={newEmployeeData.nid}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    nid: e.target.value,
+                  }))
+                }
+                type="number"
+                className="form-control"
+              />
+            </div>
+
+            {/* Blood Group */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Blood Group
+              </label>
+              <input
+                value={newEmployeeData.blood_group}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    blood_group: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            {/* Birth Date */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Birth Date
+              </label>
+              <input
+                value={newEmployeeData.birth_date}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    birth_date: e.target.value,
+                  }))
+                }
+                type="date"
+                className="form-control"
+              />
+            </div>
+
+            {/* Designation */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Designation
+              </label>
+              <input
+                value={newEmployeeData.designation}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    designation: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            {/* Department */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Department
+              </label>
+              <input
+                value={newEmployeeData.department}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    department: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+
+
+
+
+            {/* Base Salary */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Base Salary
+              </label>
+              <input
+                value={newEmployeeData.base_salary}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    base_salary: e.target.value,
+                  }))
+                }
+                type="number"
+                className="form-control"
+              />
+            </div>
+
+                        
+            {/* Base Salary */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Eid-ul-fitr Bonus
+              </label>
+              <input
+                value={newEmployeeData.bonus_eid_ul_fitr}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    bonus_eid_ul_fitr: e.target.value,
+                  }))
+                }
+                type="number"
+                className="form-control"
+              />
+            </div>
+
+            
+            {/* Base Salary */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Eid-ul-adha Bonus
+              </label>
+              <input
+                value={newEmployeeData.bonus_eid_ul_adha}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    bonus_eid_ul_adha: e.target.value,
+                  }))
+                }
+                type="number"
+                className="form-control"
+              />
+            </div>
+
+
+            {/* Note*/}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Note
+              </label>
+              <textarea
+                value={newEmployeeData.note}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    note: e.target.value,
+                  }))
+                }
+                className="form-control"
+              />
+            </div>
+
+
+     
+
+
+            <button type="submit" className="btn btn-sm btn-outline-primary">
+              Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+}

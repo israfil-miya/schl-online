@@ -214,7 +214,7 @@ export default function Tasks() {
       <Navbar navFor="admin" />
       <div className="container my-5">
         <div className="add-order">
-          <h5 className="py-3">Add New Tasks</h5>
+          <h5 className="py-3">Add New Task</h5>
           <form onSubmit={AddNewOrder} id="inputForm">
             <label htmlFor="clientCode" className="form-label">
               Client Code

@@ -185,6 +185,15 @@ export default function Navbar({ navFor, shortNote }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
+                  href="/admin/employees"
+                >
+                  Employees
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
                   href="/admin/tasks"
                 >
                   Tasks
@@ -229,32 +238,13 @@ export default function Navbar({ navFor, shortNote }) {
                 </Link>
               </li>
 
-
-
-              <li className="dropdown-submenu">
-                <li
-                  className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/dashboard/employee-database"
                 >
-                  User
-                </li>
-                <ul className="dropdown-menu">
-                  <li>
-                    <Link
-                      className={`dropdown-item ${styles.dropitem}`}
-                      href="/dashboard/user/create"
-                    >
-                      Create
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className={`dropdown-item ${styles.dropitem}`}
-                      href="/dashboard/user/users-database"
-                    >
-                      View
-                    </Link>
-                  </li>
-                </ul>
+                  Employees
+                </Link>
               </li>
 
               <li className="dropdown-submenu">
