@@ -18,17 +18,13 @@ const ApprovalSchema = new mongoose.Schema(
     },
 
     name: {
-      required: true,
       type: String,
-      unique: true,
     },
     password: {
       type: String,
-      required: true,
     },
     role: {
       type: String,
-      required: true,
     },
     company_provided_name: {
       type: String,
@@ -68,15 +64,12 @@ const ApprovalSchema = new mongoose.Schema(
     },
     followup_done: {
       type: Boolean,
-      default: false,
     },
     is_test: {
       type: Boolean,
-      default: false,
     },
     is_prospected: {
       type: Boolean,
-      default: false,
     },
 
     id: {
