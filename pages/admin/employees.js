@@ -14,8 +14,8 @@ export default function Create() {
     phone: "",
     email: "",
     birth_date: "",
-    nid: 0,
-    blood_group: "",
+    nid: "",
+    blood_group: "A+",
     designation: "",
     department: "",
     base_salary: 0,
@@ -45,7 +45,7 @@ export default function Create() {
       toast.success("Created new employee");
     } else {
       console.error(result.error);
-      toast.success("Unable to create employee");
+      toast.error("Unable to create employee");
     }
 
     setNewEmployeeData({
@@ -55,8 +55,8 @@ export default function Create() {
       phone: "",
       email: "",
       birth_date: "",
-      nid: 0,
-      blood_group: "",
+      nid: "",
+      blood_group: "A+",
       designation: "",
       department: "",
       base_salary: 0,
@@ -177,7 +177,7 @@ export default function Create() {
                     nid: e.target.value,
                   }))
                 }
-                type="number"
+                type="text"
                 className="form-control"
               />
             </div>
@@ -187,7 +187,10 @@ export default function Create() {
               <label htmlFor="date" className="form-label">
                 Blood Group
               </label>
-              <input
+
+              <select
+                className="form-select"
+                id="floatingSelect"
                 value={newEmployeeData.blood_group}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -195,9 +198,16 @@ export default function Create() {
                     blood_group: e.target.value,
                   }))
                 }
-                type="text"
-                className="form-control"
-              />
+              >
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
             </div>
 
             {/* Birth Date */}

@@ -469,6 +469,7 @@ export default function Users() {
           </div>
         </div>
       </div>
+
       <style jsx>
         {`
           .table {

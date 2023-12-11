@@ -21,7 +21,7 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
     },
     nid: {
-      type: Number,
+      type: String,
     },
     blood_group: {
       type: String,
@@ -34,18 +34,15 @@ const EmployeeSchema = new mongoose.Schema(
     },
     base_salary: {
       type: Number,
+      default: 0,
     },
     bonus_eid_ul_fitr: {
       type: String,
-      default: function () {
-        return this.base_salary / 2;
-      },
+      default: 0,
     },
     bonus_eid_ul_adha: {
       type: String,
-      default: function () {
-        return this.base_salary / 2;
-      },
+      default: 0,
     },
     note: {
       type: String,
