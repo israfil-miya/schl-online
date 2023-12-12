@@ -18,9 +18,11 @@ export default function Create() {
     blood_group: "A+",
     designation: "",
     department: "",
-    base_salary: 0,
+    gross_salary: 0,
     bonus_eid_ul_fitr: 0,
     bonus_eid_ul_adha: 0,
+    status: "Active",
+    permenant: false,
     note: "",
   });
 
@@ -59,7 +61,7 @@ export default function Create() {
       blood_group: "A+",
       designation: "",
       department: "",
-      base_salary: 0,
+      gross_salary: 0,
       bonus_eid_ul_fitr: 0,
       bonus_eid_ul_adha: 0,
       note: "",
@@ -74,12 +76,14 @@ export default function Create() {
         <div className="add-user">
           <h5 className="py-3">Add new employee</h5>
           <form onSubmit={AddNewUser} id="inputForm">
+
             {/* Employee Code */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
                 Employee ID
               </label>
               <input
+              required
                 value={newEmployeeData.e_id}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -98,6 +102,7 @@ export default function Create() {
                 Full Name
               </label>
               <input
+              required
                 value={newEmployeeData.real_name}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -116,6 +121,7 @@ export default function Create() {
                 Joining Date
               </label>
               <input
+              required
                 value={newEmployeeData.joining_date}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -264,17 +270,17 @@ export default function Create() {
               />
             </div>
 
-            {/* Base Salary */}
+            {/* Gross Salary */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
-                Base Salary
+                Gross Salary
               </label>
               <input
-                value={newEmployeeData.base_salary}
+                value={newEmployeeData.gross_salary}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
                     ...prevData,
-                    base_salary: e.target.value,
+                    gross_salary: e.target.value,
                   }))
                 }
                 type="number"
@@ -282,7 +288,32 @@ export default function Create() {
               />
             </div>
 
-            {/* Base Salary */}
+            {/* Status */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Status
+              </label>
+
+              <select
+                required
+                className="form-select"
+                id="floatingSelect"
+                value={newEmployeeData.status}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    status: e.target.value,
+                  }))
+                }>
+
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Resigned">Resigned</option>
+                <option value="Fired">Fired</option>
+              </select>
+            </div>
+
+            {/* Eid-ul-fitr Bonus */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
                 Eid-ul-fitr Bonus
@@ -300,7 +331,7 @@ export default function Create() {
               />
             </div>
 
-            {/* Base Salary */}
+            {/* Eid-ul-adha Bonus */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
                 Eid-ul-adha Bonus
@@ -317,6 +348,8 @@ export default function Create() {
                 className="form-control"
               />
             </div>
+
+            
 
             {/* Note*/}
             <div className="mb-3">

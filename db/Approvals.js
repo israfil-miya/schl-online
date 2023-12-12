@@ -72,6 +72,56 @@ const ApprovalSchema = new mongoose.Schema(
       type: Boolean,
     },
 
+
+    e_id: {
+      type: String,
+    },
+    real_name: {
+      type: String,
+    },
+    joining_date: {
+      type: String,
+    },
+    phone: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+
+    birth_date: {
+      type: String,
+    },
+    nid: {
+      type: String,
+    },
+    blood_group: {
+      type: String,
+    },
+    designation: {
+      type: String,
+    },
+    department: {
+      type: String,
+    },
+    gross_salary: {
+      type: Number,
+    },
+    bonus_eid_ul_fitr: {
+      type: String,
+    },
+    bonus_eid_ul_adha: {
+      type: String,
+    },
+    status: {
+      type: String,
+    },
+    permenant: {
+      type: Boolean,
+    },
+    note: {
+      type: String,
+    },
     id: {
       type: String,
     },

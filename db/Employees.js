@@ -3,12 +3,15 @@ const EmployeeSchema = new mongoose.Schema(
   {
     e_id: {
       type: String,
+      required: true,
     },
     real_name: {
       type: String,
+      required: true,
     },
     joining_date: {
       type: String,
+      required: true,
     },
     phone: {
       type: String,
@@ -32,7 +35,7 @@ const EmployeeSchema = new mongoose.Schema(
     department: {
       type: String,
     },
-    base_salary: {
+    gross_salary: {
       type: Number,
       default: 0,
     },
@@ -43,6 +46,14 @@ const EmployeeSchema = new mongoose.Schema(
     bonus_eid_ul_adha: {
       type: String,
       default: 0,
+    },
+    status: {
+      type: String,
+      default: "Active",
+    },
+    permenant: {
+      type: Boolean,
+      default: false,
     },
     note: {
       type: String,

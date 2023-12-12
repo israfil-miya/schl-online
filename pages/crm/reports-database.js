@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
-import CallingStatusTd from "../../components/calling-status-td";
+import CallingStatusTd from "../../components/extandable-td";
 import Link from "next/link";
 const moment = require("moment-timezone");
 
@@ -20,6 +20,7 @@ export default function Report(props) {
 
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
+  const [itemPerPage, setItemPerPage] = useState(30)
 
   const [isFiltered, setIsFiltered] = useState(0);
   const [isRecall, setIsRecall] = useState(0);
@@ -74,6 +75,7 @@ export default function Report(props) {
           "Content-Type": "application/json",
           getallreports: true,
           page,
+          item_per_page: itemPerPage
         },
       };
 
@@ -101,6 +103,7 @@ export default function Report(props) {
           isfilter: true,
           ...filters,
           page,
+          item_per_page: itemPerPage
         },
       };
 
@@ -394,7 +397,7 @@ export default function Report(props) {
 
     if (!isFiltered) getAllReports();
     else getAllReportsFiltered();
-  }, [page]);
+  }, [page, itemPerPage]);
 
   /*
   Future Note:
@@ -446,6 +449,13 @@ export default function Report(props) {
                   Next
                 </button>
               </div>
+
+              <select disabled={!reports?.items?.length} style={{width: "70px"}} value={itemPerPage} onChange={(e)=>setItemPerPage(e.target.value)} className="form-select ms-2 me-2 form-select-sm" aria-label="Small select example">
+                <option value="10">10</option>
+                <option value="30">30</option>
+                <option value="70">70</option>
+                <option value="100">100</option>
+              </select>
 
               <button
                 type="button"
@@ -505,18 +515,18 @@ export default function Report(props) {
                     <td>
                       {item.website.length
                         ? item.website
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((websiteLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={websiteLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
+                          .split(" ")
+                          .filter((item) => item.length)
+                          .map((websiteLink, index) => (
+                            <p
+                              key={index}
+                              className="text-primary m-0 p-0 link"
+                            >
+                              <Link target="_blank" href={websiteLink}>
+                                Click here to visit
+                              </Link>
+                            </p>
+                          ))
                         : "No link provided"}
                     </td>
                     <td>{item.category}</td>
@@ -529,18 +539,18 @@ export default function Report(props) {
                     <td>
                       {item.linkedin.length
                         ? item.linkedin
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((linkedinLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={linkedinLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
+                          .split(" ")
+                          .filter((item) => item.length)
+                          .map((linkedinLink, index) => (
+                            <p
+                              key={index}
+                              className="text-primary m-0 p-0 link"
+                            >
+                              <Link target="_blank" href={linkedinLink}>
+                                Click here to visit
+                              </Link>
+                            </p>
+                          ))
                         : "No link provided"}
                     </td>
                     <td>{item.is_test ? "Yes" : "No"}</td>

@@ -12,12 +12,13 @@ const replaceNewlineWithBr = (text) => {
   );
 };
 
-const CallingStatusTd = ({ data }) => {
+const ExtandableTd = ({ data }) => {
   const [showFullText, setShowFullText] = useState(false);
 
   const toggleText = () => {
     setShowFullText(!showFullText);
   };
+  
 
   return (
     <>
@@ -38,6 +39,7 @@ const CallingStatusTd = ({ data }) => {
           </small>
         )}
       </td>
+
       <style jsx>
         {`
           .link:hover {
@@ -51,4 +53,4 @@ const CallingStatusTd = ({ data }) => {
   );
 };
 
-export default CallingStatusTd;
+export default ExtandableTd;

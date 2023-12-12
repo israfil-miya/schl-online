@@ -15,6 +15,7 @@ export default function Approvals() {
   const [userInfo, setUserInfo] = useState({});
   const [clientInfo, setClientInfo] = useState({});
   const [reportData, setReportData] = useState({});
+  const [employeeData, setEmployeeData] = useState({});
   const [userData, setUserData] = useState({});
   const [modalTempStore, setModalTempStore] = useState({});
 
@@ -50,6 +51,7 @@ export default function Approvals() {
         setUserInfo({});
         setClientInfo({});
         setReportData({});
+        setEmployeeData({});
         setUserData({});
       } else {
         toast.error("Unable to retrieve waiting list");
@@ -160,6 +162,31 @@ export default function Approvals() {
     }
   }
 
+  async function GetEmployeeById(id) {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/employee`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getemployeebyid: true,
+          id,
+        },
+      };
+
+      const resData = await fetchApi(url, options);
+
+      if (!resData.error) {
+        setEmployeeData(resData);
+      } else {
+        toast.error("Unable to retrieve employee data");
+      }
+    } catch (error) {
+      console.error("Error fetching employee data:", error);
+      toast.error("Error retrieving employee data");
+    }
+  }
+
   async function handleResponse(data) {
     try {
       console.log("THIS DATA BEFORE RESPONSE: ", data);
@@ -245,13 +272,13 @@ export default function Approvals() {
                   <td>{approveReq.req_type}</td>
                   <td>
                     {!approveReq.is_rejected &&
-                    approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                       "Approved"
                     ) : (
                       <></>
                     )}
                     {approveReq.is_rejected &&
-                    approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                       "Rejected"
                     ) : (
                       <></>
@@ -310,9 +337,12 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? GetUsersById(approveReq.id)
                                     : approveReq.req_type.split(" ")[0] ==
-                                        "Report"
+                                      "Report"
                                       ? GetReportById(approveReq.id)
-                                      : null;
+                                      : approveReq.req_type.split(" ")[0] ==
+                                        "Employee"
+                                        ? GetEmployeeById(approveReq.id)
+                                        : null;
                             }}
                             className="btn btn-sm btn-outline-primary"
                             data-bs-toggle="modal"
@@ -324,9 +354,12 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? "#editModal1"
                                     : approveReq.req_type.split(" ")[0] ==
-                                        "Report"
+                                      "Report"
                                       ? "#editModal4"
-                                      : null
+                                      : approveReq.req_type.split(" ")[0] ==
+                                        "Employee"
+                                        ? "#editModal5"
+                                        : null
                             }
                           >
                             View
@@ -1472,6 +1505,311 @@ export default function Approvals() {
                   </label>
                 </div>
               </div>
+            </div>
+
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div
+        className="modal fade"
+        id="editModal5"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Employee Data
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="calling_date" className="form-label">
+                  First Calling Date
+                </label>
+                <input
+                  disabled
+                  value={reportData.calling_date}
+                  type="date"
+                  className="form-control"
+                  id="calling_date"
+                />
+              </div>
+              <div className="mb-1">
+                <label htmlFor="calling_date" className="form-label">
+                  Calling Date History
+                </label>
+                <textarea
+                  disabled
+                  value={reportData.calling_date_history
+                    ?.map((date) => `${convertToDDMMYYYY(date)}`)
+                    .join("\n")}
+                  type="date"
+                  className="form-control"
+                  id="calling_date"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="followup_date" className="form-label">
+                  Followup Date
+                </label>
+                <input
+                  disabled
+                  value={reportData.followup_date}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      followup_date: e.target.value,
+                    }))
+                  }
+                  type="date"
+                  className="form-control"
+                  id="followup_date"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="country" className="form-label">
+                  Country
+                </label>
+                <input
+                  disabled
+                  value={reportData.country}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      country: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="country"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="website" className="form-label">
+                  Website
+                </label>
+                <input
+                  disabled
+                  value={reportData.website}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      website: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="website"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="category" className="form-label">
+                  Category
+                </label>
+                <input
+                  disabled
+                  value={reportData.category}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      category: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="category"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="company_name" className="form-label">
+                  Company Name
+                </label>
+                <input
+                  disabled
+                  value={reportData.company_name}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      company_name: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="company_name"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contact_person" className="form-label">
+                  Contact Person
+                </label>
+                <input
+                  disabled
+                  value={reportData.contact_person}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      contact_person: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="contact_person"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="designation" className="form-label">
+                  Designation
+                </label>
+                <input
+                  disabled
+                  value={reportData.designation}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      designation: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="designation"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="contact_number" className="form-label">
+                  Contact Number
+                </label>
+                <input
+                  disabled
+                  value={reportData.contact_number}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      contact_number: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="contact_number"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email_address" className="form-label">
+                  Email Address
+                </label>
+                <input
+                  disabled
+                  value={reportData.email_address}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      email_address: e.target.value,
+                    }))
+                  }
+                  type="email"
+                  className="form-control"
+                  id="email_address"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="calling_status" className="form-label">
+                  Calling Status
+                </label>
+                <textarea
+                  disabled
+                  value={reportData.calling_status}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      calling_status: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="calling_status"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="linkedin" className="form-label">
+                  LinkedIn
+                </label>
+                <input
+                  disabled
+                  value={reportData.linkedin}
+                  onChange={(e) =>
+                    setReportData((prevData) => ({
+                      ...prevData,
+                      linkedin: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="linkedin"
+                />
+              </div>
+
+              <div className="">
+                <div className="form-check">
+                  <input
+                    disabled
+                    type="checkbox"
+                    id="myCheckbox"
+                    className="form-check-input"
+                    checked={reportData.is_test}
+                    onChange={(e) =>
+                      setReportData({
+                        ...reportData,
+                        is_test: !reportData.is_test,
+                      })
+                    }
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Test Job
+                  </label>
+                </div>
+              </div>
+              <div className="mb-3">
+                <div className="form-check">
+                  <input
+                    disabled
+                    type="checkbox"
+                    id="myCheckbox2"
+                    className="form-check-input"
+                    checked={reportData.is_prospected}
+                    onChange={(e) =>
+                      setReportData({
+                        ...reportData,
+                        is_prospected: !reportData.is_prospected,
+                      })
+                    }
+                  />
+
+                  <label htmlFor="myCheckbox" className="form-check-label">
+                    Prospecting
+                  </label>
+                </div>
+              </div>
+
+              
             </div>
 
             <div className="modal-footer p-1">

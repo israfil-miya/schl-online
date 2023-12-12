@@ -72,6 +72,7 @@ const handleNewReport = async (req, res) => {
 async function handleGetAllReports(req, res) {
   try {
     const page = req.headers.page || 1;
+    const ITEMS_PER_PAGE = parseInt(req.headers.item_per_page) || 30
 
     let {
       country,
@@ -88,7 +89,7 @@ async function handleGetAllReports(req, res) {
     test = test === "true" ? true : false;
     prospect = prospect === "true" ? true : false;
 
-    const ITEMS_PER_PAGE = 20; // Number of items per page
+     // Number of items per page
 
     let query = {};
 

@@ -61,6 +61,20 @@ async function handleGetAllEmployees(req, res) {
   }
 }
 
+async function handleGetEmployeeById(req, res) {
+  try {
+    let data = req.headers;
+
+    const resData = await Employee.findById(data.id).lean();
+
+    if (!resData) sendError(res, 400, "No employee data found with the id");
+    else res.status(200).json(resData);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 

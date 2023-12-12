@@ -1,16 +1,51 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar";
 import { toast } from "sonner";
+import moment from "moment";
+import NoteTd from "../../components/extandable-td"
+import { useSession } from "next-auth/react";
 
 export default function EmployeeDatabase() {
   const [employees, setEmployees] = useState([]);
   const [manageData, setManageData] = useState([]);
+  const { data: session } = useSession();
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
   }
+
+  function getRemainingDaysAndMonths(joiningDate, today = moment()) {
+    // Make sure joiningDate and today are moment objects
+    joiningDate = moment(joiningDate);
+    today = moment(today);
+
+    // Calculate the difference in months and days
+    const monthsDiff = today.diff(joiningDate, 'months', true);
+    const daysDiff = today.diff(joiningDate, 'days');
+
+    // Get the whole months and remaining days
+    const wholeMonths = Math.floor(monthsDiff);
+    const remainingDays = daysDiff % 30;
+
+    // Build the text string
+    let textString = "";
+    if (wholeMonths > 0) {
+      textString += `${wholeMonths} month${wholeMonths === 1 ? '' : 's'}, `;
+    }
+    if (remainingDays > 0) {
+      textString += `${remainingDays} day${remainingDays === 1 ? '' : 's'}`;
+    }
+
+    return textString;
+  }
+
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length != 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
 
   async function getAllEmployees() {
     try {
@@ -36,15 +71,14 @@ export default function EmployeeDatabase() {
     }
   }
 
-  async function deleteEmployee(deleteEmployeeData) {
+  async function deleteEmployee() {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
     const options = {
       method: "POST",
       body: JSON.stringify({
         req_type: "Employee Delete",
         req_by: session.user.name,
-        id: deleteEmployeeData._id,
-        ...deleteEmployeeData,
+        id: manageData._id,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -111,7 +145,9 @@ export default function EmployeeDatabase() {
                   <th>Blood Group</th>
                   <th>Designation</th>
                   <th>Department</th>
-                  <th>Base Salary</th>
+                  <th>Gross Salary</th>
+                  <th>Status</th>
+                  <th>Permanent</th>
                   <th>Bonus (Eid ul Fitr)</th>
                   <th>Bonus (Eid ul Adha)</th>
                   <th>Note</th>
@@ -124,7 +160,7 @@ export default function EmployeeDatabase() {
                     <tr key={index}>
                       <td>{employee.e_id}</td>
                       <td>{employee.real_name}</td>
-                      <td>{employee.joining_date}</td>
+                      <td>{convertToDDMMYYYY(employee.joining_date)}</td>
                       <td>{employee.phone}</td>
                       <td>{employee.email}</td>
                       <td>{employee.birth_date}</td>
@@ -132,10 +168,12 @@ export default function EmployeeDatabase() {
                       <td>{employee.blood_group}</td>
                       <td>{employee.designation}</td>
                       <td>{employee.department}</td>
-                      <td>{employee.base_salary}</td>
+                      <td>{employee.gross_salary}</td>
+                      <td>{employee.status}</td>
+                      <td>{getRemainingDaysAndMonths(employee.joining_date)}</td>
                       <td>{employee.bonus_eid_ul_fitr}</td>
                       <td>{employee.bonus_eid_ul_adha}</td>
-                      <td className="text-wrap">{employee.note}</td>
+                      <NoteTd data={employee.note} />
                       <td
                         className="align-middle"
                         style={{ textAlign: "center" }}
@@ -375,17 +413,17 @@ export default function EmployeeDatabase() {
                 />
               </div>
 
-              {/* Base Salary */}
+              {/* Gross Salary */}
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
-                  Base Salary
+                  Gross Salary
                 </label>
                 <input
-                  value={manageData.base_salary}
+                  value={manageData.gross_salary}
                   onChange={(e) =>
                     setManageData((prevData) => ({
                       ...prevData,
-                      base_salary: e.target.value,
+                      gross_salary: e.target.value,
                     }))
                   }
                   type="number"
@@ -393,7 +431,32 @@ export default function EmployeeDatabase() {
                 />
               </div>
 
-              {/* Base Salary */}
+              {/* Status */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Status
+                </label>
+
+                <select
+                  required
+                  className="form-select"
+                  id="floatingSelect"
+                  value={manageData.status}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      status: e.target.value,
+                    }))
+                  }>
+
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Resigned">Resigned</option>
+                  <option value="Fired">Fired</option>
+                </select>
+              </div>
+
+              {/* Eid-ul-fitr Bonus */}
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
                   Eid-ul-fitr Bonus
@@ -411,7 +474,7 @@ export default function EmployeeDatabase() {
                 />
               </div>
 
-              {/* Base Salary */}
+              {/* Eid-ul-adha Bonus */}
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
                   Eid-ul-adha Bonus
@@ -445,6 +508,8 @@ export default function EmployeeDatabase() {
                   className="form-control"
                 />
               </div>
+
+              
             </div>
             <div className="modal-footer p-1">
               <button
@@ -466,6 +531,51 @@ export default function EmployeeDatabase() {
           </div>
         </div>
       </div>
+
+      <div
+        className="modal fade"
+        id="deleteModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Delete Employee Data Confirmation
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>Do you really want to delete this eployee data?</p>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                No
+              </button>
+              <button
+                onClick={deleteEmployee}
+                type="button"
+                className="btn btn-sm btn-outline-danger"
+                data-bs-dismiss="modal"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </>
   );
 }
