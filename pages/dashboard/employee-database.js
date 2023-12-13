@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar";
 import { toast } from "sonner";
 import moment from "moment";
-import NoteTd from "../../components/extandable-td"
+import NoteTd from "../../components/extandable-td";
 import { useSession } from "next-auth/react";
 
 export default function EmployeeDatabase() {
@@ -22,8 +22,8 @@ export default function EmployeeDatabase() {
     today = moment(today);
 
     // Calculate the difference in months and days
-    const monthsDiff = today.diff(joiningDate, 'months', true);
-    const daysDiff = today.diff(joiningDate, 'days');
+    const monthsDiff = today.diff(joiningDate, "months", true);
+    const daysDiff = today.diff(joiningDate, "days");
 
     // Get the whole months and remaining days
     const wholeMonths = Math.floor(monthsDiff);
@@ -32,13 +32,22 @@ export default function EmployeeDatabase() {
     // Build the text string
     let textString = "";
     if (wholeMonths > 0) {
-      textString += `${wholeMonths} month${wholeMonths === 1 ? '' : 's'}, `;
+      textString += `${wholeMonths} month${wholeMonths === 1 ? "" : "s"}`;
     }
     if (remainingDays > 0) {
-      textString += `${remainingDays} day${remainingDays === 1 ? '' : 's'}`;
-    }
+      if (wholeMonths > 0) {
+        textString += ", ";
+      }
 
-    return textString;
+      textString += `${remainingDays} day${remainingDays === 1 ? "" : "s"}`;
+    }
+    if (joiningDate > today) {
+      textString = "Not yet joined";
+    } else if (textString) textString += " left";
+
+    console.log(textString, joiningDate);
+
+    return textString || "Yes";
   }
 
   const convertToDDMMYYYY = (dateString) => {
@@ -157,7 +166,16 @@ export default function EmployeeDatabase() {
               <tbody>
                 {employees &&
                   employees.map((employee, index) => (
-                    <tr key={index}>
+                    <tr
+                      key={index}
+                      className={
+                        employee.status == "Active"
+                          ? "table-success"
+                          : employee.status == "Inactive"
+                            ? "table-warning"
+                            : "table-danger"
+                      }
+                    >
                       <td>{employee.e_id}</td>
                       <td>{employee.real_name}</td>
                       <td>{convertToDDMMYYYY(employee.joining_date)}</td>
@@ -170,7 +188,9 @@ export default function EmployeeDatabase() {
                       <td>{employee.department}</td>
                       <td>{employee.gross_salary}</td>
                       <td>{employee.status}</td>
-                      <td>{getRemainingDaysAndMonths(employee.joining_date)}</td>
+                      <td>
+                        {getRemainingDaysAndMonths(employee.joining_date)}
+                      </td>
                       <td>{employee.bonus_eid_ul_fitr}</td>
                       <td>{employee.bonus_eid_ul_adha}</td>
                       <NoteTd data={employee.note} />
@@ -447,8 +467,8 @@ export default function EmployeeDatabase() {
                       ...prevData,
                       status: e.target.value,
                     }))
-                  }>
-
+                  }
+                >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                   <option value="Resigned">Resigned</option>
@@ -508,8 +528,6 @@ export default function EmployeeDatabase() {
                   className="form-control"
                 />
               </div>
-
-              
             </div>
             <div className="modal-footer p-1">
               <button
@@ -574,8 +592,6 @@ export default function EmployeeDatabase() {
           </div>
         </div>
       </div>
-
-
     </>
   );
 }

@@ -18,7 +18,6 @@ const ExtandableTd = ({ data }) => {
   const toggleText = () => {
     setShowFullText(!showFullText);
   };
-  
 
   return (
     <>

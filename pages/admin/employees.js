@@ -76,14 +76,13 @@ export default function Create() {
         <div className="add-user">
           <h5 className="py-3">Add new employee</h5>
           <form onSubmit={AddNewUser} id="inputForm">
-
             {/* Employee Code */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
                 Employee ID
               </label>
               <input
-              required
+                required
                 value={newEmployeeData.e_id}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -102,7 +101,7 @@ export default function Create() {
                 Full Name
               </label>
               <input
-              required
+                required
                 value={newEmployeeData.real_name}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -121,7 +120,7 @@ export default function Create() {
                 Joining Date
               </label>
               <input
-              required
+                required
                 value={newEmployeeData.joining_date}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -304,8 +303,8 @@ export default function Create() {
                     ...prevData,
                     status: e.target.value,
                   }))
-                }>
-
+                }
+              >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
                 <option value="Resigned">Resigned</option>
@@ -348,8 +347,6 @@ export default function Create() {
                 className="form-control"
               />
             </div>
-
-            
 
             {/* Note*/}
             <div className="mb-3">

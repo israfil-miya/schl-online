@@ -20,7 +20,7 @@ export default function Report(props) {
 
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [itemPerPage, setItemPerPage] = useState(30)
+  const [itemPerPage, setItemPerPage] = useState(30);
 
   const [isFiltered, setIsFiltered] = useState(0);
   const [isRecall, setIsRecall] = useState(0);
@@ -75,7 +75,7 @@ export default function Report(props) {
           "Content-Type": "application/json",
           getallreports: true,
           page,
-          item_per_page: itemPerPage
+          item_per_page: itemPerPage,
         },
       };
 
@@ -103,7 +103,7 @@ export default function Report(props) {
           isfilter: true,
           ...filters,
           page,
-          item_per_page: itemPerPage
+          item_per_page: itemPerPage,
         },
       };
 
@@ -450,7 +450,14 @@ export default function Report(props) {
                 </button>
               </div>
 
-              <select disabled={!reports?.items?.length} style={{width: "70px"}} value={itemPerPage} onChange={(e)=>setItemPerPage(e.target.value)} className="form-select ms-2 me-2 form-select-sm" aria-label="Small select example">
+              <select
+                disabled={!reports?.items?.length}
+                style={{ width: "70px" }}
+                value={itemPerPage}
+                onChange={(e) => setItemPerPage(e.target.value)}
+                className="form-select ms-2 me-2 form-select-sm"
+                aria-label="Small select example"
+              >
                 <option value="10">10</option>
                 <option value="30">30</option>
                 <option value="70">70</option>
@@ -515,18 +522,18 @@ export default function Report(props) {
                     <td>
                       {item.website.length
                         ? item.website
-                          .split(" ")
-                          .filter((item) => item.length)
-                          .map((websiteLink, index) => (
-                            <p
-                              key={index}
-                              className="text-primary m-0 p-0 link"
-                            >
-                              <Link target="_blank" href={websiteLink}>
-                                Click here to visit
-                              </Link>
-                            </p>
-                          ))
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((websiteLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={websiteLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
                         : "No link provided"}
                     </td>
                     <td>{item.category}</td>
@@ -539,18 +546,18 @@ export default function Report(props) {
                     <td>
                       {item.linkedin.length
                         ? item.linkedin
-                          .split(" ")
-                          .filter((item) => item.length)
-                          .map((linkedinLink, index) => (
-                            <p
-                              key={index}
-                              className="text-primary m-0 p-0 link"
-                            >
-                              <Link target="_blank" href={linkedinLink}>
-                                Click here to visit
-                              </Link>
-                            </p>
-                          ))
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((linkedinLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={linkedinLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
                         : "No link provided"}
                     </td>
                     <td>{item.is_test ? "Yes" : "No"}</td>

@@ -272,13 +272,13 @@ export default function Approvals() {
                   <td>{approveReq.req_type}</td>
                   <td>
                     {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                    approveReq.checked_by != "None" ? (
                       "Approved"
                     ) : (
                       <></>
                     )}
                     {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                    approveReq.checked_by != "None" ? (
                       "Rejected"
                     ) : (
                       <></>
@@ -337,10 +337,10 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? GetUsersById(approveReq.id)
                                     : approveReq.req_type.split(" ")[0] ==
-                                      "Report"
+                                        "Report"
                                       ? GetReportById(approveReq.id)
                                       : approveReq.req_type.split(" ")[0] ==
-                                        "Employee"
+                                          "Employee"
                                         ? GetEmployeeById(approveReq.id)
                                         : null;
                             }}
@@ -354,10 +354,10 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? "#editModal1"
                                     : approveReq.req_type.split(" ")[0] ==
-                                      "Report"
+                                        "Report"
                                       ? "#editModal4"
                                       : approveReq.req_type.split(" ")[0] ==
-                                        "Employee"
+                                          "Employee"
                                         ? "#editModal5"
                                         : null
                             }
@@ -1520,7 +1520,6 @@ export default function Approvals() {
         </div>
       </div>
 
-
       <div
         className="modal fade"
         id="editModal5"
@@ -1541,275 +1540,216 @@ export default function Approvals() {
               ></button>
             </div>
             <div className="modal-body">
+              {/* Employee Code */}
               <div className="mb-3">
-                <label htmlFor="calling_date" className="form-label">
-                  First Calling Date
+                <label htmlFor="date" className="form-label">
+                  Employee ID
                 </label>
                 <input
+                  value={employeeData.e_id}
                   disabled
-                  value={reportData.calling_date}
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Full Name */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Full Name
+                </label>
+                <input
+                  value={employeeData.real_name}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Joining Date */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Joining Date
+                </label>
+                <input
+                  value={employeeData.joining_date}
+                  disabled
                   type="date"
                   className="form-control"
-                  id="calling_date"
                 />
               </div>
-              <div className="mb-1">
-                <label htmlFor="calling_date" className="form-label">
-                  Calling Date History
+
+              {/* Phone Number */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Phone
                 </label>
-                <textarea
+                <input
+                  value={employeeData.phone}
                   disabled
-                  value={reportData.calling_date_history
-                    ?.map((date) => `${convertToDDMMYYYY(date)}`)
-                    .join("\n")}
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Email
+                </label>
+                <input
+                  value={employeeData.email}
+                  disabled
+                  type="email"
+                  className="form-control"
+                />
+              </div>
+
+              {/* NID Number */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  NID Number
+                </label>
+                <input
+                  value={employeeData.nid}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Blood Group */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Blood Group
+                </label>
+
+                <select
+                  className="form-select"
+                  id="floatingSelect"
+                  value={employeeData.blood_group}
+                  disabled
+                >
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+
+              {/* Birth Date */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Birth Date
+                </label>
+                <input
+                  value={employeeData.birth_date}
+                  disabled
                   type="date"
                   className="form-control"
-                  id="calling_date"
                 />
               </div>
+
+              {/* Designation */}
               <div className="mb-3">
-                <label htmlFor="followup_date" className="form-label">
-                  Followup Date
-                </label>
-                <input
-                  disabled
-                  value={reportData.followup_date}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      followup_date: e.target.value,
-                    }))
-                  }
-                  type="date"
-                  className="form-control"
-                  id="followup_date"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="country" className="form-label">
-                  Country
-                </label>
-                <input
-                  disabled
-                  value={reportData.country}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      country: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="country"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="website" className="form-label">
-                  Website
-                </label>
-                <input
-                  disabled
-                  value={reportData.website}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      website: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="website"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="category" className="form-label">
-                  Category
-                </label>
-                <input
-                  disabled
-                  value={reportData.category}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      category: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="category"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="company_name" className="form-label">
-                  Company Name
-                </label>
-                <input
-                  disabled
-                  value={reportData.company_name}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      company_name: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="company_name"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="contact_person" className="form-label">
-                  Contact Person
-                </label>
-                <input
-                  disabled
-                  value={reportData.contact_person}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      contact_person: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="contact_person"
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="designation" className="form-label">
+                <label htmlFor="date" className="form-label">
                   Designation
                 </label>
                 <input
+                  value={employeeData.designation}
                   disabled
-                  value={reportData.designation}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      designation: e.target.value,
-                    }))
-                  }
                   type="text"
                   className="form-control"
-                  id="designation"
                 />
               </div>
+
+              {/* Department */}
               <div className="mb-3">
-                <label htmlFor="contact_number" className="form-label">
-                  Contact Number
+                <label htmlFor="date" className="form-label">
+                  Department
                 </label>
                 <input
+                  value={employeeData.department}
                   disabled
-                  value={reportData.contact_number}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      contact_number: e.target.value,
-                    }))
-                  }
                   type="text"
                   className="form-control"
-                  id="contact_number"
                 />
               </div>
+
+              {/* Gross Salary */}
               <div className="mb-3">
-                <label htmlFor="email_address" className="form-label">
-                  Email Address
+                <label htmlFor="date" className="form-label">
+                  Gross Salary
                 </label>
                 <input
+                  value={employeeData.gross_salary}
                   disabled
-                  value={reportData.email_address}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      email_address: e.target.value,
-                    }))
-                  }
-                  type="email"
+                  type="number"
                   className="form-control"
-                  id="email_address"
                 />
               </div>
+
+              {/* Status */}
               <div className="mb-3">
-                <label htmlFor="calling_status" className="form-label">
-                  Calling Status
+                <label htmlFor="date" className="form-label">
+                  Status
+                </label>
+
+                <select
+                  required
+                  className="form-select"
+                  id="floatingSelect"
+                  value={employeeData.status}
+                  disabled
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Resigned">Resigned</option>
+                  <option value="Fired">Fired</option>
+                </select>
+              </div>
+
+              {/* Eid-ul-fitr Bonus */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Eid-ul-fitr Bonus
+                </label>
+                <input
+                  value={employeeData.bonus_eid_ul_fitr}
+                  disabled
+                  type="number"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Eid-ul-adha Bonus */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Eid-ul-adha Bonus
+                </label>
+                <input
+                  value={employeeData.bonus_eid_ul_adha}
+                  disabled
+                  type="number"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Note*/}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Note
                 </label>
                 <textarea
+                  value={employeeData.note}
                   disabled
-                  value={reportData.calling_status}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      calling_status: e.target.value,
-                    }))
-                  }
-                  type="text"
                   className="form-control"
-                  id="calling_status"
                 />
               </div>
-              <div className="mb-3">
-                <label htmlFor="linkedin" className="form-label">
-                  LinkedIn
-                </label>
-                <input
-                  disabled
-                  value={reportData.linkedin}
-                  onChange={(e) =>
-                    setReportData((prevData) => ({
-                      ...prevData,
-                      linkedin: e.target.value,
-                    }))
-                  }
-                  type="text"
-                  className="form-control"
-                  id="linkedin"
-                />
-              </div>
-
-              <div className="">
-                <div className="form-check">
-                  <input
-                    disabled
-                    type="checkbox"
-                    id="myCheckbox"
-                    className="form-check-input"
-                    checked={reportData.is_test}
-                    onChange={(e) =>
-                      setReportData({
-                        ...reportData,
-                        is_test: !reportData.is_test,
-                      })
-                    }
-                  />
-
-                  <label htmlFor="myCheckbox" className="form-check-label">
-                    Test Job
-                  </label>
-                </div>
-              </div>
-              <div className="mb-3">
-                <div className="form-check">
-                  <input
-                    disabled
-                    type="checkbox"
-                    id="myCheckbox2"
-                    className="form-check-input"
-                    checked={reportData.is_prospected}
-                    onChange={(e) =>
-                      setReportData({
-                        ...reportData,
-                        is_prospected: !reportData.is_prospected,
-                      })
-                    }
-                  />
-
-                  <label htmlFor="myCheckbox" className="form-check-label">
-                    Prospecting
-                  </label>
-                </div>
-              </div>
-
-              
             </div>
 
             <div className="modal-footer p-1">

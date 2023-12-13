@@ -72,7 +72,6 @@ const ApprovalSchema = new mongoose.Schema(
       type: Boolean,
     },
 
-
     e_id: {
       type: String,
     },

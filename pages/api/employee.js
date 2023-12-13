@@ -1,5 +1,6 @@
 import dbConnect from "../../db/dbConnect";
 import Employee from "../../db/Employees";
+import moment from "moment";
 dbConnect();
 
 function sendError(res, statusCode, message) {
@@ -7,6 +8,112 @@ function sendError(res, statusCode, message) {
     error: true,
     message: message,
   });
+}
+
+function getRemainingTimeToBePermenant(joiningDate, today = moment()) {
+  // Make sure joiningDate and today are moment objects
+  joiningDate = moment(joiningDate);
+  today = moment(today);
+
+  // Calculate the difference in months and days
+  const monthsDiff = today.diff(joiningDate, "months", true);
+  const daysDiff = today.diff(joiningDate, "days");
+
+  // Get the whole months and remaining days
+  const wholeMonths = Math.floor(monthsDiff);
+  const remainingDays = daysDiff % 30;
+
+  // Build the text string
+  let textString = "";
+  if (wholeMonths > 0) {
+    textString += `${wholeMonths} month${wholeMonths === 1 ? "" : "s"}`;
+  }
+  if (remainingDays > 0) {
+    if (wholeMonths > 0) {
+      textString += ", ";
+    }
+
+    textString += `${remainingDays} day${remainingDays === 1 ? "" : "s"}`;
+  }
+  if (joiningDate > today) {
+    textString = "Not yet joined";
+  } else if (textString) textString += " left";
+
+  console.log(textString, joiningDate);
+
+  return textString || "Yes";
+}
+
+async function handleGetAllEmployees(req, res) {
+  try {
+    let query = {};
+
+    const pipeline = [
+      { $match: query }, // Apply the query filter
+      {
+        $addFields: {
+          remainingTime: {
+            $cond: {
+              if: { $eq: ["$status", "Active"] },
+              then: getRemainingTimeToBePermenant("$joining_date"),
+              else: "N/A",
+            },
+          },
+          priority: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$status", "Active"] },
+                      { $eq: ["$remainingTime", "Yes"] },
+                    ],
+                  },
+                  then: 1,
+                },
+                {
+                  case: {
+                    $and: [
+                      { $eq: ["$status", "Active"] },
+                      { $gt: ["$remainingTime", 0] },
+                    ],
+                  },
+                  then: 2,
+                },
+                {
+                  case: { $eq: ["$status", "Inactive"] },
+                  then: {
+                    $cond: {
+                      if: { $eq: ["$remainingTime", "Yes"] },
+                      then: 4,
+                      else: 5,
+                    },
+                  },
+                },
+                { case: { $eq: ["$status", "Fired"] }, then: 7 },
+                { case: { $eq: ["$status", "Resigned"] }, then: 8 },
+              ],
+              default: 3,
+            },
+          },
+        },
+      },
+      {
+        $sort: { priority: 1 },
+      },
+    ];
+
+    let usersList = await Employee.aggregate(pipeline).exec();
+
+    console.log(usersList);
+
+    if (usersList) {
+      res.status(200).json(usersList);
+    } else sendError(res, 400, "Unable to retrieve employees list");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
 }
 
 async function handleNewEmployee(req, res) {
@@ -48,19 +155,6 @@ async function handleEditEmployee(req, res) {
   }
 }
 
-async function handleGetAllEmployees(req, res) {
-  try {
-    let usersList = await Employee.find({}).lean();
-
-    if (usersList) {
-      res.status(200).json(usersList);
-    } else sendError(res, 400, "Unable to retrieve employees list");
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
 async function handleGetEmployeeById(req, res) {
   try {
     let data = req.headers;
@@ -82,6 +176,8 @@ export default async function handle(req, res) {
     case "GET":
       if (req.headers.getallemployees) {
         await handleGetAllEmployees(req, res);
+      } else if (req.headers.getemployeebyid) {
+        await handleGetEmployeeById(req, res);
       }
       break;
 
