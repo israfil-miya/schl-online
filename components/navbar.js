@@ -186,6 +186,7 @@ export default function Navbar({ navFor, shortNote }) {
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
                   href="/admin/employees"
+                  target="_blank"
                 >
                   Employees
                 </Link>
@@ -301,6 +302,7 @@ export default function Navbar({ navFor, shortNote }) {
               aria-expanded="false"
             >
               <Link
+                target="_blank"
                 href={
                   session.user.role === "marketer"
                     ? `/crm/marketers`
@@ -319,6 +321,7 @@ export default function Navbar({ navFor, shortNote }) {
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
                   href="/crm/marketers"
+                  target="_blank"
                 >
                   Marketers
                 </Link>
@@ -327,6 +330,7 @@ export default function Navbar({ navFor, shortNote }) {
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
                   href="/crm/reports-database"
+                  target="_blank"
                 >
                   Call Reports
                 </Link>

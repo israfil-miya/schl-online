@@ -19,13 +19,19 @@ export default function EmployeeDatabase() {
   function isEmployeePermanent(joiningDate) {
     // Existing logic to check if permanent
     const joinDate = new Date(joiningDate);
-    const probationEndDate = new Date(joinDate.getFullYear(), joinDate.getMonth() + 6, joinDate.getDate());
+    const probationEndDate = new Date(
+      joinDate.getFullYear(),
+      joinDate.getMonth() + 6,
+      joinDate.getDate(),
+    );
     const today = new Date();
     const isPermanent = today >= probationEndDate;
 
     // Calculate remaining time if not permanent
     if (!isPermanent) {
-      const remainingDays = Math.floor((probationEndDate - today) / (1000 * 60 * 60 * 24));
+      const remainingDays = Math.floor(
+        (probationEndDate - today) / (1000 * 60 * 60 * 24),
+      );
       return {
         isPermanent: false,
         remainingTime: formatRemainingTime(remainingDays),
@@ -41,11 +47,13 @@ export default function EmployeeDatabase() {
     const days = remainingDays % 30;
 
     if (months === 0) {
-      return `${days} day${days > 1 ? 's' : ''}`;
+      return `${days} day${days > 1 ? "s" : ""}`;
     } else if (months === 1 && days === 0) {
       return `${months} month`;
     } else {
-      return `${months} month${months > 1 ? 's' : ''}, ${days} day${days > 1 ? 's' : ''}`;
+      return `${months} month${months > 1 ? "s" : ""}, ${days} day${
+        days > 1 ? "s" : ""
+      }`;
     }
   }
 
@@ -164,8 +172,11 @@ export default function EmployeeDatabase() {
               </thead>
               <tbody>
                 {employees &&
-                  employees.map((employee, index) => {// Joined today
-                    const employeeInfo = isEmployeePermanent(employee.joining_date);
+                  employees.map((employee, index) => {
+                    // Joined today
+                    const employeeInfo = isEmployeePermanent(
+                      employee.joining_date,
+                    );
                     return (
                       <tr
                         key={index}
@@ -188,7 +199,9 @@ export default function EmployeeDatabase() {
                         <td>{employee.gross_salary}</td>
                         <td>{employee.status}</td>
                         <td>
-                          {employeeInfo.isPermanent ? "Yes" : employeeInfo.remainingTime}
+                          {employeeInfo.isPermanent
+                            ? "Yes"
+                            : employeeInfo.remainingTime}
                         </td>
                         <td>{employee.bonus_eid_ul_fitr}</td>
                         <td>{employee.bonus_eid_ul_adha}</td>
@@ -215,8 +228,7 @@ export default function EmployeeDatabase() {
                           </button>
                         </td>
                       </tr>
-
-                    )
+                    );
                   })}
               </tbody>
             </table>

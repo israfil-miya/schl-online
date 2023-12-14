@@ -10,20 +10,25 @@ function sendError(res, statusCode, message) {
   });
 }
 
-
 function isEmployeePermanent(joiningDate) {
   // Existing logic to check if permanent
   const joinDate = new Date(joiningDate);
-  const probationEndDate = new Date(joinDate.getFullYear(), joinDate.getMonth() + 6, joinDate.getDate());
+  const probationEndDate = new Date(
+    joinDate.getFullYear(),
+    joinDate.getMonth() + 6,
+    joinDate.getDate(),
+  );
   const today = new Date();
   const isPermanent = today >= probationEndDate;
 
   // Calculate remaining time if not permanent
   if (!isPermanent) {
-    const remainingDays = Math.floor((probationEndDate - today) / (1000 * 60 * 60 * 24));
+    const remainingDays = Math.floor(
+      (probationEndDate - today) / (1000 * 60 * 60 * 24),
+    );
     return {
       isPermanent: false,
-      remainingTime: remainingDays
+      remainingTime: remainingDays,
     };
   }
 
@@ -31,32 +36,31 @@ function isEmployeePermanent(joiningDate) {
   return { isPermanent: true };
 }
 
-
 async function handleGetAllEmployees(req, res) {
   try {
     let query = {};
     let employees = await Employee.find().exec();
-    const processedEmployees = employees.map(employee => {
+    const processedEmployees = employees.map((employee) => {
       const permanentInfo = isEmployeePermanent(employee.joining_date);
       let priority = 0;
 
       switch (true) {
-        case employee.status === 'Active' && permanentInfo.isPermanent:
+        case employee.status === "Active" && permanentInfo.isPermanent:
           priority = 1;
           break;
-        case employee.status === 'Active' && !permanentInfo.isPermanent:
+        case employee.status === "Active" && !permanentInfo.isPermanent:
           priority = 2;
           break;
-        case employee.status === 'Inactive' && permanentInfo.isPermanent:
+        case employee.status === "Inactive" && permanentInfo.isPermanent:
           priority = 4;
           break;
-        case employee.status === 'Inactive' && !permanentInfo.isPermanent:
+        case employee.status === "Inactive" && !permanentInfo.isPermanent:
           priority = 5;
           break;
-        case employee.status === 'Fired':
+        case employee.status === "Fired":
           priority = 7;
           break;
-        case employee.status === 'Resigned':
+        case employee.status === "Resigned":
           priority = 8;
           break;
       }
@@ -67,7 +71,9 @@ async function handleGetAllEmployees(req, res) {
         priority,
       };
     });
-    const sortedEmployees = processedEmployees.sort((a, b) => a.priority - b.priority);
+    const sortedEmployees = processedEmployees.sort(
+      (a, b) => a.priority - b.priority,
+    );
     if (sortedEmployees) {
       res.status(200).json(sortedEmployees);
     } else sendError(res, 400, "Unable to retrieve employees list");
