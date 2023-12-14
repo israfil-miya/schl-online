@@ -16,38 +16,37 @@ export default function EmployeeDatabase() {
     return data;
   }
 
-  function getRemainingDaysAndMonths(joiningDate, today = moment()) {
-    // Make sure joiningDate and today are moment objects
-    joiningDate = moment(joiningDate);
-    today = moment(today);
+  function isEmployeePermanent(joiningDate) {
+    // Existing logic to check if permanent
+    const joinDate = new Date(joiningDate);
+    const probationEndDate = new Date(joinDate.getFullYear(), joinDate.getMonth() + 6, joinDate.getDate());
+    const today = new Date();
+    const isPermanent = today >= probationEndDate;
 
-    // Calculate the difference in months and days
-    const monthsDiff = today.diff(joiningDate, "months", true);
-    const daysDiff = today.diff(joiningDate, "days");
-
-    // Get the whole months and remaining days
-    const wholeMonths = Math.floor(monthsDiff);
-    const remainingDays = daysDiff % 30;
-
-    // Build the text string
-    let textString = "";
-    if (wholeMonths > 0) {
-      textString += `${wholeMonths} month${wholeMonths === 1 ? "" : "s"}`;
+    // Calculate remaining time if not permanent
+    if (!isPermanent) {
+      const remainingDays = Math.floor((probationEndDate - today) / (1000 * 60 * 60 * 24));
+      return {
+        isPermanent: false,
+        remainingTime: formatRemainingTime(remainingDays),
+      };
     }
-    if (remainingDays > 0) {
-      if (wholeMonths > 0) {
-        textString += ", ";
-      }
 
-      textString += `${remainingDays} day${remainingDays === 1 ? "" : "s"}`;
+    // Return permanent status if permanent
+    return { isPermanent: true };
+  }
+
+  function formatRemainingTime(remainingDays) {
+    const months = Math.floor(remainingDays / 30);
+    const days = remainingDays % 30;
+
+    if (months === 0) {
+      return `${days} day${days > 1 ? 's' : ''}`;
+    } else if (months === 1 && days === 0) {
+      return `${months} month`;
+    } else {
+      return `${months} month${months > 1 ? 's' : ''}, ${days} day${days > 1 ? 's' : ''}`;
     }
-    if (joiningDate > today) {
-      textString = "Not yet joined";
-    } else if (textString) textString += " left";
-
-    console.log(textString, joiningDate);
-
-    return textString || "Yes";
   }
 
   const convertToDDMMYYYY = (dateString) => {
@@ -165,58 +164,60 @@ export default function EmployeeDatabase() {
               </thead>
               <tbody>
                 {employees &&
-                  employees.map((employee, index) => (
-                    <tr
-                      key={index}
-                      className={
-                        employee.status == "Active"
-                          ? "table-success"
-                          : employee.status == "Inactive"
-                            ? "table-warning"
+                  employees.map((employee, index) => {// Joined today
+                    const employeeInfo = isEmployeePermanent(employee.joining_date);
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          employee.status == "Active"
+                            ? "table-success"
                             : "table-danger"
-                      }
-                    >
-                      <td>{employee.e_id}</td>
-                      <td>{employee.real_name}</td>
-                      <td>{convertToDDMMYYYY(employee.joining_date)}</td>
-                      <td>{employee.phone}</td>
-                      <td>{employee.email}</td>
-                      <td>{employee.birth_date}</td>
-                      <td>{employee.nid}</td>
-                      <td>{employee.blood_group}</td>
-                      <td>{employee.designation}</td>
-                      <td>{employee.department}</td>
-                      <td>{employee.gross_salary}</td>
-                      <td>{employee.status}</td>
-                      <td>
-                        {getRemainingDaysAndMonths(employee.joining_date)}
-                      </td>
-                      <td>{employee.bonus_eid_ul_fitr}</td>
-                      <td>{employee.bonus_eid_ul_adha}</td>
-                      <NoteTd data={employee.note} />
-                      <td
-                        className="align-middle"
-                        style={{ textAlign: "center" }}
+                        }
                       >
-                        <button
-                          onClick={() => setManageData(employee)}
-                          className="btn btn-sm btn-outline-primary me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#editModal"
+                        <td>{employee.e_id}</td>
+                        <td>{employee.real_name}</td>
+                        <td>{convertToDDMMYYYY(employee.joining_date)}</td>
+                        <td>{employee.phone}</td>
+                        <td>{employee.email}</td>
+                        <td>{employee.birth_date}</td>
+                        <td>{employee.nid}</td>
+                        <td>{employee.blood_group}</td>
+                        <td>{employee.designation}</td>
+                        <td>{employee.department}</td>
+                        <td>{employee.gross_salary}</td>
+                        <td>{employee.status}</td>
+                        <td>
+                          {employeeInfo.isPermanent ? "Yes" : employeeInfo.remainingTime}
+                        </td>
+                        <td>{employee.bonus_eid_ul_fitr}</td>
+                        <td>{employee.bonus_eid_ul_adha}</td>
+                        <NoteTd data={employee.note} />
+                        <td
+                          className="align-middle"
+                          style={{ textAlign: "center" }}
                         >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setManageData({ _id: employee._id })}
-                          className="btn btn-sm btn-outline-danger me-1"
-                          data-bs-toggle="modal"
-                          data-bs-target="#deleteModal"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          <button
+                            onClick={() => setManageData(employee)}
+                            className="btn btn-sm btn-outline-primary me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setManageData({ _id: employee._id })}
+                            className="btn btn-sm btn-outline-danger me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+
+                    )
+                  })}
               </tbody>
             </table>
           </div>

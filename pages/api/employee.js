@@ -10,105 +10,66 @@ function sendError(res, statusCode, message) {
   });
 }
 
-function getRemainingTimeToBePermenant(joiningDate, today = moment()) {
-  // Make sure joiningDate and today are moment objects
-  joiningDate = moment(joiningDate);
-  today = moment(today);
 
-  // Calculate the difference in months and days
-  const monthsDiff = today.diff(joiningDate, "months", true);
-  const daysDiff = today.diff(joiningDate, "days");
+function isEmployeePermanent(joiningDate) {
+  // Existing logic to check if permanent
+  const joinDate = new Date(joiningDate);
+  const probationEndDate = new Date(joinDate.getFullYear(), joinDate.getMonth() + 6, joinDate.getDate());
+  const today = new Date();
+  const isPermanent = today >= probationEndDate;
 
-  // Get the whole months and remaining days
-  const wholeMonths = Math.floor(monthsDiff);
-  const remainingDays = daysDiff % 30;
-
-  // Build the text string
-  let textString = "";
-  if (wholeMonths > 0) {
-    textString += `${wholeMonths} month${wholeMonths === 1 ? "" : "s"}`;
+  // Calculate remaining time if not permanent
+  if (!isPermanent) {
+    const remainingDays = Math.floor((probationEndDate - today) / (1000 * 60 * 60 * 24));
+    return {
+      isPermanent: false,
+      remainingTime: remainingDays
+    };
   }
-  if (remainingDays > 0) {
-    if (wholeMonths > 0) {
-      textString += ", ";
-    }
 
-    textString += `${remainingDays} day${remainingDays === 1 ? "" : "s"}`;
-  }
-  if (joiningDate > today) {
-    textString = "Not yet joined";
-  } else if (textString) textString += " left";
-
-  console.log(textString, joiningDate);
-
-  return textString || "Yes";
+  // Return permanent status if permanent
+  return { isPermanent: true };
 }
+
 
 async function handleGetAllEmployees(req, res) {
   try {
     let query = {};
+    let employees = await Employee.find().exec();
+    const processedEmployees = employees.map(employee => {
+      const permanentInfo = isEmployeePermanent(employee.joining_date);
+      let priority = 0;
 
-    const pipeline = [
-      { $match: query }, // Apply the query filter
-      {
-        $addFields: {
-          remainingTime: {
-            $cond: {
-              if: { $eq: ["$status", "Active"] },
-              then: getRemainingTimeToBePermenant("$joining_date"),
-              else: "N/A",
-            },
-          },
-          priority: {
-            $switch: {
-              branches: [
-                {
-                  case: {
-                    $and: [
-                      { $eq: ["$status", "Active"] },
-                      { $eq: ["$remainingTime", "Yes"] },
-                    ],
-                  },
-                  then: 1,
-                },
-                {
-                  case: {
-                    $and: [
-                      { $eq: ["$status", "Active"] },
-                      { $gt: ["$remainingTime", 0] },
-                    ],
-                  },
-                  then: 2,
-                },
-                {
-                  case: { $eq: ["$status", "Inactive"] },
-                  then: {
-                    $cond: {
-                      if: { $eq: ["$remainingTime", "Yes"] },
-                      then: 4,
-                      else: 5,
-                    },
-                  },
-                },
-                { case: { $eq: ["$status", "Fired"] }, then: 7 },
-                { case: { $eq: ["$status", "Resigned"] }, then: 8 },
-              ],
-              default: 3,
-            },
-          },
-        },
-      },
-      {
-        $sort: { priority: 1 },
-      },
-    ];
+      switch (true) {
+        case employee.status === 'Active' && permanentInfo.isPermanent:
+          priority = 1;
+          break;
+        case employee.status === 'Active' && !permanentInfo.isPermanent:
+          priority = 2;
+          break;
+        case employee.status === 'Inactive' && permanentInfo.isPermanent:
+          priority = 4;
+          break;
+        case employee.status === 'Inactive' && !permanentInfo.isPermanent:
+          priority = 5;
+          break;
+        case employee.status === 'Fired':
+          priority = 7;
+          break;
+        case employee.status === 'Resigned':
+          priority = 8;
+          break;
+      }
 
-    let usersList = await Employee.aggregate(pipeline).exec();
-
-    console.log(usersList);
-
-    if (usersList) {
-      res.status(200).json(usersList);
+      return {
+        ...employee.toObject(),
+        permanentInfo,
+        priority,
+      };
+    });
+    const sortedEmployees = processedEmployees.sort((a, b) => a.priority - b.priority);
+    if (sortedEmployees) {
+      res.status(200).json(sortedEmployees);
     } else sendError(res, 400, "Unable to retrieve employees list");
   } catch (e) {
     console.error(e);
