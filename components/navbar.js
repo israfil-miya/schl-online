@@ -259,6 +259,7 @@ export default function Navbar({ navFor, shortNote }) {
                     <Link
                       className={`dropdown-item ${styles.dropitem}`}
                       href="/dashboard/invoice/create"
+                      target="_blank"
                     >
                       Create
                     </Link>
@@ -268,7 +269,7 @@ export default function Navbar({ navFor, shortNote }) {
                       className={`dropdown-item ${styles.dropitem}`}
                       href="/dashboard/invoice/browse"
                     >
-                      view
+                      View
                     </Link>
                   </li>
                 </ul>
