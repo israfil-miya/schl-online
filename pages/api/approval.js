@@ -217,11 +217,73 @@ async function handleResponse(req, res) {
 
 async function handleGetAllApprovals(req, res) {
   try {
-    const resData = await Approval.find({}).lean().sort({
-      updatedAt: -1,
-      checked_by: 1,
-    }); // Sort by "checked_by" ascending, "_id" as tiebreaker
-    res.status(200).json(resData);
+    const page = req.headers.page || 1;
+
+    let {
+      request_by,
+      request_type,
+      approved_check,
+      rejected_check,
+      waiting_check,
+    } = req.headers;
+
+    const ITEMS_PER_PAGE = parseInt(req.headers.item_per_page) || 30;
+
+    let query = {};
+    if (request_by) query.req_by = { $regex: request_by, $options: "i" };
+    if (request_type) query.req_type = { $regex: request_type, $options: "i" };
+
+    approved_check = approved_check === "true";
+    rejected_check = rejected_check === "true";
+    waiting_check = waiting_check === "true";
+
+    if (approved_check) {
+      query.is_rejected = { $eq: false };
+      query.checked_by = { $ne: "None" };
+    }
+    if (rejected_check) {
+      query.is_rejected = { $eq: true };
+      query.checked_by = { $ne: "None" };
+    }
+    if (waiting_check) {
+      query.checked_by = { $eq: "None" };
+    }
+
+    console.log(query);
+
+    if (
+      Object.keys(query).length === 0 &&
+      query.constructor === Object &&
+      req.headers.isfilter == "true"
+    )
+      sendError(res, 400, "No filter applied");
+    else {
+      const skip = (page - 1) * ITEMS_PER_PAGE;
+
+      const count = await Approval.countDocuments(query);
+
+      let applovals;
+
+      if (req.headers.notpaginated) applovals = await Approval.find({});
+      else
+        applovals = await Approval.find(query)
+          .sort({
+            updatedAt: -1,
+            checked_by: 1,
+          })
+          .skip(skip)
+          .limit(ITEMS_PER_PAGE);
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: applovals,
+      });
+    }
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");

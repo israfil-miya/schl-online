@@ -19,6 +19,19 @@ export default function Approvals() {
   const [userData, setUserData] = useState({});
   const [modalTempStore, setModalTempStore] = useState({});
 
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemPerPage, setItemPerPage] = useState(30);
+
+  const [isFiltered, setIsFiltered] = useState(0);
+  const [filters, setFilters] = useState({
+    request_by: "",
+    request_type: "",
+    approved_check: false,
+    rejected_check: false,
+    waiting_check: false,
+  });
+
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
     if (year.length != 4) return dateString;
@@ -39,6 +52,8 @@ export default function Approvals() {
         headers: {
           "Content-Type": "application/json",
           getallapprovals: true,
+          page,
+          item_per_page: itemPerPage,
         },
       };
 
@@ -46,7 +61,6 @@ export default function Approvals() {
 
       if (!list.error) {
         setApprovals(list);
-
         setOrderInfo({});
         setUserInfo({});
         setClientInfo({});
@@ -57,8 +71,45 @@ export default function Approvals() {
         toast.error("Unable to retrieve waiting list");
       }
     } catch (error) {
-      console.error("Error fetching waiting list:", error);
-      toast.error("Error retrieving waiting list");
+      console.error("Error fetching approvals waiting list:", error);
+      toast.error("Error retrieving approvals waiting list");
+    }
+  }
+
+  async function GetAllApprovalsFiltered() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallapprovals: true,
+          isfilter: true,
+          ...filters,
+          page,
+          item_per_page: itemPerPage,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        console.log(list);
+        setApprovals(list);
+        setOrderInfo({});
+        setUserInfo({});
+        setClientInfo({});
+        setReportData({});
+        setEmployeeData({});
+        setUserData({});
+        setIsFiltered(1);
+      } else {
+        setIsFiltered(0);
+        await GetAllApprovals();
+      }
+    } catch (error) {
+      console.error("Error fetching approvals waiting list by filter:", error);
+      toast.error("Error fetching approvals waiting list by filter");
     }
   }
 
@@ -231,24 +282,95 @@ export default function Approvals() {
     };
   }
 
+  function handlePrevious() {
+    setPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
+  function handleNext() {
+    setPage((p) => {
+      if (p === pageCount) return p;
+      return p + 1;
+    });
+  }
+
   useEffect(() => {
-    GetAllApprovals();
-  }, []);
+    setPage(1);
+    if (!isFiltered) GetAllApprovals();
+    if (approvals) setPageCount(approvals?.pagination?.pageCount);
+  }, [approvals?.pagination?.pageCount]);
+
+  useEffect(() => {
+    if (approvals?.pagination?.pageCount == 1) return;
+
+    if (!isFiltered) GetAllApprovals();
+    else GetAllApprovalsFiltered();
+  }, [page, itemPerPage]);
 
   return (
     <>
       <Navbar navFor="dashboard" />
       <div className="my-5">
-        <div className="text-center my-4">
-          <h5>Approval requests</h5>
-          {/* <span className="text-body-secondary ms-2">
-            (
-            {
-              approvals.filter((approveReq) => approveReq.checked_by == "None")
-                .length
-            }
-            )
-          </span> */}
+        <div className="container">
+          <div
+            className="float-end"
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            <span className="me-3">
+              Page{" "}
+              <strong>
+                {approvals?.items?.length !== 0 ? page : 0}/{pageCount}
+              </strong>
+            </span>
+            <div
+              className="btn-group"
+              role="group"
+              aria-label="Basic outlined example"
+            >
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={page === 1}
+                onClick={handlePrevious}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                disabled={page === pageCount || pageCount === 0}
+                onClick={handleNext}
+              >
+                Next
+              </button>
+            </div>
+
+            <select
+              disabled={!approvals?.items?.length}
+              style={{ width: "70px" }}
+              value={itemPerPage}
+              onChange={(e) => setItemPerPage(e.target.value)}
+              className="form-select ms-2 me-2 form-select-sm"
+              aria-label="Small select example"
+            >
+              <option value="10">10</option>
+              <option value="30">30</option>
+              <option value="70">70</option>
+              <option value="100">100</option>
+            </select>
+
+            <button
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+              aria-label="Toggle navigation"
+              className="btn m-2 btn-sm btn-outline-primary"
+            >
+              Filter
+            </button>
+          </div>
         </div>
         <table
           style={{ overflow: "hidden" }}
@@ -265,8 +387,8 @@ export default function Approvals() {
             </tr>
           </thead>
           <tbody>
-            {approvals &&
-              approvals.map((approveReq, index) => (
+            {approvals?.items?.length ? (
+              approvals?.items?.map((approveReq, index) => (
                 <tr key={approveReq._id}>
                   <td>{index + 1}</td>
                   <td>{approveReq.req_type}</td>
@@ -415,7 +537,14 @@ export default function Approvals() {
                     )}
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr key={0}>
+                <td colSpan="16" className=" align-center text-center">
+                  Nothing in approvals to Show.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -1804,6 +1933,148 @@ export default function Approvals() {
                 Yes
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="offcanvas offcanvas-end"
+        tabIndex="-1"
+        id="offcanvasNavbar"
+        aria-labelledby="offcanvasNavbarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
+            Filter Approvals
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div className="d-grid gap-2">
+            <div className="row">
+              <div className="col">
+                <label className="fw-bold" htmlFor="floatingSelectGrid">
+                  Request Type
+                </label>
+                <select
+                  required
+                  onChange={(e) =>
+                    setFilters({ ...filters, request_type: e.target.value })
+                  }
+                  className="form-select"
+                  id="floatingSelectGrid"
+                >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select request type
+                  </option>
+                  <option value={"User Create"}>User Create</option>
+                  <option value={"User Delete"}>User Delete</option>
+                  <option value={"Task Delete"}>Task Delete</option>
+                  <option value={"Report Edit"}>Report Edit</option>
+                  <option value={"Report Delete"}>Report Delete</option>
+                  <option value={"Employee Delete"}>Employee Delete</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Requested Person Name
+                </label>
+                <input
+                  value={filters.request_by}
+                  onChange={(e) =>
+                    setFilters({ ...filters, request_by: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox"
+                  className="form-check-input"
+                  checked={filters.approved_check}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      approved_check: !filters.approved_check,
+                    })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Approved
+                </label>
+              </div>
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={filters.rejected_check}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      rejected_check: !filters.rejected_check,
+                    })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Rejected
+                </label>
+              </div>
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={filters.waiting_check}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      waiting_check: !filters.waiting_check,
+                    })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Waiting
+                </label>
+              </div>
+            </div>
+
+            <button
+              onClick={GetAllApprovalsFiltered}
+              className="btn btn-outline-primary"
+            >
+              Search
+            </button>
           </div>
         </div>
       </div>
