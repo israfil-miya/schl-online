@@ -15,7 +15,7 @@ export default function Create() {
     email: "",
     birth_date: "",
     nid: "",
-    blood_group: "A+",
+    blood_group: "",
     designation: "",
     department: "",
     gross_salary: 0,
@@ -58,7 +58,7 @@ export default function Create() {
       email: "",
       birth_date: "",
       nid: "",
-      blood_group: "A+",
+      blood_group: "",
       designation: "",
       department: "",
       gross_salary: 0,
@@ -204,6 +204,13 @@ export default function Create() {
                   }))
                 }
               >
+                <option
+                  value={""}
+                  defaultValue={true}
+                  className="text-body-secondary"
+                >
+                  Select a blood group
+                </option>
                 <option value="A+">A+</option>
                 <option value="A-">A-</option>
                 <option value="B+">B+</option>

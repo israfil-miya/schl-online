@@ -381,6 +381,13 @@ export default function EmployeeDatabase() {
                     }))
                   }
                 >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select a blood group
+                  </option>
                   <option value="A+">A+</option>
                   <option value="A-">A-</option>
                   <option value="B+">B+</option>
