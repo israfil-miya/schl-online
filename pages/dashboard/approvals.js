@@ -540,7 +540,7 @@ export default function Approvals() {
               ))
             ) : (
               <tr key={0}>
-                <td colSpan="16" className=" align-center text-center">
+                <td colSpan="6" className=" align-center text-center">
                   Nothing in approvals to Show.
                 </td>
               </tr>
@@ -885,22 +885,6 @@ export default function Approvals() {
                   <option value="marketer">Marketer</option>
                 </select>
               </div>
-
-              {userInfo.role == "marketer" && (
-                <div className="marketr-exclusive">
-                  <div className="mb-3">
-                    <label htmlFor="date" className="form-label">
-                      Company Provided Name
-                    </label>
-                    <input
-                      value={userInfo.company_provided_name}
-                      disabled
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
             <div className="modal-footer p-1">
               <button
@@ -1808,13 +1792,37 @@ export default function Approvals() {
                 <label htmlFor="date" className="form-label">
                   Department
                 </label>
-                <input
+
+                <select
+                  className="form-select"
+                  id="floatingSelect"
                   value={employeeData.department}
                   disabled
-                  type="text"
-                  className="form-control"
-                />
+                >
+                  <option value="Production">Production</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Management">Management</option>
+                  <option value="Software">Software</option>
+                  <option value="Others">Others</option>
+                </select>
               </div>
+
+              {employeeData.department == "Marketing" && (
+                <div className="marketr-exclusive">
+                  <div className="mb-3">
+                    <label htmlFor="date" className="form-label">
+                      Company Provided Name
+                    </label>
+                    <input
+                      required
+                      value={employeeData.company_provided_name}
+                      disabled
+                      type="text"
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Gross Salary */}
               <div className="mb-3">

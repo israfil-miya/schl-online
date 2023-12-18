@@ -125,7 +125,6 @@ async function handleEditEmployee(req, res) {
 async function handleGetEmployeeById(req, res) {
   try {
     let data = req.headers;
-
     const resData = await Employee.findById(data.id).lean();
 
     if (!resData) sendError(res, 400, "No employee data found with the id");

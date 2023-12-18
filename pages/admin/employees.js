@@ -17,12 +17,12 @@ export default function Create() {
     nid: "",
     blood_group: "",
     designation: "",
-    department: "",
+    department: "Production",
     gross_salary: 0,
     bonus_eid_ul_fitr: 0,
     bonus_eid_ul_adha: 0,
     status: "Active",
-    permenant: false,
+    company_provided_name: "",
     note: "",
   });
 
@@ -60,10 +60,12 @@ export default function Create() {
       nid: "",
       blood_group: "",
       designation: "",
-      department: "",
+      department: "Production",
       gross_salary: 0,
       bonus_eid_ul_fitr: 0,
       bonus_eid_ul_adha: 0,
+      status: "Active",
+      company_provided_name: "",
       note: "",
     });
   };
@@ -263,7 +265,10 @@ export default function Create() {
               <label htmlFor="date" className="form-label">
                 Department
               </label>
-              <input
+
+              <select
+                className="form-select"
+                id="floatingSelect"
                 value={newEmployeeData.department}
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
@@ -271,10 +276,38 @@ export default function Create() {
                     department: e.target.value,
                   }))
                 }
-                type="text"
-                className="form-control"
-              />
+              >
+                <option defaultValue={true} value="Production">
+                  Production
+                </option>
+                <option value="Marketing">Marketing</option>
+                <option value="Management">Management</option>
+                <option value="Software">Software</option>
+                <option value="Others">Others</option>
+              </select>
             </div>
+
+            {newEmployeeData.department == "Marketing" && (
+              <div className="marketr-exclusive">
+                <div className="mb-3">
+                  <label htmlFor="date" className="form-label">
+                    Company Provided Name
+                  </label>
+                  <input
+                    required
+                    value={newEmployeeData.company_provided_name}
+                    onChange={(e) =>
+                      setNewEmployeeData((prevData) => ({
+                        ...prevData,
+                        company_provided_name: e.target.value,
+                      }))
+                    }
+                    type="text"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Gross Salary */}
             <div className="mb-3">

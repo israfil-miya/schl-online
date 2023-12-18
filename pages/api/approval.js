@@ -72,18 +72,11 @@ async function handleResponse(req, res) {
     }
 
     if (data.req_type == "User Create") {
-      console.log("CLIENT CREATE DATA: ", data);
-
       let insertdata = {
         name: data.name,
         password: data.password,
         role: data.role,
       };
-
-      if (data.company_provided_name)
-        insertdata.company_provided_name = data.company_provided_name;
-
-      console.log("CLIENT CREATE DATA: ", insertdata);
 
       const resData = await User.findOneAndUpdate(
         { name: data.name },

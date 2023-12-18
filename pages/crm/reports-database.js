@@ -147,7 +147,7 @@ export default function Report(props) {
         list.forEach((marketer, index) => {
           marketersName.push({
             _id: marketer._id,
-            marketer_name: marketer.name,
+            marketer_name: marketer.company_provided_name,
           });
         });
 

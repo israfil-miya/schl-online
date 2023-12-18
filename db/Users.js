@@ -13,9 +13,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  company_provided_name: {
-    type: String,
-  },
 });
 
 module.exports = mongoose.models.User || mongoose.model("User", UserSchema);

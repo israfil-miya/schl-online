@@ -276,6 +276,7 @@ export default function Marketers(props) {
     getAvailableFollowups();
     getMarketers();
   }, []);
+
   return (
     <>
       <Navbar navFor={session.user.role == "marketer" ? "marketers" : "crm"} />
@@ -305,7 +306,7 @@ export default function Marketers(props) {
                     return (
                       <tr key={index}>
                         <td>{index + 1}</td>
-                        <td className="">{marketer.name}</td>
+                        <td>{marketer.real_name}</td>
                         <td>{marketer.company_provided_name}</td>
                         <td>
                           {marketer.joining_date

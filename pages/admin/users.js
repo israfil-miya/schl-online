@@ -13,7 +13,6 @@ export default function Users() {
     name: "",
     password: "",
     role: "user",
-    company_provided_name: "",
   });
 
   const [editUserData, setEditUserData] = useState({}); // info of the person who is editing the user data
@@ -106,7 +105,6 @@ export default function Users() {
       name: "",
       password: "",
       role: "user",
-      company_provided_name: "",
     });
   };
 
@@ -265,29 +263,6 @@ export default function Users() {
               </select>
             </div>
 
-            {/* Company Provided Name */}
-            {newUserData.role == "marketer" && (
-              <div className="marketr-exclusive">
-                <div className="mb-3">
-                  <label htmlFor="date" className="form-label">
-                    Company Provided Name
-                  </label>
-                  <input
-                    required
-                    value={newUserData.company_provided_name}
-                    onChange={(e) =>
-                      setNewUserData((prevData) => ({
-                        ...prevData,
-                        company_provided_name: e.target.value,
-                      }))
-                    }
-                    type="text"
-                    className="form-control"
-                  />
-                </div>
-              </div>
-            )}
-
             <button type="submit" className="btn btn-sm btn-outline-primary">
               Submit
             </button>
@@ -427,28 +402,6 @@ export default function Users() {
                   <option value="marketer">Marketer</option>
                 </select>
               </div>
-
-              {manageData.role == "marketer" && (
-                <div className="marketr-exclusive">
-                  <div className="mb-3">
-                    <label htmlFor="date" className="form-label">
-                      Company Provided Name
-                    </label>
-                    <input
-                      required
-                      value={manageData.company_provided_name}
-                      onChange={(e) =>
-                        setManageData((prevData) => ({
-                          ...prevData,
-                          company_provided_name: e.target.value,
-                        }))
-                      }
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
             <div className="modal-footer p-1">
               <button

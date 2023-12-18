@@ -4,7 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import TimeCard from "./timecard";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import styles from "../styles/NavBar.module.css";
+import { UilSignOutAlt, UilUserCircle } from "@iconscout/react-unicons";
 
 const cities = [
   "Asia/Dhaka",
@@ -18,6 +20,7 @@ const cities = [
 ];
 export default function Navbar({ navFor, shortNote }) {
   const { data: session } = useSession();
+  const router = useRouter();
   const signOutHandle = () => {
     signOut({ callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/login` });
   };
@@ -89,44 +92,19 @@ export default function Navbar({ navFor, shortNote }) {
             {renderTimeCards()}
 
             <div className="navbar-text d-flex me-3">
-              <div className="btn-group dropdown-center">
-                <Link
-                  className={
-                    navFor == "account" ? "nav-link active" : "nav-link"
-                  }
-                  href="/account"
-                  role="button"
-                >
-                  <em>
-                    Welcome {session.user?.name}{" "}
-                    <span className="text-body-secondary">
-                      ({session.user?.role})
-                    </span>
-                  </em>
-                </Link>
-                <Link
-                  role="button"
-                  href=""
-                  className="dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <span className="visually-hidden">Toggle Dropdown</span>
-                </Link>
-                <ul className="dropdown-menu list-unstyled">
-                  <div className="text-center">
-                    <span className="fw-medium p-1">
-                      Interacting as {session.user.role}
-                    </span>
-                    <button
-                      onClick={signOutHandle}
-                      className="btn mt-3 px-5 btn-sm btn-outline-danger"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </ul>
-              </div>
+              <button
+                className="btn btn-outline-primary btn-sm me-2"
+                onClick={() => router.push("/account")}
+              >
+                Account <UilUserCircle />
+              </button>
+
+              <button
+                onClick={signOutHandle}
+                className="btn btn-sm btn-outline-danger"
+              >
+                Logout <UilSignOutAlt />
+              </button>
             </div>
           </div>
         </div>

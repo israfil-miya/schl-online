@@ -26,9 +26,6 @@ const ApprovalSchema = new mongoose.Schema(
     role: {
       type: String,
     },
-    company_provided_name: {
-      type: String,
-    },
 
     marketer_id: String,
 
@@ -101,6 +98,9 @@ const ApprovalSchema = new mongoose.Schema(
       type: String,
     },
     department: {
+      type: String,
+    },
+    company_provided_name: {
       type: String,
     },
     gross_salary: {

@@ -51,6 +51,9 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
       default: "Active",
     },
+    company_provided_name: {
+      type: String,
+    },
     permenant: {
       type: Boolean,
       default: false,

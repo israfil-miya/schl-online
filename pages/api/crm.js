@@ -1,6 +1,7 @@
 import User from "../../db/Users";
 import dbConnect from "../../db/dbConnect";
 import Report from "../../db/Reports";
+import Employee from "../../db/Employees";
 const moment = require("moment-timezone");
 
 dbConnect();
@@ -11,39 +12,12 @@ function sendError(res, statusCode, message) {
   });
 }
 
-function yyyyMmDdtoISODate(yyyyMmDd) {
-  try {
-    const parts = yyyyMmDd.split("-");
-    if (parts.length !== 3) {
-      throw new Error("Invalid date format: Incorrect number of parts");
-    }
-
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-
-    if (isNaN(day) || isNaN(month) || isNaN(year)) {
-      throw new Error("Invalid date format: Parts are not numbers");
-    }
-
-    // Months are 0-based in JavaScript, so subtract 1 from the month
-    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)); // Set time to midnight in UTC
-
-    if (isNaN(date.getTime())) {
-      throw new Error("Invalid date: Resulting date is NaN");
-    }
-
-    const isoDate = date.toISOString();
-    return isoDate;
-  } catch (error) {
-    console.error(`Error converting ${ddMmYyyy} to ISODate: ${error.message}`);
-    throw error;
-  }
-}
-
 const handleGetAllMarketers = async (req, res) => {
   try {
-    const userData = await User.find({ role: "marketer" });
+    const userData = await Employee.find({
+      department: "Marketing",
+      status: "Active",
+    });
     res.status(200).json(userData);
   } catch (e) {
     console.error(e);
@@ -187,7 +161,6 @@ const getValidWeekDays = () => {
       }); // Store valid weekdays
     }
   }
-
   return validWeekdays;
 };
 

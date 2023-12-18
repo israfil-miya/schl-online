@@ -171,7 +171,7 @@ export default function EmployeeDatabase() {
                 </tr>
               </thead>
               <tbody>
-                {employees &&
+                {employees?.length != 0 ? (
                   employees.map((employee, index) => {
                     // Joined today
                     const employeeInfo = isEmployeePermanent(
@@ -188,10 +188,18 @@ export default function EmployeeDatabase() {
                       >
                         <td>{employee.e_id}</td>
                         <td>{employee.real_name}</td>
-                        <td>{convertToDDMMYYYY(employee.joining_date)}</td>
+                        <td>
+                          {employee.joining_date?.length
+                            ? convertToDDMMYYYY(employee.joining_date)
+                            : null}
+                        </td>
                         <td>{employee.phone}</td>
                         <td>{employee.email}</td>
-                        <td>{employee.birth_date}</td>
+                        <td>
+                          {employee.birth_date?.length
+                            ? convertToDDMMYYYY(employee.birth_date)
+                            : null}
+                        </td>
                         <td>{employee.nid}</td>
                         <td>{employee.blood_group}</td>
                         <td>{employee.designation}</td>
@@ -229,7 +237,14 @@ export default function EmployeeDatabase() {
                         </td>
                       </tr>
                     );
-                  })}
+                  })
+                ) : (
+                  <tr key={0}>
+                    <td colSpan="17" className=" align-center text-center">
+                      No employee data to show
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -440,7 +455,10 @@ export default function EmployeeDatabase() {
                 <label htmlFor="date" className="form-label">
                   Department
                 </label>
-                <input
+
+                <select
+                  className="form-select"
+                  id="floatingSelect"
                   value={manageData.department}
                   onChange={(e) =>
                     setManageData((prevData) => ({
@@ -448,10 +466,36 @@ export default function EmployeeDatabase() {
                       department: e.target.value,
                     }))
                   }
-                  type="text"
-                  className="form-control"
-                />
+                >
+                  <option value="Production">Production</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Management">Management</option>
+                  <option value="Software">Software</option>
+                  <option value="Others">Others</option>
+                </select>
               </div>
+
+              {manageData.department == "Marketing" && (
+                <div className="marketr-exclusive">
+                  <div className="mb-3">
+                    <label htmlFor="date" className="form-label">
+                      Company Provided Name
+                    </label>
+                    <input
+                      required
+                      value={manageData.company_provided_name}
+                      onChange={(e) =>
+                        setManageData((prevData) => ({
+                          ...prevData,
+                          company_provided_name: e.target.value,
+                        }))
+                      }
+                      type="text"
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Gross Salary */}
               <div className="mb-3">
