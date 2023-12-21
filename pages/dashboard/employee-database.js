@@ -8,6 +8,11 @@ import { useSession } from "next-auth/react";
 export default function EmployeeDatabase() {
   const [employees, setEmployees] = useState([]);
   const [manageData, setManageData] = useState([]);
+  const [totalPayout, setTotalPayout] = useState({
+    gross: 0,
+    bonus_fitr: 0,
+    bonus_adha: 0,
+  });
   const { data: session } = useSession();
 
   async function fetchApi(url, options) {
@@ -77,6 +82,20 @@ export default function EmployeeDatabase() {
       const employeesList = await fetchApi(url, options);
 
       if (!employeesList.error) {
+        setTotalPayout({
+          gross: 0,
+          bonus_fitr: 0,
+          bonus_adha: 0,
+        });
+        employeesList.forEach((employee) => {
+          if (employee.status === "Active") {
+            setTotalPayout((prevData) => ({
+              gross: prevData.gross + employee.gross_salary,
+              bonus_fitr: prevData.bonus_fitr + employee.bonus_eid_ul_fitr,
+              bonus_adha: prevData.bonus_adha + employee.bonus_eid_ul_adha,
+            }));
+          }
+        });
         setEmployees(employeesList);
       } else {
         toast.error("Unable to retrieve employees list");
@@ -173,17 +192,11 @@ export default function EmployeeDatabase() {
               <tbody>
                 {employees?.length != 0 ? (
                   employees.map((employee, index) => {
-                    // Joined today
-                    const employeeInfo = isEmployeePermanent(
-                      employee.joining_date,
-                    );
                     return (
                       <tr
                         key={index}
                         className={
-                          employee.status == "Active"
-                            ? "table-success"
-                            : "table-danger"
+                          employee.status == "Active" ? null : "table-danger"
                         }
                       >
                         <td>{employee.e_id}</td>
@@ -207,9 +220,11 @@ export default function EmployeeDatabase() {
                         <td>{employee.gross_salary}</td>
                         <td>{employee.status}</td>
                         <td>
-                          {employeeInfo.isPermanent
+                          {employee.permanentInfo.isPermanent
                             ? "Yes"
-                            : employeeInfo.remainingTime}
+                            : formatRemainingTime(
+                                employee.permanentInfo.remainingTime,
+                              )}
                         </td>
                         <td>{employee.bonus_eid_ul_fitr}</td>
                         <td>{employee.bonus_eid_ul_adha}</td>
@@ -243,6 +258,31 @@ export default function EmployeeDatabase() {
                     <td colSpan="17" className=" align-center text-center">
                       No employee data to show
                     </td>
+                  </tr>
+                )}
+                {employees?.length != 0 && (
+                  <tr className="table-dark">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td className="fw-semibold">TOTAL: {totalPayout.gross}</td>
+                    <td></td>
+                    <td></td>
+                    <td className="fw-semibold">
+                      TOTAL: {totalPayout.bonus_fitr}
+                    </td>
+                    <td className="fw-semibold">
+                      TOTAL: {totalPayout.bonus_adha}
+                    </td>
+                    <td></td>
+                    <td></td>
                   </tr>
                 )}
               </tbody>
@@ -656,6 +696,15 @@ export default function EmployeeDatabase() {
           </div>
         </div>
       </div>
+
+      <style jsx>
+        {`
+          .borderless tr td {
+            border: none !important;
+            padding: 0px !important;
+          }
+        `}
+      </style>
     </>
   );
 }

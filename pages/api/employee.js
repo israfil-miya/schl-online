@@ -39,29 +39,23 @@ function isEmployeePermanent(joiningDate) {
 async function handleGetAllEmployees(req, res) {
   try {
     let query = {};
-    let employees = await Employee.find().exec();
+    let employees = await Employee.find(query).sort({ e_id: 1 }).exec();
     const processedEmployees = employees.map((employee) => {
       const permanentInfo = isEmployeePermanent(employee.joining_date);
       let priority = 0;
 
       switch (true) {
-        case employee.status === "Active" && permanentInfo.isPermanent:
+        case employee.status === "Active":
           priority = 1;
           break;
-        case employee.status === "Active" && !permanentInfo.isPermanent:
+        case employee.status === "Inactive":
           priority = 2;
           break;
-        case employee.status === "Inactive" && permanentInfo.isPermanent:
-          priority = 4;
-          break;
-        case employee.status === "Inactive" && !permanentInfo.isPermanent:
-          priority = 5;
-          break;
         case employee.status === "Fired":
-          priority = 7;
+          priority = 3;
           break;
         case employee.status === "Resigned":
-          priority = 8;
+          priority = 4;
           break;
       }
 

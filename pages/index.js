@@ -26,19 +26,7 @@ function calculateCountdown(timeDifferenceMs) {
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
-function isoDateToDdMmYyyy(isoDate) {
-  const date = new Date(isoDate);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
-  const year = date.getFullYear().toString();
-
-  return `${day}-${month}-${year}`;
-}
-
 export default function Home({ orders, ordersRedo }) {
-  const router = useRouter();
-  let { error, success } = router.query;
-
   const [countdowns, setCountdowns] = useState(getCurrentTimes(orders));
 
   const GetAllOrdersTime = async () => {
@@ -54,23 +42,6 @@ export default function Home({ orders, ordersRedo }) {
   };
 
   useEffect(() => {
-    if (error) {
-      toast.error(error, {
-        toastId: "error",
-      });
-      router.replace("/");
-    }
-    if (success) {
-      toast.success(success, {
-        toastId: "success",
-      });
-      router.replace("/");
-    }
-
-    if (!orders || orders?.error) {
-      toast.error("Unable to retrieve tasks list");
-    }
-
     if (orders?.length) {
       const countdownIntervalId = setInterval(async () => {
         const updatedOrders = await GetAllOrdersTime();
@@ -82,7 +53,7 @@ export default function Home({ orders, ordersRedo }) {
         clearInterval(countdownIntervalId); // Clear countdown interval
       };
     }
-  }, [error, success, router, orders]);
+  }, [orders]);
 
   return (
     <>

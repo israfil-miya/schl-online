@@ -21,17 +21,17 @@ const ExtandableTd = ({ data }) => {
 
   return (
     <>
-      <td className="text-wrap" style={{ minWidth: "400px" }}>
+      <td className="text-wrap" style={{ minWidth: "200px" }}>
         {showFullText ? (
           <span
             dangerouslySetInnerHTML={{ __html: replaceNewlineWithBr(data) }}
           />
         ) : (
           <span className="text-nowrap">
-            {data.length <= 50 ? data : data.substring(0, 50).trim() + "..."}
+            {data.length <= 22 ? data : data.substring(0, 22).trim() + "..."}
           </span>
         )}
-        {data.length > 50 && (
+        {data.length > 22 && (
           <small className="link" onClick={toggleText}>
             <br />
             {showFullText ? "Show Less" : "Show More"}

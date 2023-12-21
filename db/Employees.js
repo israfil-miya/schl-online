@@ -40,11 +40,11 @@ const EmployeeSchema = new mongoose.Schema(
       default: 0,
     },
     bonus_eid_ul_fitr: {
-      type: String,
+      type: Number,
       default: 0,
     },
     bonus_eid_ul_adha: {
-      type: String,
+      type: Number,
       default: 0,
     },
     status: {
