@@ -129,6 +129,37 @@ async function handleGetEmployeeById(req, res) {
   }
 }
 
+async function handleGetEmployeeByCode(req, res) {
+  try {
+    let data = req.headers;
+
+    const employee = await Employee.findOne({
+      e_id: data.e_id,
+    }).lean();
+
+    if (!employee) sendError(res, 400, "No employee found with the code");
+    else res.status(200).json(employee);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+async function handleGetMarkerNameByRealName(req, res) {
+  try {
+    let data = req.headers;
+
+    const employee = await Employee.findOne({
+      real_name: data.real_name,
+    }).lean();
+
+    if (!employee) sendError(res, 400, "No employee found with the name");
+    else res.status(200).json(employee);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -138,6 +169,10 @@ export default async function handle(req, res) {
         await handleGetAllEmployees(req, res);
       } else if (req.headers.getemployeebyid) {
         await handleGetEmployeeById(req, res);
+      } else if (req.headers.getemployeebycode) {
+        await handleGetEmployeeByCode(req, res);
+      } else if (req.headers.getmarkernamebyrealname) {
+        await handleGetMarkerNameByRealName(req, res);
       }
       break;
 

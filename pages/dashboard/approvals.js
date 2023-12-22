@@ -844,6 +844,18 @@ export default function Approvals() {
             <div className="modal-body">
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
+                  Employee Name
+                </label>
+                <input
+                  required
+                  value={userInfo.real_name}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
                   Name
                 </label>
                 <input
@@ -919,6 +931,23 @@ export default function Approvals() {
               ></button>
             </div>
             <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Employee Name
+                </label>
+                <input
+                  required
+                  value={userData.real_name}
+                  onChange={(e) =>
+                    setUserData((prevData) => ({
+                      ...prevData,
+                      real_name: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
                   Name

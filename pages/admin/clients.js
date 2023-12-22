@@ -35,38 +35,6 @@ export default function Clients() {
 
   const [editedBy, setEditedBy] = useState("");
 
-  const getMarketersList = async () => {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getallmarketers: true,
-        },
-      };
-
-      const list = await fetchClientData(url, options);
-
-      if (!list.error) {
-        let marketersName = [];
-        list.forEach((marketer, index) => {
-          marketersName.push({
-            _id: marketer._id,
-            marketer_name: marketer.name,
-          });
-        });
-
-        setMarketersList(marketersName);
-      } else {
-        toast.error("Unable to retrieve file list", { toastId: "error1" });
-      }
-    } catch (error) {
-      console.error("Error fetching file list:", error);
-      toast.error("Error retrieving file list", { toastId: "error3" });
-    }
-  };
-
   const [manageData, setManageData] = useState({
     _id: "",
     client_code: "",
@@ -82,7 +50,7 @@ export default function Clients() {
     currency: "",
   });
 
-  async function fetchClientData(url, options) {
+  async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
@@ -100,7 +68,7 @@ export default function Clients() {
         },
       };
 
-      const clientsList = await fetchClientData(url, options);
+      const clientsList = await fetchApi(url, options);
 
       if (!clientsList.error) {
         setClients(clientsList);
@@ -129,7 +97,7 @@ export default function Clients() {
         },
       };
 
-      const clientsList = await fetchClientData(url, options);
+      const clientsList = await fetchApi(url, options);
 
       if (!clientsList.error) {
         setClients(clientsList);
@@ -143,6 +111,38 @@ export default function Clients() {
       toast.error("Error retrieving clients");
     }
   }
+  const getMarketersList = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallmarketers: true,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        let marketersName = [];
+        list.forEach((marketer, index) => {
+          marketersName.push({
+            _id: marketer._id,
+            marketer_name: marketer.company_provided_name,
+          });
+        });
+
+        setMarketersList(marketersName);
+      } else {
+        toast.error("Unable to retrieve file list", { toastId: "error1" });
+      }
+    } catch (error) {
+      console.error("Error fetching file list:", error);
+      toast.error("Error retrieving file list", { toastId: "error3" });
+    }
+  };
+
   async function addNewClient(e) {
     e.preventDefault();
 
@@ -168,7 +168,7 @@ export default function Clients() {
     };
 
     try {
-      const result = await fetchClientData(url, options);
+      const result = await fetchApi(url, options);
 
       if (!result.error) {
         toast.success("Added new client");
@@ -227,7 +227,7 @@ export default function Clients() {
     };
 
     try {
-      const result = await fetchClientData(url, options);
+      const result = await fetchApi(url, options);
 
       if (!result.error) {
         toast.success("Edited the client data", {
@@ -436,12 +436,17 @@ export default function Clients() {
                 className="form-select"
                 id="floatingSelectGrid"
               >
+                <option
+                  value={""}
+                  defaultValue={true}
+                  className="text-body-secondary"
+                >
+                  Select a marketer
+                </option>
                 {marketersList?.map((marketer, index) => {
                   return (
                     <>
-                      <option key={index} defaultValue={index == 0}>
-                        {marketer?.marketer_name}
-                      </option>
+                      <option key={index}>{marketer?.marketer_name}</option>
                     </>
                   );
                 })}

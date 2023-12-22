@@ -21,31 +21,26 @@ export default function EmployeeDatabase() {
     return data;
   }
 
-  function isEmployeePermanent(joiningDate) {
-    // Existing logic to check if permanent
-    const joinDate = new Date(joiningDate);
-    const probationEndDate = new Date(
-      joinDate.getFullYear(),
-      joinDate.getMonth() + 6,
-      joinDate.getDate(),
+  const [marker_name, setMarkerName] = useState("");
+
+  const getMarketerNameByRealName = async () => {
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "/api/employee",
+      {
+        method: "GET",
+        headers: {
+          getmarkernamebyrealname: true,
+          real_name: session.user?.real_name,
+          "Content-Type": "application/json",
+        },
+      },
     );
-    const today = new Date();
-    const isPermanent = today >= probationEndDate;
+    const result = await res.json();
 
-    // Calculate remaining time if not permanent
-    if (!isPermanent) {
-      const remainingDays = Math.floor(
-        (probationEndDate - today) / (1000 * 60 * 60 * 24),
-      );
-      return {
-        isPermanent: false,
-        remainingTime: formatRemainingTime(remainingDays),
-      };
-    }
-
-    // Return permanent status if permanent
-    return { isPermanent: true };
-  }
+    if (!result.error) {
+      setMarkerName(result.company_provided_name);
+    } else toast.error(result.message);
+  };
 
   function formatRemainingTime(remainingDays) {
     const months = Math.floor(remainingDays / 30);
@@ -158,6 +153,7 @@ export default function EmployeeDatabase() {
   }
 
   useEffect(() => {
+    getMarketerNameByRealName();
     getAllEmployees();
   }, []);
 

@@ -73,6 +73,7 @@ async function handleResponse(req, res) {
 
     if (data.req_type == "User Create") {
       let insertdata = {
+        real_name: data.real_name,
         name: data.name,
         password: data.password,
         role: data.role,

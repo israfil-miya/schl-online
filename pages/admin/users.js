@@ -9,17 +9,30 @@ export default function Users() {
   const router = useRouter();
   const [users, setUsers] = useState([]);
 
+  const [e_id, setEId] = useState("");
+
   const [newUserData, setNewUserData] = useState({
     name: "",
+    real_name: "",
     password: "",
     role: "user",
   });
 
-  const [editUserData, setEditUserData] = useState({}); // info of the person who is editing the user data
+  const [editUserData, setEditUserData] = useState({
+    name: "",
+    real_name: "",
+    password: "",
+    role: "user",
+  }); // info of the person who is editing the user data
 
-  const [manageData, setManageData] = useState({});
+  const [manageData, setManageData] = useState({
+    name: "",
+    real_name: "",
+    password: "",
+    role: "user",
+  });
 
-  async function fetchUserData(url, options) {
+  async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
@@ -36,7 +49,7 @@ export default function Users() {
         },
       };
 
-      const usersList = await fetchUserData(url, options);
+      const usersList = await fetchApi(url, options);
 
       if (!usersList.error) {
         setUsers(usersList);
@@ -174,7 +187,7 @@ export default function Users() {
     };
 
     try {
-      const result = await fetchUserData(url, options);
+      const result = await fetchApi(url, options);
 
       if (!result.error) {
         toast.success("Edited the user data");
@@ -182,11 +195,63 @@ export default function Users() {
       } else {
         router.replace(`/admin?error=${result.message}`);
       }
+
+      setEditUserData({
+        name: "",
+        real_name: "",
+        password: "",
+        role: "user",
+      });
+      setManageData({
+        name: "",
+        real_name: "",
+        password: "",
+        role: "user",
+      });
     } catch (error) {
       console.error("Error editing user:", error);
       toast.error("Error editing user");
     }
   }
+
+  const handleEmployeeNameFocus = async () => {
+    if (!e_id) return;
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/employee`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getemployeebycode: true,
+          e_id,
+        },
+      };
+
+      const employeeData = await fetchApi(url, options);
+
+      if (!employeeData.error) {
+        console.log(employeeData);
+
+        if (!employeeData.real_name)
+          setNewUserData((prevData) => ({
+            ...prevData,
+            real_name: "Unknown",
+          }));
+        else
+          setNewUserData((prevData) => ({
+            ...prevData,
+            real_name: employeeData.real_name,
+          }));
+      }
+      if (!employeeData || employeeData.error)
+        setNewUserData((prevData) => ({
+          ...prevData,
+          real_name: "Unknown",
+        }));
+    } catch (error) {
+      console.error("Error fetching client:", error);
+    }
+  };
 
   useEffect(() => {
     GetAllUsers();
@@ -199,6 +264,37 @@ export default function Users() {
         <div className="add-user">
           <h5 className="py-3">Add New User</h5>
           <form onSubmit={AddNewUser} id="inputForm">
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Employee ID
+              </label>
+              <input
+                value={e_id}
+                onChange={(e) => setEId(e.target.value)}
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Employee Name
+              </label>
+              <input
+                required
+                onFocus={handleEmployeeNameFocus}
+                value={newUserData.real_name}
+                onChange={(e) =>
+                  setNewUserData((prevData) => ({
+                    ...prevData,
+                    real_name: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
             {/* Login Name */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -274,6 +370,7 @@ export default function Users() {
             <thead>
               <tr className="table-dark">
                 <th>#</th>
+                <th>Employee Name</th>
                 <th>Name</th>
                 <th>Password</th>
                 <th>Role</th>
@@ -286,6 +383,7 @@ export default function Users() {
                   return (
                     <tr key={user._id}>
                       <td>{index + 1}</td>
+                      <td>{user.real_name}</td>
                       <td>{user.name}</td>
                       <td>
                         {(user.role == "super" || user.role == "admin") &&
@@ -343,6 +441,23 @@ export default function Users() {
               ></button>
             </div>
             <div className="modal-body">
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Employee name
+                </label>
+                <input
+                  required
+                  value={manageData.real_name}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      real_name: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
                   Name
@@ -415,6 +530,7 @@ export default function Users() {
                 onClick={editUser}
                 type="button"
                 className="btn btn-sm btn-outline-primary"
+                data-bs-dismiss="modal"
               >
                 Submit
               </button>

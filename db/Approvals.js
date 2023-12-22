@@ -20,6 +20,9 @@ const ApprovalSchema = new mongoose.Schema(
     name: {
       type: String,
     },
+    real_name: {
+      type: String,
+    },
     password: {
       type: String,
     },
