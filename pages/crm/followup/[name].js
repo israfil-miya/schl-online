@@ -5,6 +5,7 @@ import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
 import CallingStatusTd from "../../../components/extandable-td";
 import Link from "next/link";
+import moment from "moment-timezone";
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -29,34 +30,13 @@ export default function Followup() {
     return `${day}-${month}-${year}`;
   };
 
-  const [marker_name, setMarkerName] = useState("");
-
-  const getMarketerNameByRealName = async () => {
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "/api/employee",
-      {
-        method: "GET",
-        headers: {
-          getmarkernamebyrealname: true,
-          real_name: session.user?.real_name,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const result = await res.json();
-
-    if (!result.error) {
-      setMarkerName(result.company_provided_name);
-    } else toast.error(result.message);
-  };
-
   const handlefinishfollowup = async () => {
     let result;
     const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/crm", {
       method: "GET",
       headers: {
         finishfollowup: true,
-        updated_by: marker_name,
+        updated_by: session.user?.real_name,
         id: manageData._id,
         "Content-Type": "application/json",
       },
@@ -117,12 +97,12 @@ export default function Followup() {
           headers: {
             "Content-Type": "application/json",
             editreport: true,
-            name: session.user?.name,
+            name: session.user?.real_name,
           },
         };
 
         if (
-          reports.items.find(
+          nearestFollowUps.find(
             (data) => data.followup_date == today && data._id == submitData._id,
           )
         ) {
@@ -136,9 +116,6 @@ export default function Followup() {
 
           if (!result.error) {
             toast.success("Edited the report data");
-
-            if (!isFiltered) await getAllReports();
-            else await getAllReportsFiltered();
           } else {
             toast.error("Something gone wrong!");
           }
@@ -157,7 +134,7 @@ export default function Followup() {
             )
               ? manageData.calling_date_history
               : [...manageData.calling_date_history, today],
-            updated_by: session.user?.name,
+            updated_by: session.user?.real_name,
           };
 
           delete submitData._id;
@@ -196,7 +173,7 @@ export default function Followup() {
         headers: {
           "Content-Type": "application/json",
           editreport: true,
-          name: session.user?.name,
+          name: session.user?.real_name,
         },
       };
 
@@ -220,7 +197,6 @@ export default function Followup() {
   }
 
   useEffect(() => {
-    getMarketerNameByRealName();
     getReportsForFollowup();
   }, []);
 

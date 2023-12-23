@@ -7,26 +7,6 @@ import { toast } from "sonner";
 export default function DailyReport() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [marker_name, setMarkerName] = useState("");
-
-  const getMarketerNameByRealName = async () => {
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "/api/employee",
-      {
-        method: "GET",
-        headers: {
-          getmarkernamebyrealname: true,
-          real_name: session.user?.real_name,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const result = await res.json();
-
-    if (!result.error) {
-      setMarkerName(result.company_provided_name);
-    } else toast.error(result.message);
-  };
 
   const getTodayDate = () => {
     const today = new Date();
@@ -71,7 +51,7 @@ export default function DailyReport() {
       body: JSON.stringify({
         ...reportData,
         marketer_id: session.user._id,
-        marketer_name: marker_name,
+        marketer_name: session.user?.real_name,
       }),
       headers: {
         newreport: true,
@@ -104,9 +84,6 @@ export default function DailyReport() {
     }));
   };
 
-  useEffect(() => {
-    getMarketerNameByRealName();
-  });
   return (
     <>
       <Navbar navFor="call-report-submit" />

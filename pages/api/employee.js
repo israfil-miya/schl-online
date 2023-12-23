@@ -28,12 +28,16 @@ function isEmployeePermanent(joiningDate) {
     );
     return {
       isPermanent: false,
-      remainingTime: remainingDays,
+      remainingTimeInDays: remainingDays, // Return raw days
     };
   }
 
-  // Return permanent status if permanent
-  return { isPermanent: true };
+  // Calculate job age/service time if permanent
+  const jobAgeInDays = Math.floor((today - joinDate) / (1000 * 60 * 60 * 24));
+  return {
+    isPermanent: true,
+    jobAgeInDays: jobAgeInDays, // Return raw days
+  };
 }
 
 async function handleGetAllEmployees(req, res) {

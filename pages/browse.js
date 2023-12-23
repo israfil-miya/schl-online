@@ -223,7 +223,7 @@ export default function Browse() {
       headers: {
         "Content-Type": "application/json",
         editorder: true,
-        name: session.user?.name,
+        name: session.user?.real_name,
       },
     };
 

@@ -43,17 +43,30 @@ export default function EmployeeDatabase() {
   };
 
   function formatRemainingTime(remainingDays) {
-    const months = Math.floor(remainingDays / 30);
-    const days = remainingDays % 30;
+    const years = Math.floor(remainingDays / 365); // Calculate years
+    const remainingMonths = Math.floor((remainingDays % 365) / 30); // Adjust months
+    const days = remainingDays % 30; // Remaining days within the month
 
-    if (months === 0) {
-      return `${days} day${days > 1 ? "s" : ""}`;
-    } else if (months === 1 && days === 0) {
-      return `${months} month`;
+    if (years === 0) {
+      if (remainingMonths === 0) {
+        return `${days} day${days > 1 ? "s" : ""}`; // Only days
+      } else if (remainingMonths === 1 && days === 0) {
+        return `${remainingMonths} month`; // Only months
+      } else {
+        return `${remainingMonths} month${
+          remainingMonths > 1 ? "s" : ""
+        }, ${days} day${days > 1 ? "s" : ""}`; // Months and days
+      }
     } else {
-      return `${months} month${months > 1 ? "s" : ""}, ${days} day${
-        days > 1 ? "s" : ""
-      }`;
+      if (remainingMonths === 0 && days === 0) {
+        return `${years} year`; // Only years
+      } else if (remainingMonths === 0) {
+        return `${years} year, ${days} day${days > 1 ? "s" : ""}`; // Years and days
+      } else {
+        return `${years} year${years > 1 ? "s" : ""}, ${remainingMonths} month${
+          remainingMonths > 1 ? "s" : ""
+        }, ${days} day${days > 1 ? "s" : ""}`; // Years, months, and days
+      }
     }
   }
 
@@ -217,9 +230,11 @@ export default function EmployeeDatabase() {
                         <td>{employee.status}</td>
                         <td>
                           {employee.permanentInfo.isPermanent
-                            ? "Yes"
+                            ? `Yes (${formatRemainingTime(
+                                employee.permanentInfo.jobAgeInDays,
+                              )})`
                             : formatRemainingTime(
-                                employee.permanentInfo.remainingTime,
+                                employee.permanentInfo.remainingTimeInDays,
                               )}
                         </td>
                         <td>{employee.bonus_eid_ul_fitr}</td>

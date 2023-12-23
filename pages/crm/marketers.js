@@ -294,7 +294,7 @@ export default function Marketers(props) {
                 <tr className="table-dark">
                   <th>#</th>
                   <th>Real Name</th>
-                  <th>Company Name</th>
+                  <th>Marketer Name</th>
                   <th>Joining Date</th>
                   <th>Phone</th>
                   <th>Email</th>

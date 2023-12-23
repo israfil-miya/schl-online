@@ -14,8 +14,6 @@ async function fetchApi(url, options) {
 }
 
 export default function Report(props) {
-  const router = useRouter();
-  const { name } = router.query;
   const { data: session } = useSession();
 
   const [page, setPage] = useState(1);
@@ -25,7 +23,7 @@ export default function Report(props) {
   const [isFiltered, setIsFiltered] = useState(0);
   const [isRecall, setIsRecall] = useState(0);
 
-  const [marketersList, setMarketersList] = useState([]);
+  const [marketers, setMarketers] = useState([]);
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -147,11 +145,11 @@ export default function Report(props) {
         list.forEach((marketer, index) => {
           marketersName.push({
             _id: marketer._id,
-            marketer_name: marketer.company_provided_name,
+            marketer_name: marketer.real_name,
           });
         });
 
-        setMarketersList(marketersName);
+        setMarketers(marketersName);
       } else {
         toast.error("Unable to retrieve file list", { toastId: "error1" });
       }
@@ -207,7 +205,7 @@ export default function Report(props) {
           headers: {
             "Content-Type": "application/json",
             editreport: true,
-            name: session.user?.name,
+            name: session.user?.real_name,
           },
         };
 
@@ -268,7 +266,7 @@ export default function Report(props) {
             )
               ? manageData.calling_date_history
               : [...manageData.calling_date_history, today],
-            updated_by: session.user?.name,
+            updated_by: session.user?.real_name,
           };
 
           delete submitData._id;
@@ -328,7 +326,7 @@ export default function Report(props) {
         headers: {
           "Content-Type": "application/json",
           editreport: true,
-          name: session.user?.name,
+          name: session.user?.real_name,
         },
       };
 
@@ -1029,7 +1027,7 @@ export default function Report(props) {
                   >
                     Select a marketer
                   </option>
-                  {marketersList?.map((marketer, index) => {
+                  {marketers?.map((marketer, index) => {
                     return (
                       <>
                         <option key={index}>{marketer?.marketer_name}</option>

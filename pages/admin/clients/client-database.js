@@ -3,7 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 import Link from "next/link";
-import Navbar from "../../components/navbar";
+import Navbar from "../../../components/navbar";
 
 export default function Clients() {
   const router = useRouter();
@@ -11,29 +11,15 @@ export default function Clients() {
 
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-
   const [isFiltered, setIsFiltered] = useState(0);
-
   const [clients, setClients] = useState([]);
-  const [clientCode, setClientCode] = useState("");
-  const [clientName, setClientName] = useState("");
-  const [marketer, setMarketer] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [country, setCountry] = useState("");
-  const [address, setAddress] = useState("");
-  const [prices, setPrices] = useState("");
-  const [currency, setCurrency] = useState("");
+  const [marketers, setMarketers] = useState([]);
+  const [editedBy, setEditedBy] = useState("");
+
   const [clientCodeFilter, setClientCodeFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
   const [contactPersonFilter, setContactPersonFilter] = useState("");
   const [marketerNameFilter, setMarketerNameFilter] = useState("");
-
-  const [marketersList, setMarketersList] = useState([]);
-
-  const [editedBy, setEditedBy] = useState("");
 
   const [manageData, setManageData] = useState({
     _id: "",
@@ -129,11 +115,11 @@ export default function Clients() {
         list.forEach((marketer, index) => {
           marketersName.push({
             _id: marketer._id,
-            marketer_name: marketer.company_provided_name,
+            marketer_name: marketer.real_name,
           });
         });
 
-        setMarketersList(marketersName);
+        setMarketers(marketersName);
       } else {
         toast.error("Unable to retrieve file list", { toastId: "error1" });
       }
@@ -142,48 +128,6 @@ export default function Clients() {
       toast.error("Error retrieving file list", { toastId: "error3" });
     }
   };
-
-  async function addNewClient(e) {
-    e.preventDefault();
-
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
-    const options = {
-      method: "POST",
-      body: JSON.stringify({
-        client_code: clientCode,
-        client_name: clientName,
-        marketer,
-        contact_person: contactPerson,
-        designation,
-        contact_number: contactNumber,
-        email,
-        country,
-        address,
-        prices,
-        currency,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    try {
-      const result = await fetchApi(url, options);
-
-      if (!result.error) {
-        toast.success("Added new client");
-        await getAllClients();
-      } else {
-        router.replace(`/admin?error=${result.message}`);
-      }
-    } catch (error) {
-      console.error("Error adding new client:", error);
-      toast.error("Error adding new client");
-    }
-
-    setClientCode("");
-    setClientName("");
-  }
 
   async function deleteClient(deleteClientData) {
     let result;
@@ -222,7 +166,7 @@ export default function Clients() {
       headers: {
         "Content-Type": "application/json",
         editclient: true,
-        name: session.user?.name,
+        name: session.user?.real_name,
       },
     };
 
@@ -276,147 +220,6 @@ export default function Clients() {
     <>
       <Navbar navFor="admin" />
       <div className="my-5">
-        <div className="container add-client">
-          <h5 className="py-3">Add New Client</h5>
-          <form onSubmit={addNewClient} id="inputForm">
-            <div className="mb-3">
-              <label htmlFor="clientCode" className="form-label">
-                Client Code
-              </label>
-              <input
-                value={clientCode}
-                onChange={(e) => setClientCode(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientCode"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Client Name
-              </label>
-              <input
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Marketer Name
-              </label>
-              <input
-                value={marketer}
-                onChange={(e) => setMarketer(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Contact Person
-              </label>
-              <input
-                value={contactPerson}
-                onChange={(e) => setContactPerson(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Designation
-              </label>
-              <input
-                value={designation}
-                onChange={(e) => setDesignation(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Contact Number
-              </label>
-              <input
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Email
-              </label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Country
-              </label>
-              <input
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Address
-              </label>
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Prices
-              </label>
-              <textarea
-                value={prices}
-                onChange={(e) => setPrices(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="clientName" className="form-label">
-                Currency
-              </label>
-              <input
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                type="text"
-                className="form-control"
-                id="clientName"
-              />
-            </div>
-
-            <button type="submit" className="btn btn-sm btn-outline-primary">
-              Submit
-            </button>
-          </form>
-        </div>
         <div
           style={{ overflowX: "auto" }}
           className="text-nowrap client-list my-5"
@@ -443,10 +246,12 @@ export default function Clients() {
                 >
                   Select a marketer
                 </option>
-                {marketersList?.map((marketer, index) => {
+                {marketers?.map((marketer, index) => {
                   return (
                     <>
-                      <option key={index}>{marketer?.marketer_name}</option>
+                      <option key={index} value={marketer?.marketer_name}>
+                        {marketer?.marketer_name}
+                      </option>
                     </>
                   );
                 })}

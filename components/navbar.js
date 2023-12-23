@@ -178,13 +178,30 @@ export default function Navbar({ navFor, shortNote }) {
                   Tasks
                 </Link>
               </li>
-              <li>
-                <Link
-                  className={`dropdown-item ${styles.dropitem}`}
-                  href="/admin/clients"
+              <li className="dropdown-submenu">
+                <li
+                  className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
                 >
                   Clients
-                </Link>
+                </li>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/admin/clients/create"
+                    >
+                      Create
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/admin/clients/client-database"
+                    >
+                      View
+                    </Link>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
@@ -341,7 +358,7 @@ export default function Navbar({ navFor, shortNote }) {
               className={`${styles.navitem} ${
                 navFor === "call-report-submit" ? styles.active : ""
               }`}
-              href={`/crm/marketer/report?name=${session.user.name}`}
+              href={`/crm/marketer/report`}
             >
               Call Report Submit
             </Link>
