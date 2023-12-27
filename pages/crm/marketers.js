@@ -19,6 +19,10 @@ export default function Marketers(props) {
   const [availableFollowups, setAvailableFollowups] = useState([]);
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState([]);
   const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState([]);
+  const [reportTimePeriod, setReportTimePeriod] = useState(5);
+
+  const [dailyReportStatusLoading, setDailyReportStatusLoading] =
+    useState(false);
 
   const getMarketers = async () => {
     try {
@@ -70,12 +74,15 @@ export default function Marketers(props) {
 
   const getDailyReportStatus = async () => {
     try {
+      setDailyReportStatusLoading(true);
+
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
       const options = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           getdailyreportslast5days: true,
+          days: reportTimePeriod,
         },
       };
 
@@ -94,6 +101,8 @@ export default function Marketers(props) {
       toast.error("Error retrieving daily report status list", {
         toastId: "error3",
       });
+    } finally {
+      setDailyReportStatusLoading(false); // Set loading state to false after completion
     }
   };
 
@@ -277,6 +286,10 @@ export default function Marketers(props) {
     getMarketers();
   }, []);
 
+  useEffect(() => {
+    createDailyReportStatusTable();
+  }, [reportTimePeriod]);
+
   return (
     <>
       <Navbar navFor={session.user.role == "marketer" ? "marketers" : "crm"} />
@@ -366,8 +379,21 @@ export default function Marketers(props) {
           </div>
 
           <div className="daily-report-status mt-3">
-            <h5 className="bg-light text-center p-2 mb-3 border">
-              Daily Report Status (Last Five Business Days)
+            <h5 className="bg-light text-center justify-content-center align-center d-flex p-2 mb-3 border">
+              Daily Report Status (Last
+              <select
+                style={{ width: "70px" }}
+                className="form-select ms-2 me-2 form-select-sm"
+                id="floatingSelect"
+                value={reportTimePeriod}
+                onChange={(e) => setReportTimePeriod(e.target.value)}
+              >
+                <option value={5}>5</option>
+                <option value={30}>30</option>
+                <option value={60}>60</option>
+                <option value={365}>365</option>
+              </select>
+              Business Days)
             </h5>
 
             <table className="table table-bordered table-hover">
@@ -403,7 +429,15 @@ export default function Marketers(props) {
                 </tr>
               </thead>
               <tbody>
-                {dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)}
+                {dailyReportStatusLoading ? (
+                  <tr key={0}>
+                    <td colSpan="4" className="text-center">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : (
+                  dailyReportStatusRowHtml?.map((tableRow, index) => tableRow)
+                )}
               </tbody>
             </table>
           </div>

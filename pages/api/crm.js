@@ -147,10 +147,10 @@ const isWeekend = (date) => {
   return dayOfWeek === 0 /* Sunday */ || dayOfWeek === 6 /* Saturday */;
 };
 
-const getValidWeekDays = () => {
+const getValidWeekDays = (days) => {
   const today = moment().utc();
 
-  const fiveDaysAgo = moment().subtract(5, "days").utc();
+  const fiveDaysAgo = moment().subtract(days, "days").utc();
 
   const validWeekdays = [];
 
@@ -164,36 +164,87 @@ const getValidWeekDays = () => {
   return validWeekdays;
 };
 
+async function handleGetDailyReportsLast5Days(req, res) {
+  try {
+    let validWeekdays = getValidWeekDays(parseInt(req.headers.days));
+
+    const validDates = validWeekdays.map((day) => day.calling_date_history);
+
+    let resDataPromises = validDates.map((date) =>
+      Report.find(
+        { calling_date_history: date },
+        { marketer_name: 1, is_prospected: 1, is_test: 1 },
+      ).lean(),
+    );
+
+    let resData = await Promise.all(resDataPromises);
+    resData = resData.flat();
+
+    let returnData = resData.reduce((acc, entry) => {
+      // Find existing entry for the marketer
+      const existingEntry = acc.find(
+        (item) => item.marketer_name === entry.marketer_name,
+      );
+
+      if (existingEntry) {
+        // Update existing entry with new data
+        existingEntry.data.total_calls_made += 1;
+        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
+        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+      } else {
+        // Create a new entry if the marketer doesn't exist in the result array
+        acc.push({
+          marketer_name: entry.marketer_name,
+          data: {
+            total_calls_made: 1,
+            total_prospects: entry.is_prospected ? 1 : 0,
+            total_test_jobs: entry.is_test ? 1 : 0,
+          },
+        });
+      }
+
+      return acc;
+    }, []);
+
+    if (resData && returnData) {
+      res.status(200).json(returnData);
+    } else sendError(res, 500, "No data found");
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 async function handleGetNearestFollowUps(req, res) {
   try {
     let marketer_name = req.headers.marketer_name;
-    let resData;
+    let query = {
+      followup_done: false,
+      followup_date: { $ne: "" },
+    };
 
     if (marketer_name) {
-      resData = await Report.find({
-        followup_done: false,
-        marketer_name,
-        followup_date: { $ne: "" },
-      }).sort({ followup_date: 1 });
-    } else {
-      resData = await Report.find({
-        followup_done: false,
-        followup_date: { $ne: "" },
-      }).sort({
-        followup_date: 1,
-      });
+      query.marketer_name = marketer_name;
+    }
 
+    let resData = await Report.find(query, {
+      marketer_name: 1,
+      followup_date: 1,
+    })
+      .sort({ followup_date: 1 })
+      .lean();
+
+    if (marketer_name) {
+      res.status(200).json(resData);
+    } else {
       let returnData = resData.reduce((acc, entry) => {
-        // Find existing entry for the marketer
         const existingEntry = acc.find(
           (item) => item.marketer_name === entry.marketer_name,
         );
 
         if (existingEntry) {
-          // Update existing entry with new data
           existingEntry.followups_count += 1;
         } else {
-          // Create a new entry if the marketer doesn't exist in the result array
           acc.push({
             marketer_name: entry.marketer_name,
             followup_date: entry.followup_date,
@@ -206,13 +257,10 @@ async function handleGetNearestFollowUps(req, res) {
 
       if (returnData) {
         res.status(200).json(returnData);
-      } else sendError(res, 500, "No data found");
-      return;
+      } else {
+        sendError(res, 500, "No data found");
+      }
     }
-
-    if (resData) {
-      res.status(200).json(resData);
-    } else sendError(res, 500, "No data found");
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
@@ -289,47 +337,6 @@ async function handleGetDailyReportsToday(req, res) {
     const today = moment().utc().format("YYYY-MM-DD");
 
     let resData = await Report.find({ calling_date_history: today });
-
-    let returnData = resData.reduce((acc, entry) => {
-      // Find existing entry for the marketer
-      const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name,
-      );
-
-      if (existingEntry) {
-        // Update existing entry with new data
-        existingEntry.data.total_calls_made += 1;
-        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
-        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
-      } else {
-        // Create a new entry if the marketer doesn't exist in the result array
-        acc.push({
-          marketer_name: entry.marketer_name,
-          data: {
-            total_calls_made: 1,
-            total_prospects: entry.is_prospected ? 1 : 0,
-            total_test_jobs: entry.is_test ? 1 : 0,
-          },
-        });
-      }
-
-      return acc;
-    }, []);
-
-    if (resData && returnData) {
-      res.status(200).json(returnData);
-    } else sendError(res, 500, "No data found");
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetDailyReportsLast5Days(req, res) {
-  try {
-    let validWeekdays = getValidWeekDays();
-
-    let resData = await Report.find({ $or: validWeekdays });
 
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
