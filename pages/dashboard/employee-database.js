@@ -15,32 +15,25 @@ export default function EmployeeDatabase() {
   });
   const { data: session } = useSession();
 
+  const [filters, setFilters] = useState({
+    // country: "",
+    // company_name: "",
+    // category: "",
+    // fromdate: "",
+    // todate: "",
+    // marketer_name: "",
+    // test: false,
+    // prospect: false,
+    servicetime: "",
+    blood_group: "",
+    generalsearchstring: "",
+  });
+
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
   }
-
-  const [marker_name, setMarkerName] = useState("");
-
-  const getMarketerNameByRealName = async () => {
-    const res = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "/api/employee",
-      {
-        method: "GET",
-        headers: {
-          getmarkernamebyrealname: true,
-          real_name: session.user?.real_name,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const result = await res.json();
-
-    if (!result.error) {
-      setMarkerName(result.company_provided_name);
-    } else toast.error(result.message);
-  };
 
   function formatRemainingTime(remainingDays) {
     const years = Math.floor(remainingDays / 365); // Calculate years
@@ -98,12 +91,56 @@ export default function EmployeeDatabase() {
         employeesList.forEach((employee) => {
           if (employee.status === "Active") {
             setTotalPayout((prevData) => ({
+              gross: parseInt(prevData.gross) + parseInt(employee.gross_salary),
+              bonus_fitr:
+                parseInt(prevData.bonus_fitr) +
+                parseInt(employee.bonus_eid_ul_fitr),
+              bonus_adha:
+                parseInt(prevData.bonus_adha) +
+                parseInt(employee.bonus_eid_ul_adha),
+            }));
+          }
+        });
+        setEmployees(employeesList);
+      } else {
+        toast.error("Unable to retrieve employees list");
+      }
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      toast.error("Error retrieving employees");
+    }
+  }
+
+  async function getAllEmployeesFiltered() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/employee`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getallemployeebyfilter: true,
+          ...filters,
+        },
+      };
+
+      const employeesList = await fetchApi(url, options);
+
+      if (!employeesList.error) {
+        setTotalPayout({
+          gross: 0,
+          bonus_fitr: 0,
+          bonus_adha: 0,
+        });
+        employeesList.forEach((employee) => {
+          if (employee.status === "Active") {
+            setTotalPayout((prevData) => ({
               gross: prevData.gross + employee.gross_salary,
               bonus_fitr: prevData.bonus_fitr + employee.bonus_eid_ul_fitr,
               bonus_adha: prevData.bonus_adha + employee.bonus_eid_ul_adha,
             }));
           }
         });
+
         setEmployees(employeesList);
       } else {
         toast.error("Unable to retrieve employees list");
@@ -166,7 +203,6 @@ export default function EmployeeDatabase() {
   }
 
   useEffect(() => {
-    getMarketerNameByRealName();
     getAllEmployees();
   }, []);
 
@@ -174,131 +210,134 @@ export default function EmployeeDatabase() {
     <>
       <Navbar navFor="dashboard" />
       <div className="my-5">
-        <div className="user-list my-5">
-          <div style={{ overflowX: "auto" }} className="text-nowrap">
-            <table className="table p-3 table-hover table-bordered">
-              <thead>
-                <tr className="table-dark">
-                  <th>Employee ID</th>
-                  <th>Full Name</th>
-                  <th>Joining Date</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Birth Date</th>
-                  <th>NID</th>
-                  <th>Blood Group</th>
-                  <th>Designation</th>
-                  <th>Department</th>
-                  <th>Gross Salary</th>
-                  <th>Status</th>
-                  <th>Permanent</th>
-                  <th>Bonus (Eid ul Fitr)</th>
-                  <th>Bonus (Eid ul Adha)</th>
-                  <th>Note</th>
-                  <th>Manage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees?.length != 0 ? (
-                  employees.map((employee, index) => {
-                    return (
-                      <tr
-                        key={index}
-                        className={
-                          employee.status == "Active" ? null : "table-danger"
-                        }
-                      >
-                        <td>{employee.e_id}</td>
-                        <td>{employee.real_name}</td>
-                        <td>
-                          {employee.joining_date?.length
-                            ? convertToDDMMYYYY(employee.joining_date)
-                            : null}
-                        </td>
-                        <td>{employee.phone}</td>
-                        <td>{employee.email}</td>
-                        <td>
-                          {employee.birth_date?.length
-                            ? convertToDDMMYYYY(employee.birth_date)
-                            : null}
-                        </td>
-                        <td>{employee.nid}</td>
-                        <td>{employee.blood_group}</td>
-                        <td>{employee.designation}</td>
-                        <td>{employee.department}</td>
-                        <td>{employee.gross_salary}</td>
-                        <td>{employee.status}</td>
-                        <td>
-                          {employee.permanentInfo.isPermanent
-                            ? `Yes (${formatRemainingTime(
-                                employee.permanentInfo.jobAgeInDays,
-                              )})`
-                            : formatRemainingTime(
-                                employee.permanentInfo.remainingTimeInDays,
-                              )}
-                        </td>
-                        <td>{employee.bonus_eid_ul_fitr}</td>
-                        <td>{employee.bonus_eid_ul_adha}</td>
-                        <NoteTd data={employee.note} />
-                        <td
-                          className="align-middle"
-                          style={{ textAlign: "center" }}
-                        >
-                          <button
-                            onClick={() => setManageData(employee)}
-                            className="btn btn-sm btn-outline-primary me-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editModal"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setManageData({ _id: employee._id })}
-                            className="btn btn-sm btn-outline-danger me-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteModal"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr key={0}>
-                    <td colSpan="17" className=" align-center text-center">
-                      No employee data to show
-                    </td>
-                  </tr>
-                )}
-                {employees?.length != 0 && (
-                  <tr className="table-dark">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td className="fw-semibold">TOTAL: {totalPayout.gross}</td>
-                    <td></td>
-                    <td></td>
-                    <td className="fw-semibold">
-                      TOTAL: {totalPayout.bonus_fitr}
-                    </td>
-                    <td className="fw-semibold">
-                      TOTAL: {totalPayout.bonus_adha}
-                    </td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <h5 className="text-center">Employee List</h5>
+
+        <div className="d-flex mt-3">
+          <div className="container">
+            <div
+              className="float-end"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <button
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar"
+                aria-label="Toggle navigation"
+                className="btn m-2 btn-sm btn-outline-primary"
+              >
+                Filter
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div className="text-nowrap">
+          <table className="table p-3 table-hover">
+            <thead className="sticky-header">
+              <tr className="table-dark">
+                <th>#</th>
+                <th>EID</th>
+                <th>Full Name</th>
+                <th>Joining Date</th>
+                <th>Blood Group</th>
+                <th>Designation</th>
+                <th>Department</th>
+                <th>Gross Salary</th>
+                <th>Status</th>
+                <th>Permanent Status</th>
+                <th>Note</th>
+                <th>Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees?.length != 0 ? (
+                employees.map((employee, index) => {
+                  return (
+                    <tr
+                      key={index}
+                      className={
+                        employee.status == "Active" ? null : "table-danger"
+                      }
+                    >
+                      <td>{index + 1}</td>
+                      <td>{employee.e_id}</td>
+                      <td>{employee.real_name}</td>
+                      <td>
+                        {employee.joining_date?.length
+                          ? convertToDDMMYYYY(employee.joining_date)
+                          : null}
+                      </td>
+                      <td>{employee.blood_group}</td>
+                      <td>{employee.designation}</td>
+                      <td>{employee.department}</td>
+                      <td>{employee.gross_salary} BDT</td>
+                      <td>{employee.status}</td>
+                      <td>
+                        {employee.permanentInfo.isPermanent
+                          ? `Yes (${formatRemainingTime(
+                              employee.permanentInfo.jobAgeInDays,
+                            )})`
+                          : formatRemainingTime(
+                              employee.permanentInfo.remainingTimeInDays,
+                            )}
+                      </td>
+                      <NoteTd data={employee.note} />
+                      <td
+                        className="align-middle"
+                        style={{ textAlign: "center" }}
+                      >
+                        <button
+                          onClick={() => setManageData(employee)}
+                          className="btn btn-sm btn-outline-primary me-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editModal"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setManageData({ _id: employee._id })}
+                          className="btn btn-sm btn-outline-danger me-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteModal"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr key={0}>
+                  <td colSpan="17" className=" align-center text-center">
+                    No employee data to show
+                  </td>
+                </tr>
+              )}
+              {employees?.length != 0 && (
+                <tr className="table-dark">
+                  <td></td>
+                  <td></td>
+                  <td className="fw-semibold">
+                    SALARY (GROSS): {totalPayout.gross} BDT
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td className="fw-semibold">
+                    BONUS (EID-UL-FITR): {totalPayout.bonus_fitr} BDT
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td className="fw-semibold">
+                    BONUS (EID-UL-ADHA): {totalPayout.bonus_adha} BDT
+                  </td>
+                  <td></td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -708,11 +747,249 @@ export default function EmployeeDatabase() {
         </div>
       </div>
 
+      <div
+        className="offcanvas offcanvas-end"
+        tabIndex="-1"
+        id="offcanvasNavbar"
+        aria-labelledby="offcanvasNavbarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
+            Search employees
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div className="d-grid gap-2">
+            <div className="row">
+              <div className="col">
+                <label className="fw-bold" htmlFor="floatingSelectGrid">
+                  Blood Group
+                </label>
+                <select
+                  required
+                  onChange={(e) =>
+                    setFilters({ ...filters, blood_group: e.target.value })
+                  }
+                  className="form-select"
+                  id="floatingSelectGrid"
+                >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select a blood group
+                  </option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <label className="fw-bold" htmlFor="floatingSelectGrid">
+                  Service Time
+                </label>
+                <select
+                  required
+                  onChange={(e) =>
+                    setFilters({ ...filters, servicetime: e.target.value })
+                  }
+                  className="form-select"
+                  id="floatingSelectGrid"
+                >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select service time
+                  </option>
+                  <option value="lessThan1Year">{"<"} 1 year</option>
+                  <option value="atLeast1Year">{"=<"} 1 year</option>
+                  <option value="atLeast2Years">{"=<"} 2 years</option>
+                  <option value="atLeast3Years">{"=<"} 3 years</option>
+                  <option value="moreThan3Years">{">"} 3 years</option>
+                </select>
+              </div>
+            </div>
+
+            {/* <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="datePicker">
+                  Date picker
+                </label>
+                <div id="datePicker" className="input-group">
+                  <input
+                    type="date"
+                    id="fromDate"
+                    className="form-control custom-input"
+                    value={filters.fromdate}
+                    onChange={(e) =>
+                      setFilters({ ...filters, fromdate: e.target.value })
+                    }
+                  />
+                  <span className="input-group-text">to</span>
+                  <input
+                    type="date"
+                    id="toDate"
+                    className="form-control custom-input"
+                    value={filters.todate}
+                    onChange={(e) =>
+                      setFilters({ ...filters, todate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Country name
+                </label>
+                <input
+                  value={filters.country}
+                  onChange={(e) =>
+                    setFilters({ ...filters, country: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Category
+                </label>
+                <input
+                  value={filters.category}
+                  onChange={(e) =>
+                    setFilters({ ...filters, category: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Company name
+                </label>
+                <input
+                  value={filters.company_name}
+                  onChange={(e) =>
+                    setFilters({ ...filters, company_name: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox"
+                  className="form-check-input"
+                  checked={filters.test}
+                  onChange={(e) =>
+                    setFilters({ ...filters, test: !filters.test })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Test Job
+                </label>
+              </div>
+              <div className="col">
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={filters.prospect}
+                  onChange={(e) =>
+                    setFilters({ ...filters, prospect: !filters.prospect })
+                  }
+                />
+
+                <label
+                  htmlFor="myCheckbox"
+                  className="form-check-label fw-semibold ms-1"
+                >
+                  Prospecting
+                </label>
+              </div>
+            </div> */}
+
+            <button
+              onClick={getAllEmployeesFiltered}
+              className="btn btn-outline-primary"
+            >
+              Search
+            </button>
+
+            <div className="general-search-field d-grid gap-2 my-5">
+              <div className="row">
+                <div className="col">
+                  <label className="fw-semibold" htmlFor="floatingInput">
+                    General search text
+                  </label>
+                  <input
+                    value={filters.generalsearchstring}
+                    onChange={(e) =>
+                      setFilters({
+                        ...filters,
+                        generalsearchstring: e.target.value,
+                      })
+                    }
+                    type="text"
+                    className="form-control"
+                    id="floatingInput"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={getAllEmployeesFiltered}
+                className="btn btn-outline-primary"
+              >
+                General Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <style jsx>
         {`
-          .borderless tr td {
-            border: none !important;
-            padding: 0px !important;
+          .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
           }
         `}
       </style>

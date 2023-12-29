@@ -434,7 +434,6 @@ export default function Browse() {
               <th>E.T.</th>
               <th>Production</th>
               <th>QC1</th>
-              <th>Comment</th>
               <th>Type</th>
               <th>Status</th>
               <th>Manage</th>
@@ -449,12 +448,10 @@ export default function Browse() {
 
                   {session.user.role == "admin" ||
                   session.user.role == "super" ? (
-                    <td className="text-break">{order.client_name}</td>
-                  ) : (
-                    <></>
-                  )}
+                    <td className="text-wrap">{order.client_name}</td>
+                  ) : null}
 
-                  <td className="text-break">{order.folder}</td>
+                  <td className="text-wrap text-break">{order.folder}</td>
                   <td className="text-break">{order.quantity}</td>
                   <td className="text-break">{order.download_date}</td>
                   <td className="text-break">
@@ -466,7 +463,6 @@ export default function Browse() {
                   <td className="text-break">{order.et}</td>
                   <td className="text-break">{order.production}</td>
                   <td className="text-break">{order.qc1}</td>
-                  <td className="text-break">{order.comment}</td>
                   <td className="text-break">{order.type}</td>
                   <td className="text-break">{order.status}</td>
                   {session.user.role == "admin" ||
@@ -796,7 +792,7 @@ export default function Browse() {
                 <label htmlFor="comments" className="form-label">
                   Comment
                 </label>
-                <input
+                <textarea
                   value={manageData.comment}
                   onChange={(e) =>
                     setManageData((prevData) => ({
@@ -927,7 +923,7 @@ export default function Browse() {
 
           th,
           td {
-            padding: 5px 2.5px;
+            padding: 5px auto;
           }
         `}
       </style>

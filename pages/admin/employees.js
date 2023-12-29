@@ -359,6 +359,12 @@ export default function Create() {
               </label>
               <input
                 value={newEmployeeData.bonus_eid_ul_fitr}
+                onFocus={() =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    bonus_eid_ul_fitr: prevData.gross_salary / 2,
+                  }))
+                }
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
                     ...prevData,
@@ -377,6 +383,12 @@ export default function Create() {
               </label>
               <input
                 value={newEmployeeData.bonus_eid_ul_adha}
+                onFocus={() =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    bonus_eid_ul_adha: prevData.gross_salary / 2,
+                  }))
+                }
                 onChange={(e) =>
                   setNewEmployeeData((prevData) => ({
                     ...prevData,

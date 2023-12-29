@@ -40,6 +40,108 @@ function isEmployeePermanent(joiningDate) {
   };
 }
 
+async function handleGetAllEmployeeByFilter(req, res) {
+  try {
+    const { generalsearchstring, blood_group, servicetime } = req.headers;
+
+    let query = {};
+    if (blood_group) query.blood_group = blood_group;
+
+    let matchStage = {};
+    console.log(servicetime);
+
+    if (servicetime) {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+
+      switch (servicetime) {
+        case "lessThan1Year":
+          matchStage = { joining_date: { $gte: `${currentYear}-01-01` } };
+          break;
+        case "atLeast1Year":
+          matchStage = { joining_date: { $lt: `${currentYear}-01-01` } };
+          break;
+        case "atLeast2Years":
+          matchStage = { joining_date: { $lt: `${currentYear - 1}-01-01` } };
+          break;
+        case "atLeast3Years":
+          matchStage = { joining_date: { $lt: `${currentYear - 2}-01-01` } };
+          break;
+        case "moreThan3Years":
+          matchStage = { joining_date: { $lte: `${currentYear - 3}-12-31` } }; // Use $lte for end of year
+          break;
+        default:
+          console.warn(`Invalid service time option: ${servicetime}`);
+          break;
+      }
+    }
+
+    let searchQuery = { ...query, ...matchStage };
+
+    console.log(searchQuery);
+
+    if (!query && !generalsearchstring) {
+      sendError(res, 400, "No filter applied");
+    } else {
+      if (generalsearchstring) {
+        searchQuery = {
+          $or: [
+            { e_id: { $regex: generalsearchstring, $options: "i" } },
+            {
+              company_provided_name: {
+                $regex: generalsearchstring,
+                $options: "i",
+              },
+            },
+            { department: { $regex: generalsearchstring, $options: "i" } },
+            { designation: { $regex: generalsearchstring, $options: "i" } },
+            { email: { $regex: generalsearchstring, $options: "i" } },
+            { nid: { $regex: generalsearchstring, $options: "i" } },
+            { real_name: { $regex: generalsearchstring, $options: "i" } },
+          ],
+        };
+      }
+
+      let employees = await Employee.find(searchQuery).sort({ e_id: 1 }).exec();
+
+      const processedEmployees = employees.map((employee) => {
+        const permanentInfo = isEmployeePermanent(employee.joining_date);
+        let priority = 0;
+
+        switch (true) {
+          case employee.status === "Active":
+            priority = 1;
+            break;
+          case employee.status === "Inactive":
+            priority = 2;
+            break;
+          case employee.status === "Fired":
+            priority = 3;
+            break;
+          case employee.status === "Resigned":
+            priority = 4;
+            break;
+        }
+
+        return {
+          ...employee.toObject(),
+          permanentInfo,
+          priority,
+        };
+      });
+      const sortedEmployees = processedEmployees.sort(
+        (a, b) => a.priority - b.priority,
+      );
+      if (sortedEmployees) {
+        res.status(200).json(sortedEmployees);
+      } else sendError(res, 400, "Unable to retrieve employees list");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 async function handleGetAllEmployees(req, res) {
   try {
     let query = {};
@@ -177,6 +279,8 @@ export default async function handle(req, res) {
         await handleGetEmployeeByCode(req, res);
       } else if (req.headers.getmarkernamebyrealname) {
         await handleGetMarkerNameByRealName(req, res);
+      } else if (req.headers.getallemployeebyfilter) {
+        await handleGetAllEmployeeByFilter(req, res);
       }
       break;
 
