@@ -32,6 +32,10 @@ const ReportSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    is_lead: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

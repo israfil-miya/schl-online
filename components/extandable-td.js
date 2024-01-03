@@ -28,10 +28,10 @@ const ExtandableTd = ({ data }) => {
           />
         ) : (
           <span className="text-nowrap">
-            {data.length <= 25 ? data : data.substring(0, 25).trim() + "..."}
+            {data?.length <= 25 ? data : data?.substring(0, 25).trim() + "..."}
           </span>
         )}
-        {data.length > 25 && (
+        {data?.length > 25 && (
           <small className="link" onClick={toggleText}>
             <br />
             {showFullText ? "Show Less" : "Show More"}

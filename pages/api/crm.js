@@ -227,12 +227,7 @@ async function handleGetNearestFollowUps(req, res) {
       query.marketer_name = marketer_name;
     }
 
-    let resData = await Report.find(query, {
-      marketer_name: 1,
-      followup_date: 1,
-    })
-      .sort({ followup_date: 1 })
-      .lean();
+    let resData = await Report.find(query).sort({ followup_date: 1 }).lean();
 
     if (marketer_name) {
       res.status(200).json(resData);

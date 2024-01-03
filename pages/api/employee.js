@@ -48,27 +48,38 @@ async function handleGetAllEmployeeByFilter(req, res) {
     if (blood_group) query.blood_group = blood_group;
 
     let matchStage = {};
-    console.log(servicetime);
 
     if (servicetime) {
-      const today = new Date();
-      const currentYear = today.getFullYear();
+      const [year, month, date] = moment()
+        .utc()
+        .format("YYYY-MM-DD")
+        .split("-");
 
       switch (servicetime) {
         case "lessThan1Year":
-          matchStage = { joining_date: { $gte: `${currentYear}-01-01` } };
+          matchStage = {
+            joining_date: { $gt: `${year - 1}-${month}-${date}` },
+          };
           break;
         case "atLeast1Year":
-          matchStage = { joining_date: { $lt: `${currentYear}-01-01` } };
+          matchStage = {
+            joining_date: { $lte: `${year - 1}-${month}-${date}` },
+          };
           break;
         case "atLeast2Years":
-          matchStage = { joining_date: { $lt: `${currentYear - 1}-01-01` } };
+          matchStage = {
+            joining_date: { $lte: `${year - 2}-${month}-${date}` },
+          };
           break;
         case "atLeast3Years":
-          matchStage = { joining_date: { $lt: `${currentYear - 2}-01-01` } };
+          matchStage = {
+            joining_date: { $lte: `${year - 3}-${month}-${date}` },
+          };
           break;
         case "moreThan3Years":
-          matchStage = { joining_date: { $lte: `${currentYear - 3}-12-31` } }; // Use $lte for end of year
+          matchStage = {
+            joining_date: { $lt: `${year - 3}-${month}-${date}` },
+          };
           break;
         default:
           console.warn(`Invalid service time option: ${servicetime}`);
@@ -77,8 +88,6 @@ async function handleGetAllEmployeeByFilter(req, res) {
     }
 
     let searchQuery = { ...query, ...matchStage };
-
-    console.log(searchQuery);
 
     if (!query && !generalsearchstring) {
       sendError(res, 400, "No filter applied");

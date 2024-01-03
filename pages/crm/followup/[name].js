@@ -236,22 +236,22 @@ export default function Followup() {
                     <tr key={index}>
                       <td>{index + 1}</td>
                       <td>
-                        {item.calling_date
-                          ? convertToDDMMYYYY(item.calling_date)
+                        {item?.calling_date
+                          ? convertToDDMMYYYY(item?.calling_date)
                           : ""}
                       </td>
                       <td>
-                        {item.followup_date
-                          ? convertToDDMMYYYY(item.followup_date)
+                        {item?.followup_date
+                          ? convertToDDMMYYYY(item?.followup_date)
                           : ""}
                       </td>
 
-                      <td>{item.country}</td>
+                      <td>{item?.country}</td>
                       <td>
-                        {item.website.length
-                          ? item.website
+                        {item?.website?.length
+                          ? item?.website
                               .split(" ")
-                              .filter((item) => item.length)
+                              .filter((item) => item?.length)
                               .map((websiteLink, link) => (
                                 <p
                                   key={index}
@@ -264,18 +264,18 @@ export default function Followup() {
                               ))
                           : "No link provided"}
                       </td>
-                      <td>{item.category}</td>
-                      <td className="text-wrap">{item.company_name}</td>
-                      <td className="text-wrap">{item.contact_person}</td>
-                      <td>{item.designation}</td>
-                      <td className="text-wrap">{item.contact_number}</td>
-                      <td className="text-wrap">{item.email_address}</td>
-                      <CallingStatusTd data={item.calling_status} />
+                      <td>{item?.category}</td>
+                      <td className="text-wrap">{item?.company_name}</td>
+                      <td className="text-wrap">{item?.contact_person}</td>
+                      <td>{item?.designation}</td>
+                      <td className="text-wrap">{item?.contact_number}</td>
+                      <td className="text-wrap">{item?.email_address}</td>
+                      <CallingStatusTd data={item?.calling_status} />
                       <td>
-                        {item.linkedin.length
-                          ? item.linkedin
+                        {item?.linkedin?.length
+                          ? item?.linkedin
                               .split(" ")
-                              .filter((item) => item.length)
+                              .filter((item) => item?.length)
                               .map((linkedinLink, index) => (
                                 <p
                                   key={index}
@@ -288,10 +288,10 @@ export default function Followup() {
                               ))
                           : "No link provided"}
                       </td>
-                      <td>{item.is_test ? "Yes" : "No"}</td>
+                      <td>{item?.is_test ? "Yes" : "No"}</td>
                       <td>
-                        {item.is_prospected
-                          ? `Yes (${item.followup_done ? "Done" : "Pending"})`
+                        {item?.is_prospected
+                          ? `Yes (${item?.followup_done ? "Done" : "Pending"})`
                           : "No"}
                       </td>
 
@@ -311,7 +311,7 @@ export default function Followup() {
                           onClick={() => {
                             setIsRecall(0);
                             setManageData(item);
-                            setEditedBy(item.updated_by || "");
+                            setEditedBy(item?.updated_by || "");
                           }}
                           className="btn btn-sm btn-outline-primary me-1"
                           data-bs-toggle="modal"

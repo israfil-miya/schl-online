@@ -817,11 +817,11 @@ export default function EmployeeDatabase() {
                   >
                     Select service time
                   </option>
-                  <option value="lessThan1Year">{"<"} 1 year</option>
-                  <option value="atLeast1Year">{"=<"} 1 year</option>
-                  <option value="atLeast2Years">{"=<"} 2 years</option>
-                  <option value="atLeast3Years">{"=<"} 3 years</option>
-                  <option value="moreThan3Years">{">"} 3 years</option>
+                  <option value="lessThan1Year">Less than 1 year</option>
+                  <option value="atLeast1Year">At least 1 year</option>
+                  <option value="atLeast2Years">At least 2 years</option>
+                  <option value="atLeast3Years">At least 3 years</option>
+                  <option value="moreThan3Years">More than 3 years</option>
                 </select>
               </div>
             </div>
