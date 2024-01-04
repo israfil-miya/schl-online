@@ -133,6 +133,7 @@ async function handleGetAllReports(req, res) {
             { email_address: { $regex: generalsearchstring, $options: "i" } },
             { linkedin: { $regex: generalsearchstring, $options: "i" } },
           ],
+          is_lead: onlylead,
         };
       }
 
