@@ -39,6 +39,7 @@ export default function DailyReport() {
     leads_taken_feedback: "",
     is_test: false,
     is_prospected: false,
+    is_lead: false,
   });
 
   const AddNewReport = async (e) => {
@@ -81,12 +82,13 @@ export default function DailyReport() {
       leads_taken_feedback: "",
       is_test: false,
       is_prospected: false,
+      is_lead: false,
     }));
   };
 
   return (
     <>
-      <Navbar navFor="call-report-submit" />
+      <Navbar navFor="report-submition" />
       <div className="container my-5">
         <div className="add-report">
           <h5 className="py-3">New Report</h5>
@@ -309,6 +311,26 @@ export default function DailyReport() {
 
                 <label htmlFor="myCheckbox" className="form-check-label">
                   Prospecting
+                </label>
+              </div>
+            </div>
+            <div className="mb-3">
+              <div className="form-check">
+                <input
+                  type="checkbox"
+                  id="myCheckbox2"
+                  className="form-check-input"
+                  checked={reportData.is_lead}
+                  onChange={(e) =>
+                    setReportData({
+                      ...reportData,
+                      is_lead: !reportData.is_lead,
+                    })
+                  }
+                />
+
+                <label htmlFor="myCheckbox" className="form-check-label">
+                  New Lead
                 </label>
               </div>
             </div>

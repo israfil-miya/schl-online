@@ -12,6 +12,28 @@ function sendError(res, statusCode, message) {
   });
 }
 
+const isWeekend = (date) => {
+  const dayOfWeek = date.getDay();
+  return dayOfWeek === 0 /* Sunday */ || dayOfWeek === 6 /* Saturday */;
+};
+
+const getValidWeekDays = (days) => {
+  const today = moment().utc();
+
+  const fiveDaysAgo = moment().subtract(days, "days").utc();
+
+  const validWeekdays = [];
+
+  for (let d = moment(fiveDaysAgo); d.isSameOrBefore(today); d.add(1, "day")) {
+    if (!isWeekend(d.toDate())) {
+      validWeekdays.push({
+        calling_date_history: d.utc().format("YYYY-MM-DD"),
+      }); // Store valid weekdays
+    }
+  }
+  return validWeekdays;
+};
+
 const handleGetAllMarketers = async (req, res) => {
   try {
     const userData = await Employee.find({
@@ -58,10 +80,12 @@ async function handleGetAllReports(req, res) {
       test,
       prospect,
       generalsearchstring,
+      onlylead,
     } = req.headers;
 
     test = test === "true" ? true : false;
     prospect = prospect === "true" ? true : false;
+    onlylead = onlylead === "true" ? true : false;
 
     // Number of items per page
 
@@ -75,6 +99,7 @@ async function handleGetAllReports(req, res) {
       query.marketer_name = { $regex: marketer_name, $options: "i" };
     if (test) query.is_test = test;
     if (prospect) query.is_prospected = prospect;
+    if (onlylead) query.is_lead = onlylead;
 
     if (fromdate || todate) {
       query.calling_date = {};
@@ -111,6 +136,8 @@ async function handleGetAllReports(req, res) {
         };
       }
 
+      console.log(searchQuery);
+
       const countPromise = Report.countDocuments(searchQuery);
       const reportsPromise = req.headers.notpaginated
         ? Report.find({}).lean()
@@ -142,27 +169,144 @@ async function handleGetAllReports(req, res) {
   }
 }
 
-const isWeekend = (date) => {
-  const dayOfWeek = date.getDay();
-  return dayOfWeek === 0 /* Sunday */ || dayOfWeek === 6 /* Saturday */;
-};
+async function handleFinishFollowup(req, res) {
+  try {
+    let followupDataId = req.headers.id;
+    let updatedByName = req.headers.updated_by || null;
 
-const getValidWeekDays = (days) => {
-  const today = moment().utc();
+    let resData = await Report.findByIdAndUpdate(
+      followupDataId,
+      {
+        updated_by: updatedByName,
+        followup_done: true,
+      },
+      {
+        new: true,
+      },
+    );
 
-  const fiveDaysAgo = moment().subtract(days, "days").utc();
-
-  const validWeekdays = [];
-
-  for (let d = moment(fiveDaysAgo); d.isSameOrBefore(today); d.add(1, "day")) {
-    if (!isWeekend(d.toDate())) {
-      validWeekdays.push({
-        calling_date_history: d.utc().format("YYYY-MM-DD"),
-      }); // Store valid weekdays
+    if (resData) {
+      res
+        .status(200)
+        .json({ message: "Succesfully updated the followup status" });
+    } else {
+      sendError(res, 500, "Unable to update the followup status");
     }
+  } catch (e) {
+    sendError(res, 500, e.message);
   }
-  return validWeekdays;
-};
+}
+
+async function handleFinishLead(req, res) {
+  try {
+    let leadDataId = req.headers.id;
+    let updatedByName = req.headers.updated_by || null;
+
+    let resData = await Report.findByIdAndUpdate(
+      leadDataId,
+      {
+        updated_by: updatedByName,
+        is_lead: false,
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (resData) {
+      res.status(200).json({ message: "Succesfully updated the lead status" });
+    } else {
+      sendError(res, 500, "Unable to update the lead status");
+    }
+  } catch (e) {
+    sendError(res, 500, e.message);
+  }
+}
+
+async function handleEditReport(req, res) {
+  try {
+    let data = req.body;
+    const updated_by = req.headers.name;
+    data = { ...data, updated_by };
+
+    console.log(data);
+
+    const resData = await Report.findByIdAndUpdate(data._id, data, {
+      new: true,
+    });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No report found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleGetReportById(req, res) {
+  try {
+    let data = req.headers;
+
+    const resData = await Report.findById(data.id).lean();
+
+    if (!resData) sendError(res, 400, "No report found with the id");
+    else res.status(200).json(resData);
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleGetNearestFollowUps(req, res) {
+  try {
+    let marketer_name = req.headers.marketer_name;
+    let query = {
+      is_lead: false,
+      followup_done: false,
+      followup_date: { $ne: "" },
+    };
+
+    if (marketer_name) {
+      query.marketer_name = marketer_name;
+    }
+
+    let resData = await Report.find(query).sort({ followup_date: 1 }).lean();
+
+    if (marketer_name) {
+      res.status(200).json(resData);
+    } else {
+      let returnData = resData.reduce((acc, entry) => {
+        const existingEntry = acc.find(
+          (item) => item.marketer_name === entry.marketer_name,
+        );
+
+        if (existingEntry) {
+          existingEntry.followups_count += 1;
+        } else {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            followup_date: entry.followup_date,
+            followups_count: 1,
+          });
+        }
+
+        return acc;
+      }, []);
+
+      if (returnData) {
+        res.status(200).json(returnData);
+      } else {
+        sendError(res, 500, "No data found");
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
 
 async function handleGetDailyReportsLast5Days(req, res) {
   try {
@@ -209,118 +353,6 @@ async function handleGetDailyReportsLast5Days(req, res) {
     if (resData && returnData) {
       res.status(200).json(returnData);
     } else sendError(res, 500, "No data found");
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetNearestFollowUps(req, res) {
-  try {
-    let marketer_name = req.headers.marketer_name;
-    let query = {
-      followup_done: false,
-      followup_date: { $ne: "" },
-    };
-
-    if (marketer_name) {
-      query.marketer_name = marketer_name;
-    }
-
-    let resData = await Report.find(query).sort({ followup_date: 1 }).lean();
-
-    if (marketer_name) {
-      res.status(200).json(resData);
-    } else {
-      let returnData = resData.reduce((acc, entry) => {
-        const existingEntry = acc.find(
-          (item) => item.marketer_name === entry.marketer_name,
-        );
-
-        if (existingEntry) {
-          existingEntry.followups_count += 1;
-        } else {
-          acc.push({
-            marketer_name: entry.marketer_name,
-            followup_date: entry.followup_date,
-            followups_count: 1,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      if (returnData) {
-        res.status(200).json(returnData);
-      } else {
-        sendError(res, 500, "No data found");
-      }
-    }
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleFinishFollowup(req, res) {
-  try {
-    let followupDataId = req.headers.id;
-    let updatedByName = req.headers.updated_by || null;
-
-    let resData = await Report.findByIdAndUpdate(
-      followupDataId,
-      {
-        updated_by: updatedByName,
-        followup_done: true,
-      },
-      {
-        new: true,
-      },
-    );
-
-    if (resData) {
-      res
-        .status(200)
-        .json({ message: "Succesfully updated the followup status" });
-    } else {
-      sendError(res, 500, "Unable to update the followup status");
-    }
-  } catch (e) {
-    sendError(res, 500, e.message);
-  }
-}
-
-async function handleEditReport(req, res) {
-  try {
-    let data = req.body;
-    const updated_by = req.headers.name;
-    data = { ...data, updated_by };
-
-    console.log(data);
-
-    const resData = await Report.findByIdAndUpdate(data._id, data, {
-      new: true,
-    });
-
-    if (resData) {
-      res.status(200).json(resData);
-    } else {
-      sendError(res, 400, "No report found");
-    }
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
-
-async function handleGetReportById(req, res) {
-  try {
-    let data = req.headers;
-
-    const resData = await Report.findById(data.id).lean();
-
-    if (!resData) sendError(res, 400, "No report found with the id");
-    else res.status(200).json(resData);
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
@@ -383,6 +415,8 @@ export default async function handle(req, res) {
         await handleGetNearestFollowUps(req, res);
       } else if (req.headers.finishfollowup) {
         await handleFinishFollowup(req, res);
+      } else if (req.headers.finishlead) {
+        await handleFinishLead(req, res);
       } else if (req.headers.getreportbyid) {
         await handleGetReportById(req, res);
       } else if (req.headers.getdailyreportstoday) {

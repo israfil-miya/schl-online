@@ -72,6 +72,7 @@ export default function Report(props) {
         headers: {
           "Content-Type": "application/json",
           getallreports: true,
+          onlylead: true,
           page,
           item_per_page: itemPerPage,
         },
@@ -98,6 +99,7 @@ export default function Report(props) {
         headers: {
           "Content-Type": "application/json",
           getallreports: true,
+          onlylead: true,
           isfilter: true,
           ...filters,
           page,
@@ -367,6 +369,49 @@ export default function Report(props) {
     });
   }
 
+  async function handlefinishlead() {
+    let result;
+    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/crm", {
+      method: "GET",
+      headers: {
+        finishlead: true,
+        updated_by: session.user?.real_name,
+        id: manageData._id,
+        "Content-Type": "application/json",
+      },
+    });
+    result = await res.json();
+    if (!result.error) {
+      toast.success("Changed the status of followup");
+      if (!isFiltered) await getAllReports();
+      else await getAllReportsFiltered();
+    } else {
+      toast.error("Something gone wrong!");
+    }
+    setManageData({
+      _id: "",
+      marketer_id: "",
+      marketer_name: "",
+      calling_date: "",
+      followup_date: "",
+      country: "",
+      designation: "",
+      website: "",
+      category: "",
+      company_name: "",
+      contact_person: "",
+      contact_number: "",
+      email_address: "",
+      calling_status: "",
+      linkedin: "",
+      calling_date_history: [],
+      updated_by: "",
+      followup_done: false,
+      is_test: false,
+      is_prospected: false,
+    });
+  }
+
   function handlePrevious() {
     setPage((p) => {
       if (p === 1) return p;
@@ -409,9 +454,7 @@ export default function Report(props) {
 
   return (
     <>
-      <Navbar
-        navFor={session.user.role == "marketer" ? "call-reports" : "crm"}
-      />
+      <Navbar navFor={session.user.role == "marketer" ? "lead-mine" : "crm"} />
       <div className="containter">
         <div className="d-flex mt-3">
           <div className="container">
@@ -604,6 +647,14 @@ export default function Report(props) {
                         Edit
                       </button>
                       <button
+                        onClick={() => setManageData(item)}
+                        className="btn btn-sm me-1 btn-outline-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#finishModal"
+                      >
+                        Finish
+                      </button>
+                      <button
                         onClick={() => setManageData({ _id: item._id })}
                         className="btn btn-sm btn-outline-danger me-1"
                         data-bs-toggle="modal"
@@ -648,7 +699,7 @@ export default function Report(props) {
             <div className="modal-body">
               <div className="mb-3">
                 <label htmlFor="calling_date" className="form-label">
-                  First Calling Date
+                  Calling Date
                 </label>
                 <input
                   disabled
@@ -657,35 +708,6 @@ export default function Report(props) {
                   className="form-control"
                   id="calling_date"
                 />
-              </div>
-              <div className="mb-1">
-                <label htmlFor="calling_date" className="form-label">
-                  Calling Date History
-                </label>
-                <textarea
-                  disabled
-                  value={manageData.calling_date_history
-                    ?.map((date) => `${convertToDDMMYYYY(date)}`)
-                    .join("\n")}
-                  type="date"
-                  className="form-control"
-                  id="calling_date"
-                />
-              </div>
-              <div className="mb-3">
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    id="myCheckbox"
-                    className="form-check-input"
-                    checked={isRecall}
-                    onChange={(e) => setIsRecall((prevData) => !prevData)}
-                  />
-
-                  <label htmlFor="myCheckbox" className="form-check-label">
-                    Recall
-                  </label>
-                </div>
               </div>
               <div className="mb-3">
                 <label htmlFor="followup_date" className="form-label">
@@ -1190,6 +1212,49 @@ export default function Report(props) {
                 className="btn btn-outline-primary"
               >
                 General Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="modal fade"
+        id="finishModal"
+        tabIndex="-1"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Finish Confirmation
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure?</p>
+            </div>
+            <div className="modal-footer p-1">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                data-bs-dismiss="modal"
+              >
+                No
+              </button>
+              <button
+                onClick={handlefinishlead}
+                type="button"
+                className="btn btn-sm btn-outline-success"
+                data-bs-dismiss="modal"
+              >
+                Yes
               </button>
             </div>
           </div>

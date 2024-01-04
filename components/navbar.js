@@ -365,11 +365,19 @@ export default function Navbar({ navFor, shortNote }) {
 
             <Link
               className={`${styles.navitem} ${
-                navFor === "call-report-submit" ? styles.active : ""
+                navFor === "report-submition" ? styles.active : ""
               }`}
               href={`/crm/marketer/report`}
             >
-              Call Report Submit
+              Report Submition
+            </Link>
+            <Link
+              className={`${styles.navitem} ${
+                navFor === "lead-mine" ? styles.active : ""
+              }`}
+              href={`/crm/lead-mine`}
+            >
+              Lead Mine
             </Link>
           </>
         ) : null}
