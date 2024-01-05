@@ -167,7 +167,7 @@ export default function Report(props) {
         method: "POST",
         body: JSON.stringify({
           req_type: "Report Delete",
-          req_by: session.user.name,
+          req_by: session.user.real_name,
           id: manageData._id,
         }),
         headers: {
@@ -258,7 +258,7 @@ export default function Report(props) {
 
           const submitData = {
             req_type: "Report Edit",
-            req_by: session.user.name,
+            req_by: session.user.real_name,
             id: manageData._id,
             ...manageData,
             calling_date_history: manageData.calling_date_history.includes(

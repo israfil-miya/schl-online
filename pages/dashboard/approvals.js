@@ -247,7 +247,7 @@ export default function Approvals() {
         method: "POST",
         body: JSON.stringify({
           ...data,
-          checked_by: session.user.name,
+          checked_by: session.user.real_name,
         }),
         headers: {
           "Content-Type": "application/json",

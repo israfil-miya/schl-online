@@ -126,7 +126,7 @@ export default function Followup() {
 
           const submitData = {
             req_type: "Report Edit",
-            req_by: session.user.name,
+            req_by: session.user.real_name,
             id: manageData._id,
             ...manageData,
             calling_date_history: manageData.calling_date_history.includes(

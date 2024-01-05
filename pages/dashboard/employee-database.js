@@ -157,7 +157,7 @@ export default function EmployeeDatabase() {
       method: "POST",
       body: JSON.stringify({
         req_type: "Employee Delete",
-        req_by: session.user.name,
+        req_by: session.user.real_name,
         id: manageData._id,
       }),
       headers: {

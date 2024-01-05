@@ -94,7 +94,7 @@ export default function Users() {
           method: "POST",
           body: JSON.stringify({
             req_type: "User Create",
-            req_by: session.user.name,
+            req_by: session.user.real_name,
             ...newUserData,
           }),
           headers: {
@@ -141,7 +141,7 @@ export default function Users() {
         method: "POST",
         body: JSON.stringify({
           req_type: "User Delete",
-          req_by: session.user.name,
+          req_by: session.user.real_name,
           id: deleteUserData._id,
           ...deleteUserData,
         }),

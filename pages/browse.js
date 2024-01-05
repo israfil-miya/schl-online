@@ -194,7 +194,7 @@ export default function Browse() {
         method: "POST",
         body: JSON.stringify({
           req_type: "Task Delete",
-          req_by: session.user.name,
+          req_by: session.user.real_name,
           id: manageData._id,
         }),
         headers: {

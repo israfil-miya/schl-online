@@ -138,7 +138,7 @@ export default function Clients() {
         method: "POST",
         body: JSON.stringify({
           req_type: "Client Delete",
-          req_by: session.user.name,
+          req_by: session.user.real_name,
           id: deleteClientData._id,
         }),
         headers: {

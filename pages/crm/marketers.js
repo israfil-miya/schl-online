@@ -146,6 +146,7 @@ export default function Marketers(props) {
     let total_calls_made = 0;
     let total_test_jobs = 0;
     let total_prospects = 0;
+    let total_leads = 0;
 
     let dailyReportStatus = await getDailyReportStatus();
 
@@ -160,6 +161,9 @@ export default function Marketers(props) {
         : 0;
       total_prospects += parseInt(FiveDayReportOfMarketer.data.total_prospects)
         ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
+        : 0;
+      total_leads += parseInt(FiveDayReportOfMarketer.data.total_leads)
+        ? parseInt(FiveDayReportOfMarketer.data.total_leads)
         : 0;
       parsedTableRows.push(
         <tr key={index}>
@@ -182,6 +186,9 @@ export default function Marketers(props) {
           <td className="text-center" style={{ padding: "0px" }}>
             {FiveDayReportOfMarketer.data.total_test_jobs}
           </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_leads}
+          </td>
         </tr>,
       );
     });
@@ -205,6 +212,9 @@ export default function Marketers(props) {
         <th className="text-center" style={{ padding: "0px" }}>
           {total_test_jobs}
         </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_leads}
+        </th>
       </tr>,
     );
 
@@ -216,6 +226,7 @@ export default function Marketers(props) {
     let total_calls_made = 0;
     let total_test_jobs = 0;
     let total_prospects = 0;
+    let total_leads = 0;
 
     let todayReportStatus = await getTodayReportStatus();
 
@@ -228,6 +239,9 @@ export default function Marketers(props) {
         : 0;
       total_prospects += parseInt(TodayReportOfMarketer.data.total_prospects)
         ? parseInt(TodayReportOfMarketer.data.total_prospects)
+        : 0;
+      total_leads += parseInt(TodayReportOfMarketer.data.total_leads)
+        ? parseInt(TodayReportOfMarketer.data.total_leads)
         : 0;
       parsedTableRows.push(
         <tr key={index}>
@@ -250,6 +264,9 @@ export default function Marketers(props) {
           <td className="text-center" style={{ padding: "0px" }}>
             {TodayReportOfMarketer.data.total_test_jobs}
           </td>
+          <td className="text-center" style={{ padding: "0px" }}>
+            {TodayReportOfMarketer.data.total_leads}
+          </td>
         </tr>,
       );
     });
@@ -272,6 +289,9 @@ export default function Marketers(props) {
         </th>
         <th className="text-center" style={{ padding: "0px" }}>
           {total_test_jobs}
+        </th>
+        <th className="text-center" style={{ padding: "0px" }}>
+          {total_leads}
         </th>
       </tr>,
     );
@@ -370,6 +390,12 @@ export default function Marketers(props) {
                   >
                     Tests
                   </th>
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Leads
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -425,6 +451,12 @@ export default function Marketers(props) {
                     style={{ backgroundColor: "#212529", color: "#fff" }}
                   >
                     Tests
+                  </th>
+                  <th
+                    className="text-center"
+                    style={{ backgroundColor: "#212529", color: "#fff" }}
+                  >
+                    Leads
                   </th>
                 </tr>
               </thead>

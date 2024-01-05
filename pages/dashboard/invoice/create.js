@@ -276,7 +276,7 @@ export default function ClientDetails() {
           body: JSON.stringify({
             client_id: InvoiceData.customer._id,
             client_code: InvoiceData.customer.client_code,
-            created_by: session.user.name,
+            created_by: session.user.real_name,
             time_period: {
               fromDate: fromTime,
               toDate: toTime || getFormattedDate(),

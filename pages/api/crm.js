@@ -144,7 +144,11 @@ async function handleGetAllReports(req, res) {
         ? Report.find({}).lean()
         : Report.aggregate([
             { $match: searchQuery },
-            { $sort: { calling_date: -1 } },
+            {
+              $sort: {
+                createdAt: -1,
+              },
+            },
             { $skip: skip },
             { $limit: ITEMS_PER_PAGE },
           ]);
@@ -318,7 +322,7 @@ async function handleGetDailyReportsLast5Days(req, res) {
     let resDataPromises = validDates.map((date) =>
       Report.find(
         { calling_date_history: date },
-        { marketer_name: 1, is_prospected: 1, is_test: 1 },
+        { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
       ).lean(),
     );
 
@@ -333,19 +337,36 @@ async function handleGetDailyReportsLast5Days(req, res) {
 
       if (existingEntry) {
         // Update existing entry with new data
-        existingEntry.data.total_calls_made += 1;
-        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
-        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+        if (!entry.is_lead) {
+          existingEntry.data.total_calls_made += 1;
+          if (entry.is_prospected) existingEntry.data.total_prospects += 1;
+          if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+        } else {
+          if (entry.is_lead) existingEntry.data.total_leads += 1;
+        }
       } else {
+        if (!entry.is_lead) {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 1,
+              total_prospects: entry.is_prospected ? 1 : 0,
+              total_test_jobs: entry.is_test ? 1 : 0,
+              total_leads: 0,
+            },
+          });
+        } else {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 0,
+              total_prospects: 0,
+              total_test_jobs: 0,
+              total_leads: 1,
+            },
+          });
+        }
         // Create a new entry if the marketer doesn't exist in the result array
-        acc.push({
-          marketer_name: entry.marketer_name,
-          data: {
-            total_calls_made: 1,
-            total_prospects: entry.is_prospected ? 1 : 0,
-            total_test_jobs: entry.is_test ? 1 : 0,
-          },
-        });
       }
 
       return acc;
@@ -364,7 +385,10 @@ async function handleGetDailyReportsToday(req, res) {
   try {
     const today = moment().utc().format("YYYY-MM-DD");
 
-    let resData = await Report.find({ calling_date_history: today });
+    let resData = await Report.find(
+      { calling_date_history: today },
+      { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
+    ).lean();
 
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
@@ -374,19 +398,36 @@ async function handleGetDailyReportsToday(req, res) {
 
       if (existingEntry) {
         // Update existing entry with new data
-        existingEntry.data.total_calls_made += 1;
-        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
-        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+        if (!entry.is_lead) {
+          existingEntry.data.total_calls_made += 1;
+          if (entry.is_prospected) existingEntry.data.total_prospects += 1;
+          if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+        } else {
+          if (entry.is_lead) existingEntry.data.total_leads += 1;
+        }
       } else {
+        if (!entry.is_lead) {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 1,
+              total_prospects: entry.is_prospected ? 1 : 0,
+              total_test_jobs: entry.is_test ? 1 : 0,
+              total_leads: 0,
+            },
+          });
+        } else {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 0,
+              total_prospects: 0,
+              total_test_jobs: 0,
+              total_leads: 1,
+            },
+          });
+        }
         // Create a new entry if the marketer doesn't exist in the result array
-        acc.push({
-          marketer_name: entry.marketer_name,
-          data: {
-            total_calls_made: 1,
-            total_prospects: entry.is_prospected ? 1 : 0,
-            total_test_jobs: entry.is_test ? 1 : 0,
-          },
-        });
       }
 
       return acc;
