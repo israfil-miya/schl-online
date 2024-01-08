@@ -463,7 +463,7 @@ export default function Marketers(props) {
               <tbody>
                 {dailyReportStatusLoading ? (
                   <tr key={0}>
-                    <td colSpan="4" className="text-center">
+                    <td colSpan="5" className="text-center">
                       Loading...
                     </td>
                   </tr>

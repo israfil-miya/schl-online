@@ -257,7 +257,8 @@ export default function Approvals() {
       const resData = await fetchApi(url, options);
 
       if (!resData.error) {
-        await GetAllApprovals();
+        if (!isFiltered) await GetAllApprovals();
+        else await GetAllApprovalsFiltered();
       } else {
         toast.error("Unable to handle response");
       }

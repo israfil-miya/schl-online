@@ -94,7 +94,7 @@ export default function Navbar({ navFor, shortNote }) {
             <div className="navbar-text d-flex me-3">
               <button
                 className="btn btn-outline-primary btn-sm me-2"
-                onClick={() => router.push("/account")}
+                onClick={() => router.push("/account/profile")}
               >
                 Account <UilUserCircle />
               </button>

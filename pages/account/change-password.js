@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useSession, getSession } from "next-auth/react";
-import Navbar from "../components/navbar";
+import Navbar from "../../components/navbar";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 import { toast } from "sonner";
 
@@ -45,7 +46,7 @@ export default function Account() {
         setPassword("");
         setConfirmPassword("");
       } else {
-        router.replace(`/admin?error=${result.message}`);
+        toast.error(result.message);
       }
     } catch (error) {
       console.error("Error editing credentials:", error);
@@ -63,8 +64,8 @@ export default function Account() {
     <>
       <Navbar navFor="account" />
       <div className="container my-5">
-        <div className="add-order">
-          <h5 className="py-3">Account Settings</h5>
+        <div className="account-settings">
+          <h5 className="py-3">Change Password</h5>
           <form onSubmit={handleEdit}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
@@ -173,6 +174,19 @@ export default function Account() {
           </form>
         </div>
       </div>
+
+      <style jsx>
+        {`
+          .vertical-line {
+            width: 1px;
+            height: 100%;
+            background-color: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+        `}
+      </style>
     </>
   );
 }
