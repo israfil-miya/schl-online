@@ -21,6 +21,9 @@ export default function Create() {
     gross_salary: 0,
     bonus_eid_ul_fitr: 0,
     bonus_eid_ul_adha: 0,
+    division: "",
+    branch: "",
+    provident_fund: 0,
     status: "Active",
     company_provided_name: "",
     note: "",
@@ -64,6 +67,9 @@ export default function Create() {
       gross_salary: 0,
       bonus_eid_ul_fitr: 0,
       bonus_eid_ul_adha: 0,
+      division: "",
+      branch: "",
+      provident_fund: 0,
       status: "Active",
       company_provided_name: "",
       note: "",
@@ -309,6 +315,42 @@ export default function Create() {
               </div>
             )}
 
+            {/* Bramch */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Branch
+              </label>
+              <input
+                value={newEmployeeData.branch}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    branch: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
+            {/* Division */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Division
+              </label>
+              <input
+                value={newEmployeeData.division}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    division: e.target.value,
+                  }))
+                }
+                type="text"
+                className="form-control"
+              />
+            </div>
+
             {/* Gross Salary */}
             <div className="mb-3">
               <label htmlFor="date" className="form-label">
@@ -320,6 +362,24 @@ export default function Create() {
                   setNewEmployeeData((prevData) => ({
                     ...prevData,
                     gross_salary: e.target.value,
+                  }))
+                }
+                type="number"
+                className="form-control"
+              />
+            </div>
+
+            {/* Provident Fund */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                Provident Fund
+              </label>
+              <input
+                value={newEmployeeData.provident_fund}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    provident_fund: e.target.value,
                   }))
                 }
                 type="number"

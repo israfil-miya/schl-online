@@ -115,6 +115,15 @@ const ApprovalSchema = new mongoose.Schema(
     bonus_eid_ul_adha: {
       type: String,
     },
+    provident_fund: {
+      type: String,
+    },
+    branch: {
+      type: String,
+    },
+    division: {
+      type: String,
+    },
     status: {
       type: String,
     },

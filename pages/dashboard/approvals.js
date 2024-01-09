@@ -1854,6 +1854,32 @@ export default function Approvals() {
                 </div>
               )}
 
+              {/* Bramch */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Branch
+                </label>
+                <input
+                  value={employeeData.branch}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Division */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Division
+                </label>
+                <input
+                  value={employeeData.division}
+                  disabled
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
               {/* Gross Salary */}
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
@@ -1861,6 +1887,19 @@ export default function Approvals() {
                 </label>
                 <input
                   value={employeeData.gross_salary}
+                  disabled
+                  type="number"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Provident Fund */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Provident Fund
+                </label>
+                <input
+                  value={employeeData.provident_fund}
                   disabled
                   type="number"
                   className="form-control"

@@ -53,7 +53,7 @@ export default function Page() {
   return (
     <>
       <Navbar navFor="account" />
-      <div className="g-4">
+      <div className="overflow-hidden g-4">
         <div className="row justify-content-between">
           <div className="col-3 bg-light p-4">
             <div className="bg-white me-1 p-3 rounded">

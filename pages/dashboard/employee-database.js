@@ -16,14 +16,6 @@ export default function EmployeeDatabase() {
   const { data: session } = useSession();
 
   const [filters, setFilters] = useState({
-    // country: "",
-    // company_name: "",
-    // category: "",
-    // fromdate: "",
-    // todate: "",
-    // marketer_name: "",
-    // test: false,
-    // prospect: false,
     servicetime: "",
     blood_group: "",
     generalsearchstring: "",
@@ -587,6 +579,42 @@ export default function EmployeeDatabase() {
                 </div>
               )}
 
+              {/* Bramch */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Branch
+                </label>
+                <input
+                  value={manageData.branch}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      branch: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Division */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Division
+                </label>
+                <input
+                  value={manageData.division}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      division: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                />
+              </div>
+
               {/* Gross Salary */}
               <div className="mb-3">
                 <label htmlFor="date" className="form-label">
@@ -598,6 +626,24 @@ export default function EmployeeDatabase() {
                     setManageData((prevData) => ({
                       ...prevData,
                       gross_salary: e.target.value,
+                    }))
+                  }
+                  type="number"
+                  className="form-control"
+                />
+              </div>
+
+              {/* Provident Fund */}
+              <div className="mb-3">
+                <label htmlFor="date" className="form-label">
+                  Provident Fund
+                </label>
+                <input
+                  value={manageData.provident_fund}
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      provident_fund: e.target.value,
                     }))
                   }
                   type="number"
