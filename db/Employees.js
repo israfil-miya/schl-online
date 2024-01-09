@@ -51,6 +51,15 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
       default: "Active",
     },
+    provident_fund: {
+      type: String,
+    },
+    branch: {
+      type: String,
+    },
+    division: {
+      type: String,
+    },
     company_provided_name: {
       type: String,
     },
