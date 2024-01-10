@@ -133,7 +133,9 @@ export default function Users() {
 
     let result;
 
-    console.log("Delete User Data: ", deleteUserData);
+    let deleteUserDataId = deleteUserData._id;
+
+    delete deleteUserData._id, delete deleteUserData.__v;
 
     const res = await fetch(
       process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
@@ -142,7 +144,7 @@ export default function Users() {
         body: JSON.stringify({
           req_type: "User Delete",
           req_by: session.user.real_name,
-          id: deleteUserData._id,
+          id: deleteUserDataId,
           ...deleteUserData,
         }),
         headers: {
@@ -158,7 +160,7 @@ export default function Users() {
     // console.log(result);
 
     if (result.error) {
-      router.replace("/admin?error=" + result.message);
+      toast.error(result.message);
     }
   }
 

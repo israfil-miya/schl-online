@@ -15,9 +15,9 @@ function sendError(res, statusCode, message) {
 
 async function handleNewReq(req, res) {
   const data = req.body;
+  console.log("data: ", data);
 
   try {
-    console.log("data: ", data);
     const resData = await Approval.create(data);
 
     if (resData) {
