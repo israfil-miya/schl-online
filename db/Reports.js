@@ -36,6 +36,10 @@ const ReportSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    lead_withdrawn: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

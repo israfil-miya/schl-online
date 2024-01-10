@@ -52,12 +52,30 @@ const handleNewReport = async (req, res) => {
     let data = req.body;
     data = { ...data, calling_date_history: [data.calling_date] };
 
-    const resData = await Report.create(data);
+    if (data.is_lead) {
+      let existingReportData = await Report.findOne({
+        company_name: data.company_name,
+      });
 
-    if (resData) {
-      res.status(200).json(resData);
+      if (!existingReportData) {
+        let newReportData = await Report.create(data);
+
+        if (newReportData) {
+          res.status(200).json(newReportData);
+        } else {
+          sendError(res, 400, "Unable to create a new report");
+        }
+      } else {
+        sendError(res, 400, "This lead already exists in database");
+      }
     } else {
-      sendError(res, 400, "No order found");
+      let newReportData = await Report.create(data);
+
+      if (newReportData) {
+        res.status(200).json(newReportData);
+      } else {
+        sendError(res, 400, "Unable to create a new report");
+      }
     }
   } catch (e) {
     console.error(e);
@@ -99,7 +117,7 @@ async function handleGetAllReports(req, res) {
       query.marketer_name = { $regex: marketer_name, $options: "i" };
     if (test) query.is_test = test;
     if (prospect) query.is_prospected = prospect;
-    if (onlylead) query.is_lead = onlylead;
+    query.is_lead = onlylead || false;
 
     if (fromdate || todate) {
       query.calling_date = {};
@@ -202,24 +220,64 @@ async function handleFinishFollowup(req, res) {
   }
 }
 
+const getTodayDate = () => {
+  const today = new Date();
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  return formatDate(today);
+};
+
 async function handleFinishLead(req, res) {
   try {
     let leadDataId = req.headers.id;
     let updatedByName = req.headers.updated_by || null;
 
-    let resData = await Report.findByIdAndUpdate(
+    let leadData = await Report.findByIdAndUpdate(
       leadDataId,
       {
         updated_by: updatedByName,
-        is_lead: false,
+        is_lead: true,
+        lead_withdrawn: true,
       },
       {
         new: true,
       },
     );
 
-    if (resData) {
-      res.status(200).json({ message: "Succesfully updated the lead status" });
+    if (leadData) {
+      let callReportData = await Report.create({
+        calling_date: getTodayDate(),
+        followup_date: leadData.followup_date,
+        country: leadData.country,
+        website: leadData.website,
+        category: leadData.category,
+        company_name: leadData.company_name,
+        contact_person: leadData.contact_person,
+        designation: leadData.designation,
+        contact_number: leadData.contact_number,
+        email_address: leadData.email_address,
+        calling_status: leadData.calling_status,
+        calling_date_history: leadData.calling_date_history,
+        linkedin: leadData.linkedin,
+        marketer_id: leadData.marketer_id,
+        marketer_name: leadData.marketer_name,
+        is_test: leadData.is_test,
+        is_prospected: leadData.is_prospected,
+        is_lead: false,
+        lead_withdrawn: true,
+      });
+
+      if (callReportData) {
+        res.status(200).json({ message: "Succesfully withdrawn the lead" });
+      } else {
+        sendError(res, 500, "Unable to withdraw the lead");
+      }
     } else {
       sendError(res, 500, "Unable to update the lead status");
     }

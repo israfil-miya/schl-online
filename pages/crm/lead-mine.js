@@ -612,56 +612,62 @@ export default function Report(props) {
                       className="align-middle"
                       style={{ textAlign: "center" }}
                     >
-                      <button
-                        onClick={() => {
-                          setIsRecall(0);
-                          setManageData({
-                            _id: item._id || "",
-                            marketer_id: item.marketer_id || "",
-                            marketer_name: item.marketer_name || "",
-                            calling_date: item.calling_date || "",
-                            followup_date: item.followup_date || "",
-                            country: item.country || "",
-                            designation: item.designation || "",
-                            website: item.website || "",
-                            category: item.category || "",
-                            company_name: item.company_name || "",
-                            contact_person: item.contact_person || "",
-                            contact_number: item.contact_number || "",
-                            email_address: item.email_address || "",
-                            calling_status: item.calling_status || "",
-                            linkedin: item.linkedin || "",
-                            calling_date_history:
-                              item.calling_date_history || [],
-                            updated_by: item.updated_by || "",
-                            followup_done: item.followup_done || false,
-                            is_test: item.is_test || false,
-                            is_prospected: item.is_prospected || false,
-                          });
-                          setEditedBy(item.updated_by || "");
-                        }}
-                        className="btn btn-sm btn-outline-primary me-1"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editModal"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setManageData(item)}
-                        className="btn btn-sm me-1 btn-outline-success"
-                        data-bs-toggle="modal"
-                        data-bs-target="#finishModal"
-                      >
-                        Finish
-                      </button>
-                      <button
-                        onClick={() => setManageData({ _id: item._id })}
-                        className="btn btn-sm btn-outline-danger me-1"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteModal"
-                      >
-                        Delete
-                      </button>
+                      {item.lead_withdrawn === true ? (
+                        <>Withdrawn</>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setIsRecall(0);
+                              setManageData({
+                                _id: item._id || "",
+                                marketer_id: item.marketer_id || "",
+                                marketer_name: item.marketer_name || "",
+                                calling_date: item.calling_date || "",
+                                followup_date: item.followup_date || "",
+                                country: item.country || "",
+                                designation: item.designation || "",
+                                website: item.website || "",
+                                category: item.category || "",
+                                company_name: item.company_name || "",
+                                contact_person: item.contact_person || "",
+                                contact_number: item.contact_number || "",
+                                email_address: item.email_address || "",
+                                calling_status: item.calling_status || "",
+                                linkedin: item.linkedin || "",
+                                calling_date_history:
+                                  item.calling_date_history || [],
+                                updated_by: item.updated_by || "",
+                                followup_done: item.followup_done || false,
+                                is_test: item.is_test || false,
+                                is_prospected: item.is_prospected || false,
+                              });
+                              setEditedBy(item.updated_by || "");
+                            }}
+                            className="btn btn-sm btn-outline-primary me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setManageData(item)}
+                            className="btn btn-sm me-1 btn-outline-success"
+                            data-bs-toggle="modal"
+                            data-bs-target="#finishModal"
+                          >
+                            Finish
+                          </button>
+                          <button
+                            onClick={() => setManageData({ _id: item._id })}
+                            className="btn btn-sm btn-outline-danger me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
