@@ -263,10 +263,31 @@ async function handleGetAllApprovals(req, res) {
         applovals = await Approval.find(query)
           .sort({
             updatedAt: -1,
-            checked_by: 1,
           })
           .skip(skip)
-          .limit(ITEMS_PER_PAGE);
+          .limit(ITEMS_PER_PAGE).exec();
+
+
+      const processedAppprovals = applovals.map((approvalReq) => {
+        let priority = 0;
+
+        switch (true) {
+          case approvalReq.checked_by === "None":
+            priority = 1;
+            break;
+          default:
+            priority = 2;
+            break;
+        }
+
+        return {
+          ...approvalReq.toObject(),
+          priority,
+        };
+      });
+      const sortedApprovals = processedAppprovals.sort(
+        (a, b) => a.priority - b.priority,
+      );
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
 
@@ -275,7 +296,7 @@ async function handleGetAllApprovals(req, res) {
           count,
           pageCount,
         },
-        items: applovals,
+        items: sortedApprovals,
       });
     }
   } catch (e) {

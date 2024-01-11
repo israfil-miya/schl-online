@@ -32,6 +32,9 @@ export default function Approvals() {
     waiting_check: false,
   });
 
+
+  const [selectedRows, setSelectedRows] = useState([]);
+
   const convertToDDMMYYYY = (dateString) => {
     const [year, month, day] = dateString.split("-");
     if (year.length != 4) return dateString;
@@ -283,6 +286,67 @@ export default function Approvals() {
     };
   }
 
+
+
+
+  // Function to handle the "Select All" checkbox
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      // If "Select All" is checked, select all rows
+      const allIds = approvals?.items?.filter((item) => item.checked_by === "None").map((item) => item._id)
+      setSelectedRows(allIds);
+    } else {
+      // If "Select All" is unchecked, clear all selections
+      setSelectedRows([]);
+    }
+  };
+
+  // Function to handle individual checkbox selection
+  const handleCheckboxChange = (id) => {
+    // Toggle the selection of the checkbox
+    setSelectedRows((prevSelectedRows) => {
+      if (prevSelectedRows.includes(id)) {
+        // If already selected, remove from selection
+        return prevSelectedRows.filter((rowId) => rowId !== id);
+      } else {
+        // If not selected, add to selection
+        return [...prevSelectedRows, id];
+      }
+    });
+  };
+
+  async function handleResponseMultiple(data) {
+    try {
+      console.log("THIS DATA BEFORE RESPONSE (MULTIPLE): ", data);
+
+      // const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
+      // const options = {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     ...data,
+      //     checked_by: session.user.real_name,
+      //   }),
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // };
+
+      // const resData = await fetchApi(url, options);
+
+      // if (!resData.error) {
+      //   if (!isFiltered) await GetAllApprovals();
+      //   else await GetAllApprovalsFiltered();
+      // } else {
+      //   toast.error("Unable to handle response");
+      // }
+      return;
+    } catch (error) {
+      console.error("Error handling response:", error);
+      toast.error("Error handling response");
+    }
+  }
+
+
   function handlePrevious() {
     setPage((p) => {
       if (p === 1) return p;
@@ -313,9 +377,9 @@ export default function Approvals() {
     <>
       <Navbar navFor="dashboard" />
       <div className="my-5">
-        <div className="container">
+        <div className="mx-4">
           <div
-            className="float-end"
+            className="float-end me-5"
             style={{ display: "flex", alignItems: "center" }}
           >
             <span className="me-3">
@@ -372,6 +436,38 @@ export default function Approvals() {
               Filter
             </button>
           </div>
+          <div className="float-start"
+            style={{ display: "flex", alignItems: "center" }}>
+
+
+            <div className="form-check">
+              <input
+                type="checkbox"
+                id="selectAllCheckbox"
+                checked={selectedRows.length === approvals?.items?.filter((item) => item.checked_by === "None").length}
+
+                className="form-check-input p-2"
+                onChange={handleSelectAll}
+              />
+              <label htmlFor="selectAllCheckbox">Select All</label>
+            </div>
+
+
+            {selectedRows.length !== 0 && <div className="align-middle text-center d-flex align-items-center ms-5 justify-content-center">
+              <button data-bs-toggle="modal"
+                data-bs-target="#confirmModalSelectedAll" onClick={() => setModalTempStore({
+                  approval_ids: selectedRows,
+                  response: "approve"
+                })} className="btn me-1 btn-sm btn-outline-success">{selectedRows.length === approvals?.items?.filter((item) => item.checked_by === "None").length ? "Approve All" : "Approve"}</button>
+              <button data-bs-toggle="modal"
+                data-bs-target="#confirmModalSelectedAll"
+                onClick={() => setModalTempStore({
+                  approval_ids: selectedRows,
+                  response: "reject"
+                })} className="btn btn-sm btn-outline-danger">{selectedRows.length === approvals?.items?.filter((item) => item.checked_by === "None").length ? "Reject All" : "Reject"}</button>
+            </div>}
+
+          </div>
         </div>
         <table
           style={{ overflow: "hidden" }}
@@ -379,6 +475,7 @@ export default function Approvals() {
         >
           <thead>
             <tr className="table-dark">
+              <th></th>
               <th>#</th>
               <th>Request Type</th>
               <th>Request Status</th>
@@ -391,22 +488,34 @@ export default function Approvals() {
             {approvals?.items?.length ? (
               approvals?.items?.map((approveReq, index) => (
                 <tr key={approveReq._id}>
+                  <td>
+                    <div className="form-check align-middle text-center d-flex align-items-center justify-content-center">
+                      <input
+                        disabled={approveReq.checked_by !== "None"}
+                        type="checkbox"
+                        id={`checkbox_${approveReq._id}`}
+                        className="form-check-input p-2"
+                        checked={selectedRows.includes(approveReq._id)}
+                        onChange={() => handleCheckboxChange(approveReq._id)}
+                      />
+                    </div>
+                  </td>
                   <td>{index + 1}</td>
                   <td>{approveReq.req_type}</td>
                   <td>
                     {!approveReq.is_rejected &&
-                    approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                       "Approved"
                     ) : (
                       <></>
                     )}
                     {approveReq.is_rejected &&
-                    approveReq.checked_by != "None" ? (
+                      approveReq.checked_by != "None" ? (
                       "Rejected"
                     ) : (
                       <></>
                     )}
-                    {approveReq.checked_by == "None" ? "Waiting" : <></>}
+                    {approveReq.checked_by == "None" ? "Waiting" : null}
                   </td>
                   <td>{approveReq.req_by}</td>
                   <td>
@@ -424,28 +533,20 @@ export default function Approvals() {
                     {approveReq.checked_by == "None" ? (
                       <>
                         <button
-                          onClick={() =>
-                            setModalTempStore({
-                              ...approveReq,
-                              response: "approve",
-                            })
-                          }
-                          data-bs-toggle="modal"
-                          data-bs-target="#confirmModal"
+                          onClick={() => handleResponse({
+                            ...approveReq,
+                            response: "approve"
+                          })}
                           className="btn btn-sm btn-outline-success me-1"
                         >
                           Approve
                         </button>
                         <button
+                          onClick={() => handleResponse({
+                            ...approveReq,
+                            response: "reject",
+                          })}
                           className="btn btn-sm btn-outline-danger me-1"
-                          onClick={() =>
-                            setModalTempStore({
-                              ...approveReq,
-                              response: "reject",
-                            })
-                          }
-                          data-bs-toggle="modal"
-                          data-bs-target="#confirmModal"
                         >
                           Reject
                         </button>
@@ -460,10 +561,10 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? GetUsersById(approveReq.id)
                                     : approveReq.req_type.split(" ")[0] ==
-                                        "Report"
+                                      "Report"
                                       ? GetReportById(approveReq.id)
                                       : approveReq.req_type.split(" ")[0] ==
-                                          "Employee"
+                                        "Employee"
                                         ? GetEmployeeById(approveReq.id)
                                         : null;
                             }}
@@ -477,10 +578,10 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? "#editModal1"
                                     : approveReq.req_type.split(" ")[0] ==
-                                        "Report"
+                                      "Report"
                                       ? "#editModal4"
                                       : approveReq.req_type.split(" ")[0] ==
-                                          "Employee"
+                                        "Employee"
                                         ? "#editModal5"
                                         : null
                             }
@@ -541,7 +642,7 @@ export default function Approvals() {
               ))
             ) : (
               <tr key={0}>
-                <td colSpan="6" className=" align-center text-center">
+                <td colSpan="7" className=" align-center text-center">
                   Nothing in approvals to Show.
                 </td>
               </tr>
@@ -1980,7 +2081,7 @@ export default function Approvals() {
 
       <div
         className="modal fade"
-        id="confirmModal"
+        id="confirmModalSelectedAll"
         tabIndex="-1"
         aria-hidden="true"
       >
@@ -2009,7 +2110,7 @@ export default function Approvals() {
                 No
               </button>
               <button
-                onClick={() => handleResponse(modalTempStore)}
+                onClick={() => handleResponseMultiple(modalTempStore)}
                 type="button"
                 className="btn btn-sm btn-outline-primary"
                 data-bs-dismiss="modal"
