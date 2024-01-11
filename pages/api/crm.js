@@ -263,7 +263,7 @@ async function handleFinishLead(req, res) {
         contact_number: leadData.contact_number,
         email_address: leadData.email_address,
         calling_status: leadData.calling_status,
-        calling_date_history: leadData.calling_date_history,
+        calling_date_history: [getTodayDate()],
         linkedin: leadData.linkedin,
         marketer_id: leadData.marketer_id,
         marketer_name: leadData.marketer_name,

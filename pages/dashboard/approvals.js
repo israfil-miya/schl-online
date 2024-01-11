@@ -32,7 +32,6 @@ export default function Approvals() {
     waiting_check: false,
   });
 
-
   const [selectedRows, setSelectedRows] = useState([]);
 
   const convertToDDMMYYYY = (dateString) => {
@@ -286,14 +285,13 @@ export default function Approvals() {
     };
   }
 
-
-
-
   // Function to handle the "Select All" checkbox
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       // If "Select All" is checked, select all rows
-      const allIds = approvals?.items?.filter((item) => item.checked_by === "None").map((item) => item._id)
+      const allIds = approvals?.items
+        ?.filter((item) => item.checked_by === "None")
+        .map((item) => item._id);
       setSelectedRows(allIds);
     } else {
       // If "Select All" is unchecked, clear all selections
@@ -345,7 +343,6 @@ export default function Approvals() {
       toast.error("Error handling response");
     }
   }
-
 
   function handlePrevious() {
     setPage((p) => {
@@ -436,37 +433,66 @@ export default function Approvals() {
               Filter
             </button>
           </div>
-          <div className="float-start"
-            style={{ display: "flex", alignItems: "center" }}>
-
-
+          <div
+            className="float-start"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <div className="form-check">
               <input
                 type="checkbox"
                 id="selectAllCheckbox"
-                checked={selectedRows.length === approvals?.items?.filter((item) => item.checked_by === "None").length}
-
+                checked={
+                  selectedRows.length ===
+                    approvals?.items?.filter(
+                      (item) => item.checked_by === "None",
+                    ).length &&
+                  approvals?.items?.filter((item) => item.checked_by === "None")
+                    .length !== 0
+                }
                 className="form-check-input p-2"
                 onChange={handleSelectAll}
               />
               <label htmlFor="selectAllCheckbox">Select All</label>
             </div>
 
-
-            {selectedRows.length !== 0 && <div className="align-middle text-center d-flex align-items-center ms-5 justify-content-center">
-              <button data-bs-toggle="modal"
-                data-bs-target="#confirmModalSelectedAll" onClick={() => setModalTempStore({
-                  approval_ids: selectedRows,
-                  response: "approve"
-                })} className="btn me-1 btn-sm btn-outline-success">{selectedRows.length === approvals?.items?.filter((item) => item.checked_by === "None").length ? "Approve All" : "Approve"}</button>
-              <button data-bs-toggle="modal"
-                data-bs-target="#confirmModalSelectedAll"
-                onClick={() => setModalTempStore({
-                  approval_ids: selectedRows,
-                  response: "reject"
-                })} className="btn btn-sm btn-outline-danger">{selectedRows.length === approvals?.items?.filter((item) => item.checked_by === "None").length ? "Reject All" : "Reject"}</button>
-            </div>}
-
+            {selectedRows.length !== 0 && (
+              <div className="align-middle text-center d-flex align-items-center ms-5 justify-content-center">
+                <button
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmModalSelectedAll"
+                  onClick={() =>
+                    setModalTempStore({
+                      approval_ids: selectedRows,
+                      response: "approve",
+                    })
+                  }
+                  className="btn me-1 btn-sm btn-outline-success"
+                >
+                  {selectedRows.length ===
+                  approvals?.items?.filter((item) => item.checked_by === "None")
+                    .length
+                    ? "Approve All"
+                    : "Approve"}
+                </button>
+                <button
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmModalSelectedAll"
+                  onClick={() =>
+                    setModalTempStore({
+                      approval_ids: selectedRows,
+                      response: "reject",
+                    })
+                  }
+                  className="btn btn-sm btn-outline-danger"
+                >
+                  {selectedRows.length ===
+                  approvals?.items?.filter((item) => item.checked_by === "None")
+                    .length
+                    ? "Reject All"
+                    : "Reject"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <table
@@ -504,13 +530,13 @@ export default function Approvals() {
                   <td>{approveReq.req_type}</td>
                   <td>
                     {!approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                    approveReq.checked_by != "None" ? (
                       "Approved"
                     ) : (
                       <></>
                     )}
                     {approveReq.is_rejected &&
-                      approveReq.checked_by != "None" ? (
+                    approveReq.checked_by != "None" ? (
                       "Rejected"
                     ) : (
                       <></>
@@ -533,19 +559,23 @@ export default function Approvals() {
                     {approveReq.checked_by == "None" ? (
                       <>
                         <button
-                          onClick={() => handleResponse({
-                            ...approveReq,
-                            response: "approve"
-                          })}
+                          onClick={() =>
+                            handleResponse({
+                              ...approveReq,
+                              response: "approve",
+                            })
+                          }
                           className="btn btn-sm btn-outline-success me-1"
                         >
                           Approve
                         </button>
                         <button
-                          onClick={() => handleResponse({
-                            ...approveReq,
-                            response: "reject",
-                          })}
+                          onClick={() =>
+                            handleResponse({
+                              ...approveReq,
+                              response: "reject",
+                            })
+                          }
                           className="btn btn-sm btn-outline-danger me-1"
                         >
                           Reject
@@ -561,10 +591,10 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? GetUsersById(approveReq.id)
                                     : approveReq.req_type.split(" ")[0] ==
-                                      "Report"
+                                        "Report"
                                       ? GetReportById(approveReq.id)
                                       : approveReq.req_type.split(" ")[0] ==
-                                        "Employee"
+                                          "Employee"
                                         ? GetEmployeeById(approveReq.id)
                                         : null;
                             }}
@@ -578,10 +608,10 @@ export default function Approvals() {
                                   : approveReq.req_type.split(" ")[0] == "User"
                                     ? "#editModal1"
                                     : approveReq.req_type.split(" ")[0] ==
-                                      "Report"
+                                        "Report"
                                       ? "#editModal4"
                                       : approveReq.req_type.split(" ")[0] ==
-                                        "Employee"
+                                          "Employee"
                                         ? "#editModal5"
                                         : null
                             }

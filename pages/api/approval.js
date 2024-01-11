@@ -265,8 +265,8 @@ async function handleGetAllApprovals(req, res) {
             updatedAt: -1,
           })
           .skip(skip)
-          .limit(ITEMS_PER_PAGE).exec();
-
+          .limit(ITEMS_PER_PAGE)
+          .exec();
 
       const processedAppprovals = applovals.map((approvalReq) => {
         let priority = 0;
