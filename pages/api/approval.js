@@ -24,7 +24,7 @@ async function handleNewReq(req, res) {
       console.log(resData);
       res.status(200).json(resData);
     } else {
-      sendError(res, 400, "Unable to send request");
+      sendError(res, 400, "Unable to handle response");
     }
   } catch (e) {
     console.error(e);
@@ -47,7 +47,7 @@ async function handleResponse(req, res) {
       console.log(resData);
       res.status(200).json(resData);
     } else {
-      sendError(res, 400, "Unable to send request");
+      sendError(res, 400, "Unable to handle response");
     }
   }
 
@@ -67,7 +67,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
 
@@ -101,7 +101,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
 
@@ -121,7 +121,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
 
@@ -140,7 +140,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
     if (data.req_type == "Report Delete") {
@@ -158,7 +158,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
     if (data.req_type == "Employee Delete") {
@@ -176,7 +176,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
     if (data.req_type == "Report Edit") {
@@ -203,7 +203,7 @@ async function handleResponse(req, res) {
         console.log(resData);
         res.status(200).json(updateApprovaL);
       } else {
-        sendError(res, 400, "Unable to send request");
+        sendError(res, 400, "Unable to handle response");
       }
     }
   }
@@ -305,6 +305,218 @@ async function handleGetAllApprovals(req, res) {
   }
 }
 
+async function handleResponseMultiple(req, res) {
+  const bodyData = req.body;
+
+  console.log("THE DATA ON HANDLE RESPONSE: ", bodyData);
+
+  if (bodyData.response === "reject") {
+    if (bodyData.approval_ids.length === 0) {
+      console.log("No approval IDs provided");
+      sendError(res, 400, "No approval IDs provided");
+      return;
+    }
+
+    const updatedApprovals = await Approval.updateMany(
+      { _id: { $in: bodyData.approval_ids } },
+      {
+        checked_by: bodyData.checked_by,
+        is_rejected: true,
+      },
+    ).lean();
+
+    if (updatedApprovals && updatedApprovals.modifiedCount > 0) {
+      console.log(updatedApprovals);
+      res.status(200).json(updatedApprovals);
+    } else {
+      console.log(updatedApprovals);
+      sendError(res, 400, "Unable to handle response");
+    }
+  }
+
+  if (bodyData.response === "approve") {
+    if (bodyData.approval_ids.length === 0) {
+      console.log("No approval IDs provided");
+      sendError(res, 400, "No approval IDs provided");
+      return;
+    }
+
+    const approvalPromises = [];
+
+    for (const approval_ID of bodyData.approval_ids) {
+      const data = await Approval.findById(approval_ID).lean();
+
+      if (data.req_type === "User Delete") {
+        const resData = await User.findByIdAndDelete(data.id);
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+
+      if (data.req_type === "User Create") {
+        const insertData = {
+          real_name: data.real_name,
+          name: data.name,
+          password: data.password,
+          role: data.role,
+        };
+
+        const resData = await User.findOneAndUpdate(
+          { name: data.name },
+          insertData,
+          {
+            new: true,
+            upsert: true,
+          },
+        );
+
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+
+      if (data.req_type == "Task Delete") {
+        const resData = await Order.findByIdAndDelete(data.id);
+
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+
+      if (data.req_type == "Client Delete") {
+        const resData = await Client.findByIdAndDelete(data.id);
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+
+      if (data.req_type == "Report Delete") {
+        const resData = await Report.findByIdAndDelete(data.id);
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+
+      if (data.req_type == "Employee Delete") {
+        const resData = await Employee.findByIdAndDelete(data.id);
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+
+      if (data.req_type == "Report Edit") {
+        let editData = { ...data };
+        delete editData.id;
+        delete editData.req_by;
+        delete editData.req_type;
+        delete editData._id;
+
+        const resData = await Report.findByIdAndUpdate(data.id, editData, {
+          new: true,
+        });
+
+        const updateApproval = await Approval.findByIdAndUpdate(
+          data._id,
+          {
+            checked_by: bodyData.checked_by,
+            is_rejected: false,
+          },
+          { new: true },
+        );
+
+        console.log("UPDATE APPROVAL LIST: ", updateApproval);
+
+        if (resData) {
+          console.log(resData);
+          approvalPromises.push(updateApproval);
+        } else {
+          sendError(res, 400, "Unable to handle response");
+        }
+      }
+    }
+
+    try {
+      const results = await Promise.all(approvalPromises);
+      res.status(200).json(results);
+    } catch (error) {
+      console.error("Error processing approvals:", error);
+      sendError(res, 500, "Internal Server Error");
+    }
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -319,7 +531,11 @@ export default async function handle(req, res) {
 
     case "POST":
       if (req.body.response) {
-        await handleResponse(req, res);
+        if (req.headers.multiple) {
+          await handleResponseMultiple(req, res);
+        } else {
+          await handleResponse(req, res);
+        }
       } else await handleNewReq(req, res);
 
       break;

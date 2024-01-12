@@ -317,26 +317,30 @@ export default function Approvals() {
     try {
       console.log("THIS DATA BEFORE RESPONSE (MULTIPLE): ", data);
 
-      // const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
-      // const options = {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     ...data,
-      //     checked_by: session.user.real_name,
-      //   }),
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // };
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          checked_by: session.user.real_name,
+        }),
+        headers: {
+          multiple: true,
+          "Content-Type": "application/json",
+        },
+      };
 
-      // const resData = await fetchApi(url, options);
+      const resData = await fetchApi(url, options);
 
-      // if (!resData.error) {
-      //   if (!isFiltered) await GetAllApprovals();
-      //   else await GetAllApprovalsFiltered();
-      // } else {
-      //   toast.error("Unable to handle response");
-      // }
+      if (!resData.error) {
+        if (!isFiltered) await GetAllApprovals();
+        else await GetAllApprovalsFiltered();
+        toast.success("Checked " + selectedRows.length + " approval requests");
+        setSelectedRows([]);
+      } else {
+        toast.error("Unable to handle response");
+        console.error(resData);
+      }
       return;
     } catch (error) {
       console.error("Error handling response:", error);
