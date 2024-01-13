@@ -32,6 +32,9 @@ const ReportSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    prospect_status: {
+      type: String,
+    },
     is_lead: {
       type: Boolean,
       default: false,

@@ -1466,6 +1466,32 @@ export default function Approvals() {
                     Prospecting
                   </label>
                 </div>
+                {reportData.is_prospected && (
+                  <div>
+                    <select
+                      required
+                      onChange={(e) =>
+                        setReportData({
+                          ...reportData,
+                          prospect_status: e.target.value,
+                        })
+                      }
+                      value={reportData?.prospect_status}
+                      className="form-select"
+                      id="floatingSelectGrid"
+                    >
+                      <option
+                        value={""}
+                        defaultValue={true}
+                        className="text-body-secondary"
+                      >
+                        Select prospect status
+                      </option>
+                      <option value="high_interest">High Interest</option>
+                      <option value="low_interest">Low Interest</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1782,6 +1808,27 @@ export default function Approvals() {
                     Prospecting
                   </label>
                 </div>
+                {reportData.is_prospected && (
+                  <div>
+                    <select
+                      disabled
+                      required
+                      value={reportData?.prospect_status}
+                      className="form-select"
+                      id="floatingSelectGrid"
+                    >
+                      <option
+                        value={""}
+                        defaultValue={true}
+                        className="text-body-secondary"
+                      >
+                        Select prospect status
+                      </option>
+                      <option value="high_interest">High Interest</option>
+                      <option value="low_interest">Low Interest</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 

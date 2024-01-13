@@ -71,6 +71,17 @@ const ApprovalSchema = new mongoose.Schema(
     is_prospected: {
       type: Boolean,
     },
+    prospect_status: {
+      type: String,
+    },
+    is_lead: {
+      type: Boolean,
+      default: false,
+    },
+    lead_withdrawn: {
+      type: Boolean,
+      default: false,
+    },
 
     e_id: {
       type: String,

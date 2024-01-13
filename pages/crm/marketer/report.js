@@ -39,6 +39,7 @@ export default function DailyReport() {
     leads_taken_feedback: "",
     is_test: false,
     is_prospected: false,
+    prospect_status: "",
     is_lead: false,
   });
 
@@ -82,6 +83,7 @@ export default function DailyReport() {
       leads_taken_feedback: "",
       is_test: false,
       is_prospected: false,
+      prospect_status: "",
       is_lead: false,
     }));
   };
@@ -313,6 +315,31 @@ export default function DailyReport() {
                   Prospecting
                 </label>
               </div>
+              {reportData.is_prospected && (
+                <div>
+                  <select
+                    required
+                    onChange={(e) =>
+                      setReportData({
+                        ...reportData,
+                        prospect_status: e.target.value,
+                      })
+                    }
+                    className="form-select"
+                    id="floatingSelectGrid"
+                  >
+                    <option
+                      value={""}
+                      defaultValue={true}
+                      className="text-body-secondary"
+                    >
+                      Select prospect status
+                    </option>
+                    <option value="high_interest">High Interest</option>
+                    <option value="low_interest">Low Interest</option>
+                  </select>
+                </div>
+              )}
             </div>
             <div className="mb-3">
               <div className="form-check">
