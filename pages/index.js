@@ -164,7 +164,7 @@ export default function Home({ orders, ordersRedo }) {
                         <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
                       </td>
-                      <td className="text-break">{countdowns[index]}</td>
+                      <td className="text-break">{countdowns?.[index]}</td>
                       <td className="text-break">{order.task}</td>
                       <td className="text-break">{order.et}</td>
                       <td className="text-break">{order.production}</td>

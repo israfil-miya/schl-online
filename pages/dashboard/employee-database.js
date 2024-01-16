@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import moment from "moment";
 import NoteTd from "../../components/extandable-td";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function EmployeeDatabase() {
   const [employees, setEmployees] = useState([]);
@@ -254,7 +255,18 @@ export default function EmployeeDatabase() {
                     >
                       <td>{index + 1}</td>
                       <td>{employee.e_id}</td>
-                      <td>{employee.real_name}</td>
+                      <td className="employee_name text-decoration-underline">
+                        <Link
+                          target="_blank"
+                          href={
+                            process.env.NEXT_PUBLIC_BASE_URL +
+                            "/employee/profile/" +
+                            employee.real_name
+                          }
+                        >
+                          {employee.real_name}
+                        </Link>
+                      </td>
                       <td>
                         {employee.joining_date?.length
                           ? convertToDDMMYYYY(employee.joining_date)
@@ -1037,6 +1049,8 @@ export default function EmployeeDatabase() {
             top: 0;
             z-index: 100;
           }
+          .employee_name:hover {
+            color: rgba(0, 0, 0, 0.7);
         `}
       </style>
     </>
