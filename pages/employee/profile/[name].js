@@ -164,9 +164,6 @@ export default function Page() {
           <div className="col-9 bg-light p-4">
             <div className="bg-white p-3 rounded">
               <p>Under Construction!</p>
-              <Link className="text-primary" href={"/account/change-password"}>
-                Change your password
-              </Link>
             </div>
           </div>
         </div>
