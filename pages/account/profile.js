@@ -155,7 +155,7 @@ export default function Page() {
                     </div>
                     <div className="col-6 py-1 px-4 text-start">
                       <p className="lh-sm">
-                        {salaryComponents[3].toLocaleString("en-US")} BDT/month
+                        {salaryComponents[3]?.toLocaleString("en-US")} BDT/month
                       </p>
                     </div>
                   </div>
