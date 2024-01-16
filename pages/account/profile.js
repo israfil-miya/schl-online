@@ -7,6 +7,7 @@ import Image from "next/image";
 export default function Page() {
   const { data: session } = useSession();
   const [employeeData, setEmployeeData] = useState({});
+  const [salaryComponents, setSalaryComponents] = useState([]);
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
@@ -19,6 +20,22 @@ export default function Page() {
     if (year.length != 4) return dateString;
     return `${day}-${month}-${year}`;
   };
+
+  function calculateSalaryComponents(grossSalary) {
+    // Calculate components using the given formulas
+    const base = Math.floor((grossSalary / 3) * 2);
+    const houseRent = Math.floor(grossSalary / 3 / 2);
+    const convAllowance = Math.floor(grossSalary / 3 / 2);
+
+    // Calculate the potential difference due to rounding
+    const calculatedTotal = base + houseRent + convAllowance;
+    const difference = grossSalary - calculatedTotal;
+
+    // Adjust the base component to ensure the exact sum
+    const adjustedBase = base + difference;
+
+    return [adjustedBase, houseRent, convAllowance, grossSalary];
+  }
 
   async function GetEmployeeByName(id) {
     try {
@@ -36,6 +53,7 @@ export default function Page() {
 
       if (!resData.error) {
         setEmployeeData(resData);
+        setSalaryComponents(calculateSalaryComponents(resData.gross_salary));
         console.log(employeeData);
       } else {
         toast.error("Unable to retrieve employee data");
@@ -56,28 +74,25 @@ export default function Page() {
       <div className="overflow-hidden g-4">
         <div className="row justify-content-between">
           <div className="col-3 bg-light p-4">
-            <div className="bg-white me-1 p-3 rounded">
+            <div className="bg-white me-1 p-2 rounded">
               <div className="container">
                 <div className="d-flex justify-content-center mb-2">
                   {
                     // TEMPORARY: Only for Shahmiran. Will be removed later!
-                    employeeData.real_name == "Md. Shahmiran Talukdar" ? (
-                      <Image
-                        width={150}
-                        height={150}
-                        className="rounded-circle border"
-                        src={
-                          "https://scontent.fdac22-1.fna.fbcdn.net/v/t39.30808-6/411997314_375669695124369_3799214682215955933_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=efb6e6&_nc_ohc=pSl-kEAMf0AAX_n0ENx&_nc_ht=scontent.fdac22-1.fna&oh=00_AfC4fs6S21TxxxS3GBOFdUpgCed6Hu7tQU_6RnUTCKuQ0Q&oe=65A2AE44"
-                        }
-                      />
-                    ) : (
-                      <div
-                        style={{ height: "150px", width: "150px" }}
-                        className="rounded-circle text-body-secondary p-5 border text-center bg-light"
-                      >
-                        {employeeData.real_name}
-                      </div>
-                    )
+
+                    <Image
+                      width={150}
+                      height={150}
+                      className="rounded-circle border"
+                      src={"/images/oriental-tiles.png"}
+                    />
+
+                    // <div
+                    //   style={{ height: "150px", width: "150px" }}
+                    //   className="rounded-circle text-body-secondary p-5 border text-center bg-light"
+                    // >
+                    //   {employeeData.real_name}
+                    // </div>
                   }
                 </div>
 
@@ -103,6 +118,45 @@ export default function Page() {
                       <p className="lh-sm">{employeeData.department}</p>
                       <p className="lh-sm">{employeeData.branch}</p>
                       <p className="lh-sm">{employeeData.division}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white my-3 me-1 p-2 rounded">
+              <div className="container">
+                <h5 className="mb-1 text-center">
+                  <u>Salary Structure</u>
+                </h5>
+                <div className="g-4 py-0">
+                  <div className="row justify-content-between">
+                    <div className="col-6 pt-4 pb-1 px-4 text-start text-body-secondary fw-semibold">
+                      <p className="m-0 p-0">Basic</p>
+                      <p className="m-0 p-0">House Rent</p>
+                      <p className="m-0 p-0">Conv. Allowance</p>
+                    </div>
+                    <div className="col-6 pt-4 pb-1 px-4 text-start">
+                      <p className="m-0 p-0">
+                        {salaryComponents[0]?.toLocaleString("en-US")} BDT
+                      </p>
+                      <p className="m-0 p-0">
+                        {salaryComponents[1]?.toLocaleString("en-US")} BDT
+                      </p>
+                      <p className="m-0 p-0">
+                        {salaryComponents[2]?.toLocaleString("en-US")} BDT
+                      </p>
+                    </div>
+                  </div>
+                  <hr className="m-0" />
+                  <div className="row justify-content-between">
+                    <div className="col-6 py-1 px-4 text-start text-body-secondary fw-semibold">
+                      <p className="lh-sm fw-semibold">Gross:</p>
+                    </div>
+                    <div className="col-6 py-1 px-4 text-start">
+                      <p className="lh-sm">
+                        {salaryComponents[3].toLocaleString("en-US")} BDT/month
+                      </p>
                     </div>
                   </div>
                 </div>

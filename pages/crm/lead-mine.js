@@ -46,6 +46,7 @@ export default function Report(props) {
     followup_done: false,
     is_test: false,
     is_prospected: false,
+    prospect_status: "",
   });
 
   const [editedBy, setEditedBy] = useState("");
@@ -242,6 +243,7 @@ export default function Report(props) {
             followup_done: false,
             is_test: false,
             is_prospected: false,
+            prospect_status: "",
           });
           setIsRecall(0);
 
@@ -307,6 +309,7 @@ export default function Report(props) {
             followup_done: false,
             is_test: false,
             is_prospected: false,
+            prospect_status: "",
           });
           setIsRecall(0);
 
@@ -366,6 +369,7 @@ export default function Report(props) {
       followup_done: false,
       is_test: false,
       is_prospected: false,
+      prospect_status: "",
     });
   }
 
@@ -409,6 +413,7 @@ export default function Report(props) {
       followup_done: false,
       is_test: false,
       is_prospected: false,
+      prospect_status: "",
     });
   }
 
@@ -544,133 +549,128 @@ export default function Report(props) {
             </thead>
             <tbody>
               {reports?.items?.length ? (
-                reports?.items?.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>
-                      {item.calling_date
-                        ? convertToDDMMYYYY(item.calling_date)
-                        : ""}
-                    </td>
-                    <td>{item.marketer_name}</td>
-                    <td>
-                      {item.followup_date
-                        ? convertToDDMMYYYY(item.followup_date)
-                        : ""}
-                    </td>
+                reports?.items?.map((item, index) => {
+                  let prospectColor = "";
 
-                    <td>{item.country}</td>
-                    <td>
-                      {item.website.length
-                        ? item.website
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((websiteLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={websiteLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
-                        : "No link provided"}
-                    </td>
-                    <td>{item.category}</td>
-                    <td className="text-wrap">{item.company_name}</td>
-                    <td className="text-wrap">{item.contact_person}</td>
-                    <td>{item.designation}</td>
-                    <td className="text-wrap">{item.contact_number}</td>
-                    <td className="text-wrap">{item.email_address}</td>
-                    <CallingStatusTd data={item.calling_status} />
-                    <td>
-                      {item.linkedin.length
-                        ? item.linkedin
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((linkedinLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={linkedinLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
-                        : "No link provided"}
-                    </td>
-                    <td>{item.is_test ? "Yes" : "No"}</td>
-                    <td>
-                      {item.is_prospected
-                        ? `Yes (${item.followup_done ? "Done" : "Pending"})`
-                        : "No"}
-                    </td>
+                  if (item.is_prospected) {
+                    if (item?.prospect_status == "high_interest") {
+                      prospectColor = "table-success";
+                    } else if (item?.prospect_status == "low_interest") {
+                      prospectColor = "table-warning";
+                    }
+                  } else {
+                    prospectColor = "table-danger";
+                  }
 
-                    <td
-                      className="align-middle"
-                      style={{ textAlign: "center" }}
+                  return (
+                    <tr
+                      key={item._id}
+                      className={prospectColor ? prospectColor : ""}
                     >
-                      {item.lead_withdrawn === true ? (
-                        <>Withdrawn</>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => {
-                              setIsRecall(0);
-                              setManageData({
-                                _id: item._id || "",
-                                marketer_id: item.marketer_id || "",
-                                marketer_name: item.marketer_name || "",
-                                calling_date: item.calling_date || "",
-                                followup_date: item.followup_date || "",
-                                country: item.country || "",
-                                designation: item.designation || "",
-                                website: item.website || "",
-                                category: item.category || "",
-                                company_name: item.company_name || "",
-                                contact_person: item.contact_person || "",
-                                contact_number: item.contact_number || "",
-                                email_address: item.email_address || "",
-                                calling_status: item.calling_status || "",
-                                linkedin: item.linkedin || "",
-                                calling_date_history:
-                                  item.calling_date_history || [],
-                                updated_by: item.updated_by || "",
-                                followup_done: item.followup_done || false,
-                                is_test: item.is_test || false,
-                                is_prospected: item.is_prospected || false,
-                              });
-                              setEditedBy(item.updated_by || "");
-                            }}
-                            className="btn btn-sm btn-outline-primary me-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editModal"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setManageData(item)}
-                            className="btn btn-sm me-1 btn-outline-success"
-                            data-bs-toggle="modal"
-                            data-bs-target="#finishModal"
-                          >
-                            Finish
-                          </button>
-                          <button
-                            onClick={() => setManageData({ _id: item._id })}
-                            className="btn btn-sm btn-outline-danger me-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteModal"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      <td>{index + 1}</td>
+                      <td>
+                        {item.calling_date
+                          ? convertToDDMMYYYY(item.calling_date)
+                          : ""}
+                      </td>
+                      <td>{item.marketer_name}</td>
+                      <td>
+                        {item.followup_date
+                          ? convertToDDMMYYYY(item.followup_date)
+                          : ""}
+                      </td>
+
+                      <td>{item.country}</td>
+                      <td>
+                        {item.website.length
+                          ? item.website
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((websiteLink, index) => (
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
+                                  <Link target="_blank" href={websiteLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
+                          : "No link provided"}
+                      </td>
+                      <td>{item.category}</td>
+                      <td className="text-wrap">{item.company_name}</td>
+                      <td className="text-wrap">{item.contact_person}</td>
+                      <td>{item.designation}</td>
+                      <td className="text-wrap">{item.contact_number}</td>
+                      <td className="text-wrap">{item.email_address}</td>
+                      <CallingStatusTd data={item.calling_status} />
+                      <td>
+                        {item.linkedin.length
+                          ? item.linkedin
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((linkedinLink, index) => (
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
+                                  <Link target="_blank" href={linkedinLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
+                          : "No link provided"}
+                      </td>
+                      <td>{item.is_test ? "Yes" : "No"}</td>
+                      <td>
+                        {item.is_prospected
+                          ? `Yes (${item.followup_done ? "Done" : "Pending"})`
+                          : "No"}
+                      </td>
+
+                      <td
+                        className="align-middle"
+                        style={{ textAlign: "center" }}
+                      >
+                        {item.lead_withdrawn === true ? (
+                          <>Withdrawn</>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                setIsRecall(0);
+                                setManageData(item);
+                                setEditedBy(item.updated_by || "");
+                              }}
+                              className="btn btn-sm btn-outline-primary me-1"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => setManageData(item)}
+                              className="btn btn-sm me-1 btn-outline-success"
+                              data-bs-toggle="modal"
+                              data-bs-target="#finishModal"
+                            >
+                              Finish
+                            </button>
+                            <button
+                              onClick={() => setManageData({ _id: item._id })}
+                              className="btn btn-sm btn-outline-danger me-1"
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteModal"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr key={0}>
                   <td colSpan="16" className=" align-center text-center">
@@ -942,6 +942,32 @@ export default function Report(props) {
                     Prospecting
                   </label>
                 </div>
+                {manageData.is_prospected && (
+                  <div>
+                    <select
+                      required
+                      onChange={(e) =>
+                        setManageData({
+                          ...manageData,
+                          prospect_status: e.target.value,
+                        })
+                      }
+                      value={manageData?.prospect_status}
+                      className="form-select"
+                      id="floatingSelectGrid"
+                    >
+                      <option
+                        value={""}
+                        defaultValue={true}
+                        className="text-body-secondary"
+                      >
+                        Select prospect status
+                      </option>
+                      <option value="high_interest">High Interest</option>
+                      <option value="low_interest">Low Interest</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
             <div className="modal-footer p-1">

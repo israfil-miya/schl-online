@@ -404,14 +404,6 @@ export default function Browse() {
               </button>
             </div>
           </div>
-
-          {/* <div className="float-start">
-            <div className={`btn-group ${!isFiltered ? "d-none" : ""}`} role="group" aria-label="Basic outlined example">
-              <button type="button" className="btn btn-sm btn-outline-success">
-                EXCEL EXPORT
-              </button>
-            </div>
-          </div> */}
         </div>
       )}
 
