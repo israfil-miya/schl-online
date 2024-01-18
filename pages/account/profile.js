@@ -3,6 +3,7 @@ import Navbar from "../../components/navbar";
 import Link from "next/link";
 import { useSession, getSession } from "next-auth/react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 export default function Page() {
   const { data: session } = useSession();
@@ -22,16 +23,11 @@ export default function Page() {
   };
 
   function calculateSalaryComponents(grossSalary) {
-    // Calculate components using the given formulas
     const base = Math.floor((grossSalary / 3) * 2);
     const houseRent = Math.floor(grossSalary / 3 / 2);
     const convAllowance = Math.floor(grossSalary / 3 / 2);
-
-    // Calculate the potential difference due to rounding
     const calculatedTotal = base + houseRent + convAllowance;
     const difference = grossSalary - calculatedTotal;
-
-    // Adjust the base component to ensure the exact sum
     const adjustedBase = base + difference;
 
     return [adjustedBase, houseRent, convAllowance, grossSalary];
@@ -54,7 +50,6 @@ export default function Page() {
       if (!resData.error) {
         setEmployeeData(resData);
         setSalaryComponents(calculateSalaryComponents(resData.gross_salary));
-        console.log(employeeData);
       } else {
         toast.error("Unable to retrieve employee data");
       }
@@ -62,6 +57,23 @@ export default function Page() {
       console.error("Error fetching employee data:", error);
       toast.error("Error retrieving employee data");
     }
+  }
+
+  function getMonthsTillNow(dateString) {
+    const dateParts = dateString.split("-");
+    const givenYear = parseInt(dateParts[0]);
+    const givenMonth = parseInt(dateParts[1]) - 1;
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    const totalYears = currentYear - givenYear;
+    const totalMonths = totalYears * 12 + (currentMonth - givenMonth);
+
+    console.log(totalMonths);
+
+    return totalMonths;
   }
 
   useEffect(() => {
@@ -78,8 +90,6 @@ export default function Page() {
               <div className="container">
                 <div className="d-flex justify-content-center mb-2">
                   {
-                    // TEMPORARY: Only for Shahmiran. Will be removed later!
-
                     <Image
                       width={150}
                       height={150}
@@ -107,8 +117,8 @@ export default function Page() {
                     <div className="col-6 p-4 text-end text-body-secondary fw-semibold">
                       <p className="lh-sm">Joined On</p>
                       <p className="lh-sm">Department</p>
-                      <p className="lh-sm">Branch</p>
-                      <p className="lh-sm">Division</p>
+                      <p className="lh-sm">Phone</p>
+                      <p className="lh-sm">Status</p>
                     </div>
                     <div className="col-6 p-4 text-start">
                       <p className="lh-sm">
@@ -116,8 +126,8 @@ export default function Page() {
                           convertToDDMMYYYY(employeeData.joining_date)}
                       </p>
                       <p className="lh-sm">{employeeData.department}</p>
-                      <p className="lh-sm">{employeeData.branch}</p>
-                      <p className="lh-sm">{employeeData.division}</p>
+                      <p className="lh-sm">{employeeData.phone}</p>
+                      <p className="lh-sm">{employeeData.status}</p>
                     </div>
                   </div>
                 </div>
@@ -158,7 +168,107 @@ export default function Page() {
                         {salaryComponents[3]?.toLocaleString("en-US")} BDT/month
                       </p>
                     </div>
+                    <small>
+                      <em>
+                        ***Over Time (OT) ={" "}
+                        <span className="fw-semibold">
+                          {Math.round(
+                            salaryComponents[0] / 30 / 8 / 1.5,
+                          )?.toLocaleString("en-US")}{" "}
+                          BDT
+                        </span>
+                        /hour
+                      </em>
+                    </small>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white my-3 me-1 p-2 rounded">
+              <div className="container">
+                <h5 className=" text-center">
+                  <u>Provident Fund (PF)</u>
+                </h5>
+                <p className="text-center">
+                  Start Date:{" "}
+                  {employeeData?.joining_date &&
+                    convertToDDMMYYYY(employeeData.joining_date)}
+                </p>
+                <div className="g-4 py-0">
+                  <div className="row justify-content-between">
+                    <div className="col-6 pb-1 px-4 text-start">
+                      <p className="m-1 p-0 text-body-secondary fw-semibold">
+                        Your's Share
+                      </p>
+                      <p className="m-0 p-0">
+                        {Math.round(
+                          salaryComponents[0] *
+                            (employeeData?.provident_fund / 100 || 0),
+                        )?.toLocaleString("en-US")}{" "}
+                        BDT/month
+                      </p>
+                    </div>
+                    <div className="col-6 pb-1 px-4 text-start">
+                      <p className="m-1 p-0 text-body-secondary fw-semibold">
+                        Company's Share
+                      </p>
+                      <p className="m-0 p-0">
+                        {Math.round(
+                          salaryComponents[0] *
+                            (employeeData?.provident_fund / 100 || 0),
+                        )?.toLocaleString("en-US")}{" "}
+                        BDT/month
+                      </p>
+                    </div>
+                  </div>
+                  <hr className="m-0" />
+                  <div className="row justify-content-between">
+                    <div className="col-6 pt-1 px-4 text-start">
+                      <p>
+                        <span className="lh-sm text-body-secondary fw-semibold">
+                          Total:
+                        </span>{" "}
+                        {employeeData?.joining_date &&
+                          Math.round(
+                            salaryComponents[0] *
+                              (employeeData?.provident_fund / 100 || 0) *
+                              getMonthsTillNow(employeeData?.joining_date),
+                          )?.toLocaleString("en-US")}{" "}
+                        BDT
+                      </p>
+                    </div>
+                    <div className="col-6 pt-1 px-4 text-start">
+                      <p>
+                        <span className="lh-sm text-body-secondary fw-semibold">
+                          Total:
+                        </span>{" "}
+                        {employeeData?.joining_date &&
+                          Math.round(
+                            salaryComponents[0] *
+                              (employeeData?.provident_fund / 100 || 0) *
+                              getMonthsTillNow(employeeData?.joining_date),
+                          )?.toLocaleString("en-US")}{" "}
+                        BDT
+                      </p>
+                    </div>
+                  </div>
+                  <hr className="m-0" />
+                  <p className="text-center">
+                    <span className="lh-sm text-body-secondary fw-semibold">
+                      Subtotal:
+                    </span>{" "}
+                    {employeeData?.joining_date &&
+                      (
+                        2 *
+                        Math.round(
+                          salaryComponents[0] *
+                            (employeeData?.provident_fund / 100 || 0) *
+                            getMonthsTillNow(employeeData?.joining_date),
+                        )
+                      )?.toLocaleString("en-US")}{" "}
+                    BDT
+                  </p>
                 </div>
               </div>
             </div>

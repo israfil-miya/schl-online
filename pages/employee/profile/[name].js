@@ -64,7 +64,6 @@ export default function Page() {
   }
 
   function getMonthsTillNow(dateString) {
-    console.log("DATESTRING: ", dateString);
     const dateParts = dateString.split("-");
     const givenYear = parseInt(dateParts[0]);
     const givenMonth = parseInt(dateParts[1]) - 1;
@@ -204,7 +203,7 @@ export default function Page() {
                   <div className="row justify-content-between">
                     <div className="col-6 pb-1 px-4 text-start">
                       <p className="m-1 p-0 text-body-secondary fw-semibold">
-                        Your's Share
+                        Employee's Share
                       </p>
                       <p className="m-0 p-0">
                         {Math.round(
