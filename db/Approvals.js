@@ -127,7 +127,8 @@ const ApprovalSchema = new mongoose.Schema(
       type: String,
     },
     provident_fund: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     branch: {
       type: String,

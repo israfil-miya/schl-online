@@ -26,6 +26,7 @@ export default function Tasks() {
 
   const optionsTask = [
     "Banner",
+    "Ghost Mannequine",
     "Background erase",
     "Color correction",
     "Illustrator work",

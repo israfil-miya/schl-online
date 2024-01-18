@@ -52,7 +52,8 @@ const EmployeeSchema = new mongoose.Schema(
       default: "Active",
     },
     provident_fund: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     branch: {
       type: String,

@@ -262,10 +262,11 @@ async function handleGetEmployeeByCode(req, res) {
 async function handleGetMarkerNameByRealName(req, res) {
   try {
     let data = req.headers;
-
     const employee = await Employee.findOne({
       real_name: data.real_name,
-    }).lean();
+    })
+      .collation({ locale: "en", alternate: "shifted" })
+      .lean();
 
     if (!employee) sendError(res, 400, "No employee found with the name");
     else res.status(200).json(employee);
