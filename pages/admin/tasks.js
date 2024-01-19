@@ -17,6 +17,7 @@ export default function Tasks() {
   const [production, setProduction] = useState("");
   const [qc1, setQc1] = useState(false);
   const [status, setStatus] = useState("Running");
+  const [priority, setPriority] = useState("");
   const [tasktype, setTaskType] = useState("General");
 
   const [comment, setComment] = useState("");
@@ -174,6 +175,7 @@ export default function Tasks() {
         qc1,
         comment,
         status,
+        priority,
         type: tasktype,
       }),
       headers: {
@@ -188,7 +190,7 @@ export default function Tasks() {
     // console.log(result);
 
     if (result.error) {
-      router.replace("/admin?error=" + result.message);
+      toast.error(result.message);
     }
     setClientCode("");
     setClientName("");
@@ -203,6 +205,7 @@ export default function Tasks() {
     setQc1(false);
     setComment("");
     setStatus("Running");
+    setPriority("");
     setTaskType("General");
   };
 
@@ -509,6 +512,29 @@ export default function Tasks() {
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               />
+            </div>
+
+            <label htmlFor="priority" className="form-label">
+              Priority
+            </label>
+            <div id="status" className="mb-3">
+              <select
+                onChange={(e) => setPriority(e.target.value)}
+                value={priority}
+                className="form-select"
+                id="floatingSelectGrid"
+              >
+                <option
+                  value={""}
+                  defaultValue={true}
+                  className="text-body-secondary"
+                >
+                  Select priority
+                </option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
             </div>
 
             <label htmlFor="type" className="form-label">

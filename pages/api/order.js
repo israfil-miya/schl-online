@@ -1,6 +1,7 @@
 import Order from "../../db/Orders";
 import Client from "../../db/Clients";
 import dbConnect from "../../db/dbConnect";
+import moment from "moment-timezone";
 dbConnect();
 
 function calculateTimeDifference(deliveryDate, deliveryTime) {
@@ -10,37 +11,23 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
 
   let adjustedHours = hours;
   if (is12HourFormat) {
-    if (meridiem.toLowerCase() === "pm" && hours !== 12) {
-      adjustedHours = hours + 12;
-    }
-    if (meridiem.toLowerCase() === "am" && hours === 12) {
-      adjustedHours = 0;
-    }
+    const meridiemLower = meridiem.toLowerCase();
+    adjustedHours = moment(
+      `${hours}:${minutes} ${meridiemLower}`,
+      "hh:mm a",
+    ).hours();
   }
 
-  function getCurrentAsiaDhakaTime() {
-    const now = new Date();
-    const asiaDhakaTime = new Date(
-      now.toLocaleString("en-US", { timeZone: "Asia/Dhaka" }),
-    );
-    return asiaDhakaTime;
-  }
+  const asiaDhakaTime = moment().tz("Asia/Dhaka");
 
-  const asiaDhakaTime = getCurrentAsiaDhakaTime();
-
-  // Convert deliveryDate to a valid JavaScript Date object
   const [day, month, year] = deliveryDate.split("-").map(Number);
-  const deliveryDateTime = new Date(
-    year,
-    month - 1,
-    day,
-    adjustedHours,
-    minutes,
-    0,
-    0,
+  const deliveryDateTime = moment.tz(
+    `${year}-${month}-${day} ${adjustedHours}:${minutes}`,
+    "YYYY-MM-DD HH:mm",
+    "Asia/Dhaka",
   );
 
-  const timeDifferenceMs = deliveryDateTime - asiaDhakaTime;
+  const timeDifferenceMs = deliveryDateTime.diff(asiaDhakaTime);
 
   return timeDifferenceMs;
 }

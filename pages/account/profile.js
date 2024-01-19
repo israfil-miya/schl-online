@@ -113,8 +113,8 @@ export default function Page() {
                 <h6 className="mb-0 text-center">{employeeData.designation}</h6>
                 <hr />
                 <div className="g-4">
-                  <div className="row justify-content-between">
-                    <div className="col-6 p-4 text-end text-body-secondary fw-semibold">
+                  <div className="row text-center justify-content-between">
+                    <div className="col-6 p-4 text-start text-body-secondary fw-semibold">
                       <p className="lh-sm">Joined On</p>
                       <p className="lh-sm">Department</p>
                       <p className="lh-sm">Phone</p>
@@ -253,22 +253,6 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-                  <hr className="m-0" />
-                  <p className="text-center">
-                    <span className="lh-sm text-body-secondary fw-semibold">
-                      Subtotal:
-                    </span>{" "}
-                    {employeeData?.joining_date &&
-                      (
-                        2 *
-                        Math.round(
-                          salaryComponents[0] *
-                            (employeeData?.provident_fund / 100 || 0) *
-                            getMonthsTillNow(employeeData?.joining_date),
-                        )
-                      )?.toLocaleString("en-US")}{" "}
-                    BDT
-                  </p>
                 </div>
               </div>
             </div>

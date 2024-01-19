@@ -21,22 +21,7 @@ export default function Browse() {
   const [taskFilter, setTaskFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [isFiltered, setIsFiltered] = useState(0);
-  const [manageData, setManageData] = useState({
-    _id: "",
-    client_code: "",
-    client_name: "",
-    folder: "",
-    quantity: false,
-    download_date: "",
-    delivery_date: "",
-    delivery_bd_time: "",
-    task: "",
-    et: false,
-    production: "",
-    qc1: false,
-    comment: "",
-    status: "",
-  });
+  const [manageData, setManageData] = useState({});
 
   const [editedBy, setEditedBy] = useState("");
 
@@ -468,23 +453,11 @@ export default function Browse() {
                       <button
                         onClick={() => {
                           setManageData({
-                            _id: order._id ?? "",
-                            client_code: order.client_code ?? "",
-                            client_name: order.client_name ?? "",
-                            folder: order.folder ?? "",
-                            quantity: order.quantity ?? "",
+                            ...order,
                             download_date:
                               convertToYYYYMMDD(order.download_date) ?? "",
                             delivery_date:
                               convertToYYYYMMDD(order.delivery_date) ?? "",
-                            delivery_bd_time: order.delivery_bd_time ?? "",
-                            task: order.task ?? "",
-                            et: order.et ?? "",
-                            production: order.production ?? "",
-                            qc1: order.qc1 ?? "",
-                            comment: order.comment ?? "",
-                            status: order.status ?? "",
-                            type: order.type ?? "",
                           });
                           setEditedBy(order.updated_by ?? "");
                         }}
@@ -529,23 +502,11 @@ export default function Browse() {
                       <button
                         onClick={() => {
                           setManageData({
-                            _id: order._id || "",
-                            client_code: order.client_code || "",
-                            client_name: order.client_name || "",
-                            folder: order.folder || "",
-                            quantity: order.quantity || "",
+                            ...order,
                             download_date:
-                              convertToYYYYMMDD(order.download_date) || "",
+                              convertToYYYYMMDD(order.download_date) ?? "",
                             delivery_date:
-                              convertToYYYYMMDD(order.delivery_date) || "",
-                            delivery_bd_time: order.delivery_bd_time || "",
-                            task: order.task || "",
-                            et: order.et || "",
-                            production: order.production || "",
-                            qc1: order.qc1 || "",
-                            comment: order.comment || "",
-                            status: order.status || "",
-                            type: order.type || "",
+                              convertToYYYYMMDD(order.delivery_date) ?? "",
                           });
                           setEditedBy(order.updated_by || "");
                         }}
@@ -833,6 +794,34 @@ export default function Browse() {
                   id="status"
                   placeholder="Status"
                 />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="status" className="form-label">
+                  Priority
+                </label>
+                <select
+                  onChange={(e) =>
+                    setManageData((prevData) => ({
+                      ...prevData,
+                      priority: e.target.value,
+                    }))
+                  }
+                  value={manageData.priority}
+                  className="form-select"
+                  id="floatingSelectGrid"
+                >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select priority
+                  </option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
               </div>
             </div>
             <div className="modal-footer p-1">

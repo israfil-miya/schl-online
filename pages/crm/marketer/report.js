@@ -319,6 +319,7 @@ export default function DailyReport() {
                 <div>
                   <select
                     required
+                    value={reportData.prospect_status}
                     onChange={(e) =>
                       setReportData({
                         ...reportData,

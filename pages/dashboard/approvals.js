@@ -944,6 +944,29 @@ export default function Approvals() {
                   placeholder="Status"
                 />
               </div>
+
+              <div className="mb-3">
+                <label htmlFor="status" className="form-label">
+                  Priority
+                </label>
+                <select
+                  disabled
+                  value={orderInfo.priority}
+                  className="form-select"
+                  id="floatingSelectGrid"
+                >
+                  <option
+                    value={""}
+                    defaultValue={true}
+                    className="text-body-secondary"
+                  >
+                    Select priority
+                  </option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
             </div>
             <div className="modal-footer p-1">
               <button

@@ -141,9 +141,12 @@ export default function Home({ orders, ordersRedo }) {
                     parseInt(seconds);
 
                   if (totalSeconds > 0) {
-                    if (totalSeconds <= 1800) {
+                    if (totalSeconds <= 1800 || order.priority == "high") {
                       priorityColor = "table-danger";
-                    } else if (totalSeconds <= 3600) {
+                    } else if (
+                      totalSeconds <= 3600 ||
+                      order.priority == "medium"
+                    ) {
                       priorityColor = "table-warning";
                     }
                   }

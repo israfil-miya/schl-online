@@ -1,46 +1,15 @@
 import mongoose from "mongoose";
-
-function dateToday() {
-  const options = {
-    timeZone: "Asia/Dhaka",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  };
-
-  const now = new Date();
-  const localDate = now.toLocaleDateString("en-US", options);
-  const [month, day, year] = localDate.split("/");
-
-  const formattedDate = `${day}-${month}-${year}`;
-
-  return formattedDate;
-}
-
-function timeNow() {
-  const options = {
-    timeZone: "Asia/Dhaka",
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-
-  const now = new Date();
-  const formatter = new Intl.DateTimeFormat("en-US", options);
-  const localTime = formatter.format(now);
-
-  return localTime;
-}
+import moment from "moment-timezone";
 
 const OrderSchema = new mongoose.Schema(
   {
     date_today: {
       type: String,
-      default: dateToday(),
+      default: moment().tz("Asia/Dhaka").format("DD-MM-YYYY"),
     },
     time_now: {
       type: String,
-      default: timeNow(),
+      default: moment().tz("Asia/Dhaka").format("HH:mm"),
     },
     client_code: {
       type: String,
@@ -82,6 +51,9 @@ const OrderSchema = new mongoose.Schema(
       type: String,
     },
     status: {
+      type: String,
+    },
+    priority: {
       type: String,
     },
     updated_by: {
