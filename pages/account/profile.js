@@ -199,7 +199,7 @@ export default function Page() {
                   <div className="row justify-content-between">
                     <div className="col-6 pb-1 px-4 text-start">
                       <p className="m-1 p-0 text-body-secondary fw-semibold">
-                        Your's Part
+                        Your&apos;s Part
                       </p>
                       <p className="m-0 p-0 ps-1">
                         <input

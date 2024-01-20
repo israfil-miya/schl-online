@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../../components/navbar";
+import Navbar from "../../../../components/navbar";
 import Link from "next/link";
 import { useSession, getSession } from "next-auth/react";
 import Image from "next/image";

@@ -237,7 +237,7 @@ export default function Navbar({ navFor, shortNote }) {
               <li>
                 <Link
                   className={`dropdown-item ${styles.dropitem}`}
-                  href="/dashboard/employee-database"
+                  href="/dashboard/employee/database"
                 >
                   Employees
                 </Link>

@@ -1,4 +1,22 @@
 import mongoose from "mongoose";
+
+const ProvidentFundHistorySchema = new mongoose.Schema(
+  {
+    date: String, // An update of provident_fund/gross was made in this date.
+
+    gross: Number, // previous gross salary (if changed).
+
+    provident_fund: Number, // previous pf percentage (if changed).
+
+    saved_amount: Number, // total saved pf money
+    // from previous object's(of this pf_history array) `date` value, if no previous object then use `pf_start_date` field's value
+    // to this object's(of this pf_history array) `date` value.
+
+    note: String, // what got changed. Ex. Value: "Gross salary was updated."
+  },
+  { _id: false, __v: false },
+);
+
 const EmployeeSchema = new mongoose.Schema(
   {
     e_id: {
@@ -59,12 +77,7 @@ const EmployeeSchema = new mongoose.Schema(
       type: String,
     },
     pf_history: {
-      type: [
-        {
-          date: String,
-          saved_amount: Number,
-        },
-      ],
+      type: [ProvidentFundHistorySchema],
     },
     branch: {
       type: String,

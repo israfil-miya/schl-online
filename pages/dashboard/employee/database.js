@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../components/navbar";
+import Navbar from "../../../components/navbar";
 import { toast } from "sonner";
 import moment from "moment";
-import NoteTd from "../../components/extandable-td";
+import NoteTd from "../../../components/extandable-td";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -260,7 +260,7 @@ export default function EmployeeDatabase() {
                           target="_blank"
                           href={
                             process.env.NEXT_PUBLIC_BASE_URL +
-                            "/employee/profile/" +
+                            "/dashboard/employee/profile/" +
                             employee.real_name
                           }
                         >
