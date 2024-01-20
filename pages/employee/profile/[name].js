@@ -177,7 +177,7 @@ export default function Page() {
                         ***Over Time (OT) ={" "}
                         <span className="fw-semibold">
                           {Math.round(
-                            salaryComponents[0] / 30 / 8 / 1.5,
+                            salaryComponents[0] / 30 / 8,
                           )?.toLocaleString("en-US")}{" "}
                           BDT
                         </span>
@@ -203,76 +203,43 @@ export default function Page() {
                   <div className="row justify-content-between">
                     <div className="col-6 pb-1 px-4 text-start">
                       <p className="m-1 p-0 text-body-secondary fw-semibold">
-                        Employee&apos;s Share
+                        Employee&apos;s Part
                       </p>
-                      <p className="m-0 p-0">
-                        {Math.round(
-                          salaryComponents[0] *
-                            (employeeData?.provident_fund / 100 || 0),
-                        )?.toLocaleString("en-US")}{" "}
-                        BDT/month
+                      <p className="m-0 p-0 ps-1">
+                        <input
+                          type="text"
+                          value={
+                            employeeData?.joining_date &&
+                            Math.round(
+                              salaryComponents[0] *
+                                (employeeData?.provident_fund / 100 || 0) *
+                                getMonthsTillNow(employeeData?.joining_date),
+                            )?.toLocaleString("en-US") + " BDT"
+                          }
+                          disabled
+                        ></input>
                       </p>
                     </div>
                     <div className="col-6 pb-1 px-4 text-start">
                       <p className="m-1 p-0 text-body-secondary fw-semibold">
-                        Company&apos;s Share
+                        Company&apos;s Part
                       </p>
-                      <p className="m-0 p-0">
-                        {Math.round(
-                          salaryComponents[0] *
-                            (employeeData?.provident_fund / 100 || 0),
-                        )?.toLocaleString("en-US")}{" "}
-                        BDT/month
-                      </p>
-                    </div>
-                  </div>
-                  <hr className="m-0" />
-                  <div className="row justify-content-between">
-                    <div className="col-6 pt-1 px-4 text-start">
-                      <p>
-                        <span className="lh-sm text-body-secondary fw-semibold">
-                          Total:
-                        </span>{" "}
-                        {employeeData?.joining_date &&
-                          Math.round(
-                            salaryComponents[0] *
-                              (employeeData?.provident_fund / 100 || 0) *
-                              getMonthsTillNow(employeeData?.joining_date),
-                          )?.toLocaleString("en-US")}{" "}
-                        BDT
-                      </p>
-                    </div>
-                    <div className="col-6 pt-1 px-4 text-start">
-                      <p>
-                        <span className="lh-sm text-body-secondary fw-semibold">
-                          Total:
-                        </span>{" "}
-                        {employeeData?.joining_date &&
-                          Math.round(
-                            salaryComponents[0] *
-                              (employeeData?.provident_fund / 100 || 0) *
-                              getMonthsTillNow(employeeData?.joining_date),
-                          )?.toLocaleString("en-US")}{" "}
-                        BDT
+                      <p className="m-0 p-0 ps-1">
+                        <input
+                          type="text"
+                          value={
+                            employeeData?.joining_date &&
+                            Math.round(
+                              salaryComponents[0] *
+                                (employeeData?.provident_fund / 100 || 0) *
+                                getMonthsTillNow(employeeData?.joining_date),
+                            )?.toLocaleString("en-US") + " BDT"
+                          }
+                          disabled
+                        ></input>
                       </p>
                     </div>
                   </div>
-                  <hr className="m-0" />
-                  <p className="text-center">
-                    <span className="lh-sm text-body-secondary fw-semibold">
-                      Subtotal:
-                    </span>{" "}
-                    {employeeData?.joining_date &&
-                      (
-                        2 *
-                        Math.round(
-                          salaryComponents[0] *
-                            (employeeData?.provident_fund / 100 || 0) *
-                            getMonthsTillNow(employeeData?.joining_date),
-                        )
-                      )?.toLocaleString("en-US")}{" "}
-                    BDT
-                  </p>
                 </div>
               </div>
             </div>

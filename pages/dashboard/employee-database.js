@@ -278,13 +278,15 @@ export default function EmployeeDatabase() {
                       <td>{employee.gross_salary} BDT</td>
                       <td>{employee.status}</td>
                       <td>
-                        {employee.permanentInfo.isPermanent
-                          ? `Yes (${formatRemainingTime(
-                              employee.permanentInfo.jobAgeInDays,
-                            )})`
-                          : formatRemainingTime(
-                              employee.permanentInfo.remainingTimeInDays,
-                            )}
+                        {employee.status == "Active"
+                          ? employee.permanentInfo.isPermanent
+                            ? `Yes (${formatRemainingTime(
+                                employee.permanentInfo.jobAgeInDays,
+                              )})`
+                            : formatRemainingTime(
+                                employee.permanentInfo.remainingTimeInDays,
+                              )
+                          : "N/A"}
                       </td>
                       <NoteTd data={employee.note} />
                       <td

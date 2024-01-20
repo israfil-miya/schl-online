@@ -55,6 +55,17 @@ const EmployeeSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    pf_start_date: {
+      type: String,
+    },
+    pf_history: {
+      type: [
+        {
+          date: String,
+          saved_amount: Number,
+        },
+      ],
+    },
     branch: {
       type: String,
     },

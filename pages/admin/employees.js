@@ -24,6 +24,7 @@ export default function Create() {
     division: "",
     branch: "",
     provident_fund: 0,
+    pf_start_date: "",
     status: "Active",
     company_provided_name: "",
     note: "",
@@ -70,6 +71,7 @@ export default function Create() {
       division: "",
       branch: "",
       provident_fund: 0,
+      pf_start_date: "",
       status: "Active",
       company_provided_name: "",
       note: "",
@@ -383,6 +385,24 @@ export default function Create() {
                   }))
                 }
                 type="number"
+                className="form-control"
+              />
+            </div>
+
+            {/* Provident Fund */}
+            <div className="mb-3">
+              <label htmlFor="date" className="form-label">
+                PF Start Date
+              </label>
+              <input
+                value={newEmployeeData.pf_start_date}
+                onChange={(e) =>
+                  setNewEmployeeData((prevData) => ({
+                    ...prevData,
+                    pf_start_date: e.target.value,
+                  }))
+                }
+                type="date"
                 className="form-control"
               />
             </div>
