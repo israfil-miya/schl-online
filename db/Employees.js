@@ -10,7 +10,7 @@ const ProvidentFundHistorySchema = new mongoose.Schema(
 
     saved_amount: Number, // total saved pf money
     // from previous object's(of this pf_history array) `date` value, if no previous object then use `pf_start_date` field's value
-    // to this object's(of this pf_history array) `date` value.
+    // to this object's(of this pf_history array) `date` value. (use previous pf percentage and gross salary to calculate)
 
     note: String, // what got changed. Ex. Value: "Gross salary was updated."
   },

@@ -320,7 +320,7 @@ export default function ClientDetails() {
               error: <span>Unable to create the invoice</span>,
             });
           } else {
-            router.replace(`/dashboard?error=${result.message}`);
+            toast.error(result.message);
           }
         } catch (error) {
           console.error("Error adding new client:", error);

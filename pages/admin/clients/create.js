@@ -144,9 +144,7 @@ export default function Clients_Create() {
               />
             </div>
             <div className="mb-3">
-              <label className="fw-bold" htmlFor="floatingSelectGrid">
-                Marketer name
-              </label>
+              <label htmlFor="floatingSelectGrid">Marketer name</label>
               <select
                 required
                 onChange={(e) =>
