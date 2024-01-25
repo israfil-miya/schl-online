@@ -296,6 +296,7 @@ export default function DailyReport() {
                 </label>
               </div>
             </div>
+
             <div className="mb-3">
               <div className="form-check">
                 <input
@@ -342,6 +343,7 @@ export default function DailyReport() {
                 </div>
               )}
             </div>
+
             <div className="mb-3">
               <div className="form-check">
                 <input

@@ -1,6 +1,6 @@
 import dbConnect from "../../db/dbConnect";
 import Employee from "../../db/Employees";
-import moment from "moment";
+import moment from "moment-timezone";
 dbConnect();
 
 function sendError(res, statusCode, message) {
@@ -198,6 +198,15 @@ async function handleNewEmployee(req, res) {
 
     if (!data) sendError(res, 400, "No data provided");
 
+    if (data.pf_start_date) {
+      let pfStartDate = moment(data.pf_start_date, "YYYY-MM-DD");
+      const currentDate = moment().format("YYYY-MM-DD");
+
+      if (pfStartDate.isAfter(currentDate)) {
+        sendError(res, 400, "PF Start Date must be befere today's date");
+      }
+    }
+
     let newUser = await Employee.findOneAndUpdate({ e_id: data.e_id }, data, {
       new: true,
       upsert: true,
@@ -212,15 +221,97 @@ async function handleNewEmployee(req, res) {
   }
 }
 
+function getMonthsTillNow(dateString) {
+  const dateParts = dateString.split("-");
+  const givenYear = parseInt(dateParts[0]);
+  const givenMonth = parseInt(dateParts[1]) - 1;
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
+  const totalYears = currentYear - givenYear;
+  const totalMonths = totalYears * 12 + (currentMonth - givenMonth);
+
+  console.log(totalMonths);
+
+  return totalMonths;
+}
+
+function calculateSalaryComponents(grossSalary) {
+  const base = Math.floor((grossSalary / 3) * 2);
+  const houseRent = Math.floor(grossSalary / 3 / 2);
+  const convAllowance = Math.floor(grossSalary / 3 / 2);
+  const calculatedTotal = base + houseRent + convAllowance;
+  const difference = grossSalary - calculatedTotal;
+  const adjustedBase = base + difference;
+
+  return [adjustedBase, houseRent, convAllowance, grossSalary];
+}
+
 async function handleEditEmployee(req, res) {
   const data = req.body;
 
   try {
+    const originalEmployee = await Employee.findById(data._id);
+
     const resData = await Employee.findByIdAndUpdate(data._id, data, {
       new: true,
     });
 
-    if (resData) {
+    if (originalEmployee) {
+      const isGrossSalaryUpdated =
+        resData.gross_salary !== originalEmployee.gross_salary;
+      const isProvidentFundUpdated =
+        resData.provident_fund !== originalEmployee.provident_fund;
+
+      if (isGrossSalaryUpdated || isProvidentFundUpdated) {
+        let totalSavedAmount = 0;
+
+        if (originalEmployee.pf_history && originalEmployee.pf_history.length) {
+          totalSavedAmount =
+            originalEmployee.pf_history[originalEmployee.pf_history.length - 1]
+              .saved_amount;
+          const prevDate =
+            originalEmployee.pf_history[originalEmployee.pf_history.length - 1]
+              .date;
+
+          const salaryComponents = calculateSalaryComponents(
+            originalEmployee.gross_salary,
+          );
+          const newAmount = Math.round(
+            salaryComponents[0] *
+              (originalEmployee.provident_fund / 100 || 0) *
+              getMonthsTillNow(prevDate),
+          );
+
+          totalSavedAmount += newAmount;
+        } else {
+          const salaryComponents = calculateSalaryComponents(
+            originalEmployee.gross_salary,
+          );
+          const startDate = originalEmployee.pf_start_date;
+          const newAmount = Math.round(
+            salaryComponents[0] *
+              (originalEmployee.provident_fund / 100 || 0) *
+              getMonthsTillNow(startDate),
+          );
+          totalSavedAmount = newAmount;
+        }
+
+        resData.pf_history.push({
+          date: moment().utc().format("YYYY-MM-DD"),
+          gross: originalEmployee.gross_salary || 0,
+          provident_fund: originalEmployee.provident_fund || 0,
+          saved_amount: totalSavedAmount || 0,
+          note: isProvidentFundUpdated
+            ? "Provident fund percentage was updated."
+            : "Gross salary was updated.",
+        });
+
+        await resData.save();
+      }
+
       res.status(200).json(resData);
     } else {
       sendError(res, 400, "No employee found");
@@ -259,6 +350,7 @@ async function handleGetEmployeeByCode(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
 async function handleGetMarkerNameByRealName(req, res) {
   try {
     let data = req.headers;

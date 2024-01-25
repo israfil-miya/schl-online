@@ -9,6 +9,7 @@ export default function Page() {
   const { data: session } = useSession();
   const [employeeData, setEmployeeData] = useState({});
   const [salaryComponents, setSalaryComponents] = useState([]);
+  const [pfMoneyAmount, setPfMoneyAmount] = useState(0);
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
@@ -33,7 +34,7 @@ export default function Page() {
     return [adjustedBase, houseRent, convAllowance, grossSalary];
   }
 
-  async function GetEmployeeByName(id) {
+  async function GetEmployeeByName() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/employee`;
       const options = {
@@ -76,9 +77,56 @@ export default function Page() {
     return totalMonths;
   }
 
+  function getPFMoneyAmount() {
+    let totalSavedAmount = 0;
+
+    const formattedSalaryComponents =
+      salaryComponents.length > 0 ? salaryComponents[0] : 0;
+
+    console.log("EMPLOYEEDATA: ", employeeData);
+
+    if (employeeData.pf_history && employeeData.pf_history.length) {
+      console.log("EMPLOYEEDATA (IF): ", employeeData);
+
+      totalSavedAmount =
+        employeeData.pf_history[employeeData.pf_history.length - 1]
+          .saved_amount;
+      const prevDate =
+        employeeData.pf_history[employeeData.pf_history.length - 1].date;
+
+      const newAmount = Math.round(
+        formattedSalaryComponents *
+          (employeeData.provident_fund / 100 || 0) *
+          getMonthsTillNow(prevDate),
+      );
+
+      totalSavedAmount += newAmount;
+    } else {
+      console.log("EMPLOYEEDATA (ELSE): ", employeeData);
+
+      const startDate = employeeData.pf_start_date;
+      const newAmount = Math.round(
+        formattedSalaryComponents *
+          (employeeData.provident_fund / 100 || 0) *
+          getMonthsTillNow(startDate),
+      );
+
+      totalSavedAmount = newAmount;
+    }
+
+    console.log("TOTAL AMOUNT: ", totalSavedAmount);
+    setPfMoneyAmount(totalSavedAmount);
+  }
+
   useEffect(() => {
     GetEmployeeByName();
   }, []);
+
+  useEffect(() => {
+    if (salaryComponents.length && employeeData) {
+      getPFMoneyAmount();
+    }
+  }, [salaryComponents.length]);
 
   return (
     <>
@@ -192,8 +240,9 @@ export default function Page() {
                 </h5>
                 <p className="text-center">
                   Start Date:{" "}
-                  {employeeData?.joining_date &&
-                    convertToDDMMYYYY(employeeData.joining_date)}
+                  {employeeData?.pf_start_date
+                    ? convertToDDMMYYYY(employeeData.pf_start_date)
+                    : "N/A"}
                 </p>
                 <div className="g-4 py-0">
                   <div className="row justify-content-between">
@@ -205,15 +254,14 @@ export default function Page() {
                         <input
                           type="text"
                           value={
-                            employeeData?.joining_date &&
-                            Math.round(
-                              salaryComponents[0] *
-                                (employeeData?.provident_fund / 100 || 0) *
-                                getMonthsTillNow(employeeData?.joining_date),
-                            )?.toLocaleString("en-US") + " BDT"
+                            employeeData?.pf_start_date
+                              ? employeeData.provident_fund
+                                ? pfMoneyAmount.toLocaleString("en-US") + " BDT"
+                                : "Loading..."
+                              : "N/A"
                           }
                           disabled
-                        ></input>
+                        />
                       </p>
                     </div>
                     <div className="col-6 pb-1 px-4 text-start">
@@ -224,15 +272,14 @@ export default function Page() {
                         <input
                           type="text"
                           value={
-                            employeeData?.joining_date &&
-                            Math.round(
-                              salaryComponents[0] *
-                                (employeeData?.provident_fund / 100 || 0) *
-                                getMonthsTillNow(employeeData?.joining_date),
-                            )?.toLocaleString("en-US") + " BDT"
+                            employeeData?.pf_start_date
+                              ? employeeData.provident_fund
+                                ? pfMoneyAmount.toLocaleString("en-US") + " BDT"
+                                : "Loading..."
+                              : "N/A"
                           }
                           disabled
-                        ></input>
+                        />
                       </p>
                     </div>
                   </div>
