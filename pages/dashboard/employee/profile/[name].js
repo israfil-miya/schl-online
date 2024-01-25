@@ -52,6 +52,8 @@ export default function Page() {
       const resData = await fetchApi(url, options);
 
       if (!resData.error) {
+        console.log("Employee Data: ", employeeData);
+
         setEmployeeData(resData);
         setSalaryComponents(calculateSalaryComponents(resData.gross_salary));
         console.log(resData);
@@ -252,7 +254,7 @@ export default function Page() {
                             employeeData?.pf_start_date
                               ? employeeData.provident_fund
                                 ? pfMoneyAmount.toLocaleString("en-US") + " BDT"
-                                : "Loading..."
+                                : "N/A"
                               : "N/A"
                           }
                           disabled
@@ -270,7 +272,7 @@ export default function Page() {
                             employeeData?.pf_start_date
                               ? employeeData.provident_fund
                                 ? pfMoneyAmount.toLocaleString("en-US") + " BDT"
-                                : "Loading..."
+                                : "N/A"
                               : "N/A"
                           }
                           disabled

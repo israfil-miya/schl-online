@@ -257,7 +257,7 @@ export default function Page() {
                             employeeData?.pf_start_date
                               ? employeeData.provident_fund
                                 ? pfMoneyAmount.toLocaleString("en-US") + " BDT"
-                                : "Loading..."
+                                : "N/A"
                               : "N/A"
                           }
                           disabled
@@ -275,7 +275,7 @@ export default function Page() {
                             employeeData?.pf_start_date
                               ? employeeData.provident_fund
                                 ? pfMoneyAmount.toLocaleString("en-US") + " BDT"
-                                : "Loading..."
+                                : "N/A"
                               : "N/A"
                           }
                           disabled
