@@ -39,12 +39,6 @@ export default function ClientDetails() {
   const [foldetFilter, setFolderFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
 
-  const convertToDDMMYYYY = (dateString) => {
-    const [year, month, day] = dateString.split("-");
-    if (year.length != 4) return dateString;
-    return `${day}-${month}-${year}`;
-  };
-
   Number.prototype.pad = function (size) {
     var s = String(this);
     while (s.length < (size || 2)) {
@@ -58,6 +52,12 @@ export default function ClientDetails() {
     const data = await res.json();
     return data;
   }
+
+  const convertToDDMMYYYY = (dateString) => {
+    const [year, month, day] = dateString.split("-");
+    if (year.length !== 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
 
   async function getClientDetails() {
     try {
@@ -114,16 +114,6 @@ export default function ClientDetails() {
   }
 
   async function getAllOrdersOfClientInvoice() {
-    let adjustedFromTime = fromTime;
-    let adjustedToTime = toTime;
-
-    if (fromTime) {
-      adjustedFromTime = convertToDDMMYYYY(fromTime);
-    }
-    if (toTime) {
-      adjustedToTime = convertToDDMMYYYY(toTime);
-    }
-
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "GET",
@@ -134,8 +124,10 @@ export default function ClientDetails() {
         folder: foldetFilter,
         client: client.client_code,
         task: taskFilter,
-        fromtime: adjustedFromTime,
-        totime: adjustedToTime,
+
+        fromtime: fromTime,
+        totime: toTime,
+
         not_paginated: true, // Include the current page in the request headers
       },
     };
@@ -152,16 +144,6 @@ export default function ClientDetails() {
   }
 
   async function getAllOrdersOfClientPaginated() {
-    let adjustedFromTime = fromTime;
-    let adjustedToTime = toTime;
-
-    if (fromTime) {
-      adjustedFromTime = convertToDDMMYYYY(fromTime);
-    }
-    if (toTime) {
-      adjustedToTime = convertToDDMMYYYY(toTime);
-    }
-
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "GET",
@@ -173,8 +155,8 @@ export default function ClientDetails() {
         folder: foldetFilter,
         client: selectedClientCode,
         task: taskFilter,
-        fromtime: adjustedFromTime,
-        totime: adjustedToTime,
+        fromtime: fromTime,
+        totime: toTime,
         page, // Include the current page in the request headers
       },
     };
@@ -232,8 +214,18 @@ export default function ClientDetails() {
     const month = String(today.getMonth() + 1).padStart(2, "0"); // Month is zero-based, so we add 1
     const year = today.getFullYear();
 
+    return `${year}-${month}-${day}`;
+  }
+
+  function isoDateToDdMmYyyy(isoDate) {
+    const date = new Date(isoDate);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
+    const year = date.getFullYear().toString();
+
     return `${day}-${month}-${year}`;
   }
+
   async function createInvoice() {
     if (!invoiceCustomerData.invoice_number) {
       toast.error("Please enter an Invoie Number");
@@ -253,7 +245,7 @@ export default function ClientDetails() {
       if (orders && orders.length > 0) {
         const billData = orders.map((order, index) => {
           return {
-            date: order.date_today,
+            date: isoDateToDdMmYyyy(order.createdAt),
             job_name: order.folder,
             quantity: order.quantity,
             unit_price: 0,
@@ -514,7 +506,6 @@ export default function ClientDetails() {
               <thead>
                 <tr className="table-dark">
                   <th>#</th>
-                  <th>Added Time</th>
                   <th>Folder</th>
                   <th>Quantity</th>
                   <th>Download Date</th>
@@ -532,17 +523,15 @@ export default function ClientDetails() {
                   orders?.items?.map((order, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
-                      <td className="text-break">
-                        {order.date_today}
-                        <span className="text-body-secondary"> | </span>
-                        {order.time_now}
-                      </td>
-
                       <td className="text-break">{order.folder}</td>
                       <td className="text-break">{order.quantity}</td>
-                      <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-                        {order.delivery_date}
+                        {order.download_date &&
+                          convertToDDMMYYYY(order.download_date)}
+                      </td>
+                      <td className="text-break">
+                        {order.delivery_date &&
+                          convertToDDMMYYYY(order.delivery_date)}
                         <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
                       </td>

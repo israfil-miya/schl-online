@@ -77,16 +77,6 @@ export default function Database() {
     }
   }
   async function filteredData() {
-    let adjustedFromTime = fromTime;
-    let adjustedToTime = toTime;
-
-    if (fromTime) {
-      adjustedFromTime = convertToDDMMYYYY(fromTime);
-    }
-    if (toTime) {
-      adjustedToTime = convertToDDMMYYYY(toTime);
-    }
-
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invoice`;
 
     const options = {
@@ -95,8 +85,8 @@ export default function Database() {
         "Content-Type": "application/json",
         getinvoicesbyfilter: true,
         client: clientFilter,
-        fromtime: adjustedFromTime,
-        totime: adjustedToTime,
+        fromtime: fromTime,
+        totime: toTime,
         invoicenumber: invoiceNumberFilter,
         filename: fileNameFilter,
         page,

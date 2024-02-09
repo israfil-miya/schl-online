@@ -26,6 +26,12 @@ function calculateCountdown(timeDifferenceMs) {
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
+const convertToDDMMYYYY = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  if (year.length != 4) return dateString;
+  return `${day}-${month}-${year}`;
+};
+
 export default function Home({ orders, ordersRedo }) {
   const [countdowns, setCountdowns] = useState(getCurrentTimes(orders));
 
@@ -88,9 +94,13 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.folder}</td>
                       <td className="text-break">{order.quantity}</td>
-                      <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-                        {order.delivery_date}
+                        {order.download_date &&
+                          convertToDDMMYYYY(order.download_date)}
+                      </td>
+                      <td className="text-break">
+                        {order.delivery_date &&
+                          convertToDDMMYYYY(order.delivery_date)}
                         <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
                       </td>
@@ -161,9 +171,13 @@ export default function Home({ orders, ordersRedo }) {
                       <td className="text-break">{order.client_code}</td>
                       <td className="text-break">{order.folder}</td>
                       <td className="text-break">{order.quantity}</td>
-                      <td className="text-break">{order.download_date}</td>
                       <td className="text-break">
-                        {order.delivery_date}
+                        {order.download_date &&
+                          convertToDDMMYYYY(order.download_date)}
+                      </td>
+                      <td className="text-break">
+                        {order.delivery_date &&
+                          convertToDDMMYYYY(order.delivery_date)}
                         <span className="text-body-secondary"> | </span>
                         {order.delivery_bd_time}
                       </td>

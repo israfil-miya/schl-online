@@ -1,16 +1,7 @@
 import mongoose from "mongoose";
-import moment from "moment-timezone";
 
 const OrderSchema = new mongoose.Schema(
   {
-    date_today: {
-      type: String,
-      default: moment().tz("Asia/Dhaka").format("DD-MM-YYYY"),
-    },
-    time_now: {
-      type: String,
-      default: moment().tz("Asia/Dhaka").format("HH:mm"),
-    },
     client_code: {
       type: String,
     },

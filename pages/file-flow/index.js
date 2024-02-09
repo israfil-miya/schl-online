@@ -20,12 +20,6 @@ export default function Statistics() {
     datasets: [],
   });
 
-  const convertToDDMMYYYY = (dateString) => {
-    const [year, month, day] = dateString.split("-");
-    if (year.length !== 4) return dateString;
-    return `${day}-${month}-${year}`;
-  };
-
   function getDateRange() {
     const today = new Date();
     const fifteenDaysAgo = new Date();
@@ -43,24 +37,14 @@ export default function Statistics() {
   }
 
   async function filteredData() {
-    let adjustedFromTime = fromTime;
-    let adjustedToTime = toTime;
-
-    if (fromTime) {
-      adjustedFromTime = convertToDDMMYYYY(fromTime);
-    }
-    if (toTime) {
-      adjustedToTime = convertToDDMMYYYY(toTime);
-    }
-
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         getordersbyfilterstat: true,
-        fromtime: adjustedFromTime,
-        totime: adjustedToTime,
+        fromtime: fromTime,
+        totime: toTime,
       },
     };
 

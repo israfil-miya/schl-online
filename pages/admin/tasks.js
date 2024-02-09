@@ -149,11 +149,6 @@ export default function Tasks() {
     }
   }
 
-  const convertToDDMMYYYY = (dateString) => {
-    const [year, month, day] = dateString.split("-");
-    return `${day}-${month}-${year}`;
-  };
-
   const AddNewOrder = async (e) => {
     e.preventDefault();
 
@@ -166,8 +161,8 @@ export default function Tasks() {
         client_name,
         folder,
         quantity,
-        download_date: convertToDDMMYYYY(download_date),
-        delivery_date: convertToDDMMYYYY(delivery_date),
+        download_date: download_date,
+        delivery_date: delivery_date,
         delivery_bd_time,
         task: selectedTasks.join("+"),
         et,

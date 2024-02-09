@@ -460,7 +460,6 @@ export default function Report(props) {
                 value={itemPerPage}
                 onChange={(e) => setItemPerPage(e.target.value)}
                 className="form-select ms-2 me-2 form-select-sm"
-                aria-label="Small select example"
               >
                 <option value="10">10</option>
                 <option value="30">30</option>

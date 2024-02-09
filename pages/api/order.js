@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 dbConnect();
 
 function calculateTimeDifference(deliveryDate, deliveryTime) {
-  const is12HourFormat = /am|pm/i.test(deliveryTime);
+  const is12HourFormat = /\b(?:am|pm)\b/i.test(deliveryTime);
   const [time, meridiem] = deliveryTime.split(/\s+/);
   const [hours, minutes] = time.split(":").map(Number);
 
@@ -17,10 +17,9 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
       "hh:mm a",
     ).hours();
   }
-
   const asiaDhakaTime = moment().tz("Asia/Dhaka");
 
-  const [day, month, year] = deliveryDate.split("-").map(Number);
+  const [year, month, day] = deliveryDate.split("-").map(Number);
   const deliveryDateTime = moment.tz(
     `${year}-${month}-${day} ${adjustedHours}:${minutes}`,
     "YYYY-MM-DD HH:mm",
@@ -31,6 +30,12 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
 
   return timeDifferenceMs;
 }
+
+// Example usage:
+const deliveryDate = "2024-02-10";
+const deliveryTime = "12:00 PM";
+const timeDifferenceMs = calculateTimeDifference(deliveryDate, deliveryTime);
+console.log("Time difference in milliseconds:", timeDifferenceMs);
 
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -200,78 +205,36 @@ async function handleGetOrdersById(req, res) {
   }
 }
 
-function ddMmYyyyToIsoDate(ddMmYyyy) {
-  try {
-    const parts = ddMmYyyy.split("-");
-    if (parts.length !== 3) {
-      throw new Error("Invalid date format: Incorrect number of parts");
-    }
-
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
-
-    if (isNaN(day) || isNaN(month) || isNaN(year)) {
-      throw new Error("Invalid date format: Parts are not numbers");
-    }
-
-    // Months are 0-based in JavaScript, so subtract 1 from the month
-    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)); // Set time to midnight in UTC
-
-    if (isNaN(date.getTime())) {
-      throw new Error("Invalid date: Resulting date is NaN");
-    }
-
-    // Convert to ISODate format
-    const isoDate = date.toISOString();
-    // console.log(`Converted ${ddMmYyyy} to ISODate: ${isoDate}`);
-    return isoDate;
-  } catch (error) {
-    console.error(`Error converting ${ddMmYyyy} to ISODate: ${error.message}`);
-    throw error;
-  }
-}
-
 async function handleGetOrdersByFilter(req, res) {
   try {
-    const { fromtime, totime, folder, client, task, typefilter, forinvoice } =
+    const { fromtime, totime, folder, client_code, task, type, forinvoice } =
       req.headers;
     const page = req.headers.page || 1;
-    const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) ?? 20; // Number of items per page
+    const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) || 20; // Number of items per page
 
     console.log(
       "Received request with parameters:",
       fromtime,
       totime,
       folder,
-      client,
+      client_code,
       task,
-      typefilter,
+      type,
       forinvoice,
       page,
     );
 
     let query = {};
     if (forinvoice) query.status = "Finished";
-    if (folder) query.folder = folder;
-    if (client) query.client_code = client;
-    if (task) query.task = task;
-    if (typefilter) query.type = typefilter;
+    if (folder) query.folder = { $regex: folder, $options: "i" };
+    if (client_code) query.client_code = { $regex: client_code, $options: "i" };
+    if (task) query.task = { $regex: task, $options: "i" };
+    if (type) query.type = { $regex: type, $options: "i" };
     if (fromtime || totime) {
       query.createdAt = {};
-      if (fromtime) {
-        // Set the $gte filter for the start of the day
-        query.createdAt.$gte = new Date(ddMmYyyyToIsoDate(fromtime));
-      }
-      if (totime) {
-        // Set the $lte filter for the end of the day
-        const toTimeDate = new Date(ddMmYyyyToIsoDate(totime));
-        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
-        query.createdAt.$lte = toTimeDate;
-      }
+      if (fromtime) query.createdAt.$gte = new Date(fromtime);
+      if (totime) query.createdAt.$lte = new Date(totime);
     }
-
-    console.log(query);
 
     if (Object.keys(query).length === 0 && query.constructor === Object)
       sendError(res, 400, "No filter applied");
@@ -497,8 +460,8 @@ async function handleGetAllOrdersOfClient(req, res) {
 
 function getDatesInRange(fromTime, toTime) {
   const dates = [];
-  let currentDate = new Date(ddMmYyyyToIsoDate(fromTime));
-  const endDate = new Date(ddMmYyyyToIsoDate(toTime));
+  let currentDate = new Date(fromTime);
+  const endDate = new Date(toTime);
 
   while (currentDate <= endDate) {
     const year = currentDate.getFullYear();
@@ -540,14 +503,10 @@ async function handleGetOrdersByFilterStat(req, res) {
     if (fromtime || totime) {
       query.createdAt = {};
       if (fromtime) {
-        // Set the $gte filter for the start of the day
-        query.createdAt.$gte = new Date(ddMmYyyyToIsoDate(fromtime));
+        query.createdAt.$gte = new Date(fromtime);
       }
       if (totime) {
-        // Set the $lte filter for the end of the day
-        const toTimeDate = new Date(ddMmYyyyToIsoDate(totime));
-        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
-        query.createdAt.$lte = toTimeDate;
+        query.createdAt.$lte = new Date(totime);
       }
     }
 
@@ -599,8 +558,8 @@ async function handleGetOrdersByFilterStat(req, res) {
 
     const ordersForStatus = await Order.find({
       createdAt: {
-        $gte: new Date(ddMmYyyyToIsoDate(fromStatus)),
-        $lte: new Date(ddMmYyyyToIsoDate(toStatus)).setHours(23, 59, 59, 999),
+        $gte: new Date(fromStatus),
+        $lte: new Date(toStatus),
       },
     });
 
@@ -812,11 +771,11 @@ async function handleGetOrdersByCountry(req, res) {
       query.createdAt = {};
       if (fromtime) {
         // Set the $gte filter for the start of the day
-        query.createdAt.$gte = new Date(ddMmYyyyToIsoDate(fromtime));
+        query.createdAt.$gte = new Date(fromtime);
       }
       if (totime) {
         // Set the $lte filter for the end of the day
-        const toTimeDate = new Date(ddMmYyyyToIsoDate(totime));
+        const toTimeDate = new Date(totime);
         toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
         query.createdAt.$lte = toTimeDate;
       }

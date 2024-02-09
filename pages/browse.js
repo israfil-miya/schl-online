@@ -1,6 +1,5 @@
 import React from "react";
 import { getSession, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,14 +11,17 @@ export default function Browse() {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
 
-  const router = useRouter();
   const [orders, setOrders] = useState(null);
-  const [fromTime, setFromTime] = useState("");
-  const [toTime, setToTime] = useState("");
-  const [foldetFilter, setFolderFilter] = useState("");
-  const [clientFilter, setClientFilter] = useState("");
-  const [taskFilter, setTaskFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+
+  const [filters, setFilters] = useState({
+    folder: "",
+    client_code: "",
+    task: "",
+    fromtime: "",
+    totime: "",
+    type: "",
+  });
+
   const [isFiltered, setIsFiltered] = useState(0);
   const [manageData, setManageData] = useState({});
 
@@ -64,22 +66,7 @@ export default function Browse() {
     return `${day}-${month}-${year}`;
   };
 
-  const convertToYYYYMMDD = (dateString) => {
-    const [day, month, year] = dateString.split("-");
-    return `${year}-${month}-${day}`;
-  };
-
   async function filteredData() {
-    let adjustedFromTime = fromTime;
-    let adjustedToTime = toTime;
-
-    if (fromTime) {
-      adjustedFromTime = convertToDDMMYYYY(fromTime);
-    }
-    if (toTime) {
-      adjustedToTime = convertToDDMMYYYY(toTime);
-    }
-
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
 
     const options = {
@@ -88,13 +75,8 @@ export default function Browse() {
         "Content-Type": "application/json",
         ordersnumber: 50,
         getordersbyfilter: true,
-        folder: foldetFilter,
-        client: clientFilter,
-        task: taskFilter,
-        fromtime: adjustedFromTime,
-        totime: adjustedToTime,
-        typefilter: typeFilter,
-        page, // Include the current page in the request headers
+        ...filters,
+        page,
       },
     };
 
@@ -194,13 +176,6 @@ export default function Browse() {
   }
 
   async function editOrder() {
-    if (manageData.download_date && manageData.download_date.includes("-")) {
-      manageData.download_date = convertToDDMMYYYY(manageData.download_date);
-    }
-    if (manageData.delivery_date && manageData.delivery_date.includes("-")) {
-      manageData.delivery_date = convertToDDMMYYYY(manageData.delivery_date);
-    }
-
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "POST",
@@ -216,14 +191,12 @@ export default function Browse() {
       const result = await fetchOrderData(url, options);
 
       if (!result.error) {
-        toast.success("Edited the order data", {
-          duration: 3500,
-        });
+        toast.success("Edited the order data");
 
         if (!isFiltered) await GetAllOrders();
         else await filteredData();
       } else {
-        router.replace(`/admin?error=${result.message}`);
+        toast.error(result.message);
       }
     } catch (error) {
       console.error("Error editing order:", error);
@@ -258,104 +231,9 @@ export default function Browse() {
   return (
     <>
       <Navbar navFor="browse" />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <div
-          style={{ overflowX: "auto" }}
-          className=" text-nowrap my-5 p-3 bg-light rounded border d-flex justify-content-center"
-        >
-          <div
-            className="filter_time me-3"
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            <strong>Date: </strong>
-            <input
-              type="date"
-              className="form-control mx-2 custom-input"
-              value={fromTime}
-              onChange={(e) => setFromTime(e.target.value)}
-            />
-            <span> To </span>
-            <input
-              type="date"
-              className="form-control ms-2 custom-input"
-              value={toTime}
-              onChange={(e) => setToTime(e.target.value)}
-            />
-          </div>
 
-          <div
-            style={{ display: "flex", alignItems: "center" }}
-            className="filter_folder me-3"
-          >
-            <strong>Folder: </strong>
-            <input
-              type="text"
-              placeholder="Folder"
-              className="form-control ms-2 custom-input"
-              value={foldetFilter}
-              onChange={(e) => setFolderFilter(e.target.value)}
-            />
-          </div>
-
-          <div
-            style={{ display: "flex", alignItems: "center" }}
-            className="filter_client me-3"
-          >
-            <strong>Client: </strong>
-            <input
-              type="text"
-              placeholder="Client"
-              className="form-control ms-2 custom-input"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
-            />
-          </div>
-
-          <div
-            style={{ display: "flex", alignItems: "center" }}
-            className="filter_task me-3"
-          >
-            <strong>Task: </strong>
-            <input
-              type="text"
-              placeholder="Task"
-              className="form-control ms-2 custom-input"
-              value={taskFilter}
-              onChange={(e) => setTaskFilter(e.target.value)}
-            />
-          </div>
-
-          <div
-            style={{ display: "flex", alignItems: "center" }}
-            className="filter_type me-3"
-          >
-            <strong>Type: </strong>
-            <input
-              type="text"
-              placeholder="Task Type"
-              className="form-control ms-2 custom-input"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            />
-          </div>
-
-          <button
-            onClick={filteredData}
-            className="btn ms-4 btn-sm btn-outline-primary"
-          >
-            Search
-          </button>
-        </div>
-      </div>
-
-      {orders?.items?.length !== 0 && (
-        <div className="container mb-5">
+      <div className="d-flex mt-3">
+        <div className="container">
           <div
             className="float-end"
             style={{ display: "flex", alignItems: "center" }}
@@ -363,11 +241,11 @@ export default function Browse() {
             <span className="me-3">
               Page{" "}
               <strong>
-                {page}/{pageCount}
+                {orders?.items?.length !== 0 ? page : 0}/{pageCount}
               </strong>
             </span>
             <div
-              className="btn-group"
+              className="btn-group me-2"
               role="group"
               aria-label="Basic outlined example"
             >
@@ -382,15 +260,26 @@ export default function Browse() {
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
-                disabled={page === pageCount}
+                disabled={page === pageCount || pageCount === 0}
                 onClick={handleNext}
               >
                 Next
               </button>
             </div>
+
+            <button
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+              aria-label="Toggle navigation"
+              className="btn m-2 btn-sm btn-outline-primary"
+            >
+              Filter
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
       <div style={{ overflowX: "auto" }} className="text-nowrap">
         <table className="table table-bordered py-3 table-hover">
@@ -430,9 +319,11 @@ export default function Browse() {
 
                   <td className="text-wrap text-break">{order.folder}</td>
                   <td className="text-break">{order.quantity}</td>
-                  <td className="text-break">{order.download_date}</td>
                   <td className="text-break">
-                    {order.delivery_date}
+                    {convertToDDMMYYYY(order.download_date)}
+                  </td>
+                  <td className="text-break">
+                    {convertToDDMMYYYY(order.delivery_date)}
                     <span className="text-body-secondary"> | </span>
                     {order.delivery_bd_time}
                   </td>
@@ -458,10 +349,8 @@ export default function Browse() {
                             client_name: order.client_name || "",
                             folder: order.folder || "",
                             quantity: order.quantity || "",
-                            download_date:
-                              convertToYYYYMMDD(order.download_date) || "",
-                            delivery_date:
-                              convertToYYYYMMDD(order.delivery_date) || "",
+                            download_date: order.download_date || "",
+                            delivery_date: order.delivery_date || "",
                             delivery_bd_time: order.delivery_bd_time || "",
                             task: order.task || "",
                             et: order.et || "",
@@ -520,10 +409,8 @@ export default function Browse() {
                             client_name: order.client_name || "",
                             folder: order.folder || "",
                             quantity: order.quantity || "",
-                            download_date:
-                              convertToYYYYMMDD(order.download_date) || "",
-                            delivery_date:
-                              convertToYYYYMMDD(order.delivery_date) || "",
+                            download_date: order.download_date || "",
+                            delivery_date: order.delivery_date || "",
                             delivery_bd_time: order.delivery_bd_time || "",
                             task: order.task || "",
                             et: order.et || "",
@@ -918,6 +805,147 @@ export default function Browse() {
                 Yes
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="offcanvas offcanvas-end"
+        tabIndex="-1"
+        id="offcanvasNavbar"
+        aria-labelledby="offcanvasNavbarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
+            Search tasks
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div className="d-grid gap-2">
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Client Code
+                </label>
+                <input
+                  value={filters.client_code}
+                  onChange={(e) =>
+                    setFilters((prevData) => ({
+                      ...prevData,
+                      client_code: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="datePicker">
+                  Date picker
+                </label>
+                <div id="datePicker" className="input-group">
+                  <input
+                    type="date"
+                    id="fromDate"
+                    className="form-control custom-input"
+                    value={filters.fromtime}
+                    onChange={(e) =>
+                      setFilters((prevData) => ({
+                        ...prevData,
+                        fromtime: e.target.value,
+                      }))
+                    }
+                  />
+                  <span className="input-group-text">to</span>
+                  <input
+                    type="date"
+                    id="toDate"
+                    className="form-control custom-input"
+                    value={filters.totime}
+                    onChange={(e) =>
+                      setFilters((prevData) => ({
+                        ...prevData,
+                        totime: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Folder Name
+                </label>
+                <input
+                  value={filters.folder}
+                  onChange={(e) =>
+                    setFilters((prevData) => ({
+                      ...prevData,
+                      folder: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Task
+                </label>
+                <input
+                  value={filters.task}
+                  onChange={(e) =>
+                    setFilters((prevData) => ({
+                      ...prevData,
+                      task: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Type
+                </label>
+                <input
+                  value={filters.type}
+                  onChange={(e) =>
+                    setFilters((prevData) => ({
+                      ...prevData,
+                      type: e.target.value,
+                    }))
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+
+            <button onClick={filteredData} className="btn btn-outline-primary">
+              Search
+            </button>
           </div>
         </div>
       </div>

@@ -315,8 +315,6 @@ export default function Approvals() {
 
   async function handleResponseMultiple(data) {
     try {
-      console.log("THIS DATA BEFORE RESPONSE (MULTIPLE): ", data);
-
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/approval`;
       const options = {
         method: "POST",
