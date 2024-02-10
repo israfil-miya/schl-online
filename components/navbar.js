@@ -92,12 +92,13 @@ export default function Navbar({ navFor, shortNote }) {
             {renderTimeCards()}
 
             <div className="navbar-text d-flex me-3">
-              <button
-                className="btn btn-outline-primary btn-sm me-2"
-                onClick={() => router.push("/account/profile")}
-              >
-                Account <UilUserCircle />
-              </button>
+              <Link href={"/protected?redirect=" + "/account/profile"} target="_blank">
+                <button
+                  className="btn btn-outline-primary btn-sm me-2"
+                >
+                  Account <UilUserCircle />
+                </button>
+              </Link>
 
               <button
                 onClick={signOutHandle}
@@ -113,9 +114,8 @@ export default function Navbar({ navFor, shortNote }) {
       <div className={`px-5 navigation ${styles.nav}`}>
         {session.user.role !== "marketer" ? (
           <Link
-            className={`${styles.navitem} ${
-              navFor === "tasks" ? styles.active : ""
-            }`}
+            className={`${styles.navitem} ${navFor === "tasks" ? styles.active : ""
+              }`}
             href="/"
           >
             Tasks
@@ -123,9 +123,8 @@ export default function Navbar({ navFor, shortNote }) {
         ) : null}
         {session.user.role !== "user" && session.user.role !== "marketer" ? (
           <Link
-            className={`${styles.navitem} ${
-              navFor === "browse" ? styles.active : ""
-            }`}
+            className={`${styles.navitem} ${navFor === "browse" ? styles.active : ""
+              }`}
             href="/browse"
           >
             Browse
@@ -134,9 +133,8 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${
-              navFor === "admin" ? styles.active : ""
-            } `}
+            className={`${styles.navitem} ${navFor === "admin" ? styles.active : ""
+              } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -208,9 +206,8 @@ export default function Navbar({ navFor, shortNote }) {
         ) : null}
         {session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${
-              navFor === "dashboard" ? styles.active : ""
-            } `}
+            className={`${styles.navitem} ${navFor === "dashboard" ? styles.active : ""
+              } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -275,9 +272,8 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <Link
-            className={`${styles.navitem} ${
-              navFor === "fileflow" ? styles.active : ""
-            }`}
+            className={`${styles.navitem} ${navFor === "fileflow" ? styles.active : ""
+              }`}
             href="/file-flow"
           >
             File Flow
@@ -286,9 +282,8 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${
-              navFor === "crm" ? styles.active : ""
-            } `}
+            className={`${styles.navitem} ${navFor === "crm" ? styles.active : ""
+              } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -347,34 +342,30 @@ export default function Navbar({ navFor, shortNote }) {
         {session.user.role === "marketer" ? (
           <>
             <Link
-              className={`${styles.navitem} ${
-                navFor === "marketers" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "marketers" ? styles.active : ""
+                }`}
               href="/crm/marketers"
             >
               Marketers
             </Link>
             <Link
-              className={`${styles.navitem} ${
-                navFor === "call-reports" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "call-reports" ? styles.active : ""
+                }`}
               href="/crm/reports-database"
             >
               Call Reports
             </Link>
 
             <Link
-              className={`${styles.navitem} ${
-                navFor === "report-submition" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "report-submition" ? styles.active : ""
+                }`}
               href={`/crm/marketer/report`}
             >
               Report Submition
             </Link>
             <Link
-              className={`${styles.navitem} ${
-                navFor === "lead-mine" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "lead-mine" ? styles.active : ""
+                }`}
               href={`/crm/lead-mine`}
             >
               Lead Mine
