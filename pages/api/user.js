@@ -1,4 +1,6 @@
 import User from "../../db/Users";
+import jwt from "jsonwebtoken";
+
 import dbConnect from "../../db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
@@ -62,11 +64,11 @@ async function handleGetUsersById(req, res) {
   try {
     let data = req.headers;
 
-    console.log("USER DATA: ", data);
+    // console.log("USER DATA: ", data);
 
     const users = await User.findById(data.id).lean();
 
-    console.log("Users return data: ", users);
+    // console.log("Users return data: ", users);
 
     if (!users) sendError(res, 400, "No user found with the id");
     else res.status(200).json(users);
@@ -110,6 +112,35 @@ async function handleDeleteUser(req, res) {
   }
 }
 
+async function handleVerifyUserAndSetCookie(req, res) {
+  const { name, password } = req.body;
+  const { redirect_path } = req.headers;
+
+  try {
+    const userData = await User.findOne({
+      name,
+      password,
+    });
+
+    if (userData) {
+      const token = jwt.sign(
+        { userId: userData._id, exp: Date.now() + 10 * 1000 },
+        process.env.SECRET,
+      );
+      res.setHeader(
+        "Set-Cookie",
+        `verify-token.tmp=${token}; Path=${redirect_path}`,
+      );
+      res.status(200).json({});
+    } else {
+      sendError(res, 400, "No account found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -123,6 +154,8 @@ export default async function handle(req, res) {
         await handleGetUsersById(req, res);
       } else if (req.headers.deleteuser) {
         await handleDeleteUser(req, res);
+      } else if (req.headers.verify_user) {
+        await handleVerifyUserAndSetCookie(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
@@ -131,6 +164,8 @@ export default async function handle(req, res) {
     case "POST":
       if (req.headers.edituser) {
         await handleEditUser(req, res);
+      } else if (req.headers.verify_user) {
+        await handleVerifyUserAndSetCookie(req, res);
       } else {
         await handleNewUser(req, res);
       }

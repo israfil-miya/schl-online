@@ -2,19 +2,55 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../components/navbar";
 import Link from "next/link";
 import { useSession, getSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
+import jwt from "jsonwebtoken";
 
 export default function Page() {
   const { data: session } = useSession();
   const [employeeData, setEmployeeData] = useState({});
   const [salaryComponents, setSalaryComponents] = useState([]);
+  const router = useRouter();
   const [pfMoneyAmount, setPfMoneyAmount] = useState(0);
 
   async function fetchApi(url, options) {
     const res = await fetch(url, options);
     const data = await res.json();
     return data;
+  }
+
+  function verifyTokenAndRedirect(token) {
+    const decoded = jwt?.verify(token, process.env.NEXT_PUBLIC_SECRET);
+    const userIdFromToken = decoded.userId;
+    const sessionUserId = session.user._id || null;
+
+    if (!(userIdFromToken === sessionUserId) || !(Date.now() < decoded.exp)) {
+      router.push("/protected?redirect=" + "/account/profile");
+    }
+  }
+
+  function HandleVerifyUser() {
+    let verify_token = Cookies.get("verify-token.tmp")?.trim();
+
+    // Wait for 5 seconds until verify_token has a value
+    const waitTime = 5000; // 5 seconds in milliseconds
+    const interval = 100; // Check every 100 milliseconds
+    let elapsedTime = 0;
+
+    const intervalId = setInterval(() => {
+      verify_token = Cookies.get("verify-token.tmp")?.trim();
+      if (verify_token || elapsedTime >= waitTime) {
+        clearInterval(intervalId); // Stop the interval once verify_token has a value or timeout occurs
+        if (!verify_token) {
+          console.log("Timeout: verify_token not received within 5 seconds.");
+          return; // Return or handle the timeout scenario
+        }
+        verifyTokenAndRedirect(verify_token); // Proceed with verifying the token
+      }
+      elapsedTime += interval;
+    }, interval);
   }
 
   const convertToDDMMYYYY = (dateString) => {
@@ -72,7 +108,7 @@ export default function Page() {
     const totalYears = currentYear - givenYear;
     const totalMonths = totalYears * 12 + (currentMonth - givenMonth);
 
-    console.log(totalMonths);
+    // console.log(totalMonths);
 
     return totalMonths;
   }
@@ -83,10 +119,10 @@ export default function Page() {
     const formattedSalaryComponents =
       salaryComponents.length > 0 ? salaryComponents[0] : 0;
 
-    console.log("EMPLOYEEDATA: ", employeeData);
+    // console.log("EMPLOYEEDATA: ", employeeData);
 
     if (employeeData.pf_history && employeeData.pf_history.length) {
-      console.log("EMPLOYEEDATA (IF): ", employeeData);
+      // console.log("EMPLOYEEDATA (IF): ", employeeData);
 
       totalSavedAmount =
         employeeData.pf_history[employeeData.pf_history.length - 1]
@@ -102,7 +138,7 @@ export default function Page() {
 
       totalSavedAmount += newAmount;
     } else {
-      console.log("EMPLOYEEDATA (ELSE): ", employeeData);
+      // console.log("EMPLOYEEDATA (ELSE): ", employeeData);
 
       const startDate = employeeData.pf_start_date;
       const newAmount = Math.round(
@@ -114,9 +150,13 @@ export default function Page() {
       totalSavedAmount = newAmount;
     }
 
-    console.log("TOTAL AMOUNT: ", totalSavedAmount);
+    // console.log("TOTAL AMOUNT: ", totalSavedAmount);
     setPfMoneyAmount(totalSavedAmount);
   }
+
+  useEffect(() => {
+    HandleVerifyUser();
+  }, []);
 
   useEffect(() => {
     GetEmployeeByName();

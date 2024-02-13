@@ -35,7 +35,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
 const deliveryDate = "2024-02-10";
 const deliveryTime = "12:00 PM";
 const timeDifferenceMs = calculateTimeDifference(deliveryDate, deliveryTime);
-console.log("Time difference in milliseconds:", timeDifferenceMs);
+// console.log("Time difference in milliseconds:", timeDifferenceMs);
 
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -212,17 +212,17 @@ async function handleGetOrdersByFilter(req, res) {
     const page = req.headers.page || 1;
     const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) || 20; // Number of items per page
 
-    console.log(
-      "Received request with parameters:",
-      fromtime,
-      totime,
-      folder,
-      client_code,
-      task,
-      type,
-      forinvoice,
-      page,
-    );
+    // console.log(
+    //   "Received request with parameters:",
+    //   fromtime,
+    //   totime,
+    //   folder,
+    //   client_code,
+    //   task,
+    //   type,
+    //   forinvoice,
+    //   page,
+    // );
 
     let query = {};
     if (forinvoice) query.status = "Finished";
@@ -302,13 +302,13 @@ async function handleGetOrdersByFilter(req, res) {
         pipeline = [...pipeline, { $sort: { createdAt: 1 } }];
       }
 
-      console.log(pipeline);
+      // console.log(pipeline);
 
       const count = await Order.countDocuments(query); // Count the total matching documents
 
       const orders = await Order.aggregate(pipeline).exec();
 
-      console.log("FILTERED ORDERS: ", orders.length);
+      // console.log("FILTERED ORDERS: ", orders.length);
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
 
@@ -373,7 +373,7 @@ async function handleEditOrder(req, res) {
 async function handleDeleteOrder(req, res) {
   try {
     const data = req.headers;
-    console.log("Received edit request with data:", data);
+    // console.log("Received edit request with data:", data);
 
     const resData = await Order.findByIdAndDelete(data.id, {
       new: true,
@@ -393,7 +393,7 @@ async function handleDeleteOrder(req, res) {
 async function handleFinishOrder(req, res) {
   try {
     const data = req.headers;
-    console.log("Received edit request with data:", data);
+    // console.log("Received edit request with data:", data);
 
     const resData = await Order.findByIdAndUpdate(
       data.id,
@@ -417,7 +417,7 @@ async function handleFinishOrder(req, res) {
 async function handleRedoOrder(req, res) {
   try {
     const data = req.headers;
-    console.log("Received edit request with data:", data);
+    // console.log("Received edit request with data:", data);
 
     const resData = await Order.findByIdAndUpdate(
       data.id,
@@ -441,11 +441,11 @@ async function handleRedoOrder(req, res) {
 async function handleGetAllOrdersOfClient(req, res) {
   try {
     const data = req.headers;
-    console.log("Received edit request with data of Client:", data);
+    // console.log("Received edit request with data of Client:", data);
 
     const resData = await Order.find({ client_code: data.client_code });
 
-    console.log(resData);
+    // console.log(resData);
 
     if (resData) {
       res.status(200).json(resData);
@@ -484,7 +484,7 @@ function getDateRange() {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${day}-${month}-${year}`;
+    return `${year}-${month}-${day}`;
   };
 
   return {
@@ -496,6 +496,7 @@ function getDateRange() {
 async function handleGetOrdersByFilterStat(req, res) {
   try {
     const { fromtime, totime } = req.headers;
+
     const fromStatus = getDateRange().from;
     const toStatus = getDateRange().to;
 
@@ -509,6 +510,8 @@ async function handleGetOrdersByFilterStat(req, res) {
         query.createdAt.$lte = new Date(totime);
       }
     }
+
+    // console.log("QUERY: ", query)
 
     const monthNames = [
       "January",
@@ -531,6 +534,9 @@ async function handleGetOrdersByFilterStat(req, res) {
         order.createdAt instanceof Date
           ? order.createdAt.toISOString().split("T")[0]
           : order.createdAt.split("T")[0];
+
+      // console.log("VALIDATE IS DATE 1: ", date)
+
       const [year, month, day] = date.split("-");
       const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
 
@@ -556,6 +562,10 @@ async function handleGetOrdersByFilterStat(req, res) {
     }, {});
     const ordersQP = Object.values(mergedOrders);
 
+    // console.log("Code reached here 01")
+
+    // console.log(fromStatus, toStatus)
+
     const ordersForStatus = await Order.find({
       createdAt: {
         $gte: new Date(fromStatus),
@@ -563,11 +573,16 @@ async function handleGetOrdersByFilterStat(req, res) {
       },
     });
 
+    // console.log("Code reached here 02")
+
     const mergedOrdersStatus = ordersForStatus.reduce((merged, order) => {
       const date =
         order.createdAt instanceof Date
           ? order.createdAt.toISOString().split("T")[0]
           : order.createdAt.split("T")[0];
+
+      // console.log("VALIDATE IS DATE 2: ", date)
+
       const [year, month, day] = date.split("-");
       const formattedDate = `${monthNames[parseInt(month) - 1]} ${day}`;
 
@@ -813,7 +828,7 @@ async function handleGetOrdersByCountry(req, res) {
         res.status(200).json(returnData);
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         sendError(res, 400, "Something went wrong");
       });
   } catch (e) {

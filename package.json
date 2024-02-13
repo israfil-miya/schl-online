@@ -16,6 +16,8 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "exceljs": "^4.3.0",
     "formidable-serverless-2": "^1.1.2",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "8.5.1",
     "moment-timezone": "^0.5.43",
     "mongoose": "^7.6.8",
     "next": "^13.4.16",
