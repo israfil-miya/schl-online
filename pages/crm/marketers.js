@@ -4,6 +4,7 @@ import Navbar from "../../components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/router";
+const moment = require("moment-timezone");
 
 async function fetchApi(url, options) {
   const res = await fetch(url, options);
@@ -19,7 +20,12 @@ export default function Marketers(props) {
   const [availableFollowups, setAvailableFollowups] = useState([]);
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState([]);
   const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState([]);
-  const [reportTimePeriod, setReportTimePeriod] = useState(5);
+  const [fromTimePeriod, setFromTimePeriod] = useState(
+    moment().subtract(5, "days").utc().format("YYYY-MM-DD"),
+  );
+  const [toTimePeriod, setToTimePeriod] = useState(
+    moment().utc().format("YYYY-MM-DD"),
+  );
 
   const [dailyReportStatusLoading, setDailyReportStatusLoading] =
     useState(false);
@@ -48,6 +54,17 @@ export default function Marketers(props) {
     }
   };
 
+  function countDays(fromDate, toDate) {
+    const from_date = new Date(fromDate);
+    const to_date = new Date(toDate);
+
+    console.log(from_date, to_date, fromDate, toDate);
+
+    const timeDifference = to_date.getTime() - from_date.getTime();
+    const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+    return daysDifference;
+  }
+
   const getAvailableFollowups = async () => {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
@@ -72,9 +89,11 @@ export default function Marketers(props) {
     }
   };
 
-  const getDailyReportStatus = async () => {
+  const getDailyReportStatus = async (reportTimePeriod) => {
     try {
       setDailyReportStatusLoading(true);
+
+      console.log("report-time-period: ", reportTimePeriod);
 
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
       const options = {
@@ -148,77 +167,88 @@ export default function Marketers(props) {
     let total_prospects = 0;
     let total_leads = 0;
 
-    let dailyReportStatus = await getDailyReportStatus();
+    let reportTimePeriod = countDays(fromTimePeriod, toTimePeriod);
 
-    dailyReportStatus.map((FiveDayReportOfMarketer, index) => {
-      total_calls_made += parseInt(
-        FiveDayReportOfMarketer.data.total_calls_made,
-      )
-        ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
-        : 0;
-      total_test_jobs += parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
-        ? parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
-        : 0;
-      total_prospects += parseInt(FiveDayReportOfMarketer.data.total_prospects)
-        ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
-        : 0;
-      total_leads += parseInt(FiveDayReportOfMarketer.data.total_leads)
-        ? parseInt(FiveDayReportOfMarketer.data.total_leads)
-        : 0;
+    if (reportTimePeriod < 0) {
+      toast.error("From date can't be more recent than To date");
+      return null;
+    } else {
+      let dailyReportStatus = await getDailyReportStatus(reportTimePeriod);
+
+      dailyReportStatus?.map((FiveDayReportOfMarketer, index) => {
+        total_calls_made += parseInt(
+          FiveDayReportOfMarketer.data.total_calls_made,
+        )
+          ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
+          : 0;
+        total_test_jobs += parseInt(
+          FiveDayReportOfMarketer.data.total_test_jobs,
+        )
+          ? parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
+          : 0;
+        total_prospects += parseInt(
+          FiveDayReportOfMarketer.data.total_prospects,
+        )
+          ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
+          : 0;
+        total_leads += parseInt(FiveDayReportOfMarketer.data.total_leads)
+          ? parseInt(FiveDayReportOfMarketer.data.total_leads)
+          : 0;
+        parsedTableRows.push(
+          <tr key={index}>
+            <td
+              style={{
+                maxWidth: "5px",
+                padding: "0px 0px 0px 5px",
+                backgroundColor: "#212529",
+                color: "#fff",
+              }}
+            >
+              {index + 1}. {FiveDayReportOfMarketer.marketer_name}
+            </td>
+            <td className="text-center" style={{ padding: "0px" }}>
+              {FiveDayReportOfMarketer.data.total_calls_made}
+            </td>
+            <td className="text-center" style={{ padding: "0px" }}>
+              {FiveDayReportOfMarketer.data.total_prospects}
+            </td>
+            <td className="text-center" style={{ padding: "0px" }}>
+              {FiveDayReportOfMarketer.data.total_test_jobs}
+            </td>
+            <td className="text-center" style={{ padding: "0px" }}>
+              {FiveDayReportOfMarketer.data.total_leads}
+            </td>
+          </tr>,
+        );
+      });
+
       parsedTableRows.push(
-        <tr key={index}>
-          <td
+        <tr className="table-secondary">
+          <th
             style={{
               maxWidth: "5px",
               padding: "0px 0px 0px 5px",
-              backgroundColor: "#212529",
-              color: "#fff",
             }}
           >
-            {index + 1}. {FiveDayReportOfMarketer.marketer_name}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_calls_made}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_prospects}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_test_jobs}
-          </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {FiveDayReportOfMarketer.data.total_leads}
-          </td>
+            Total
+          </th>
+          <th className="text-center" style={{ padding: "0px" }}>
+            {total_calls_made}
+          </th>
+          <th className="text-center" style={{ padding: "0px" }}>
+            {total_prospects}
+          </th>
+          <th className="text-center" style={{ padding: "0px" }}>
+            {total_test_jobs}
+          </th>
+          <th className="text-center" style={{ padding: "0px" }}>
+            {total_leads}
+          </th>
         </tr>,
       );
-    });
 
-    parsedTableRows.push(
-      <tr className="table-secondary">
-        <th
-          style={{
-            maxWidth: "5px",
-            padding: "0px 0px 0px 5px",
-          }}
-        >
-          Total
-        </th>
-        <th className="text-center" style={{ padding: "0px" }}>
-          {total_calls_made}
-        </th>
-        <th className="text-center" style={{ padding: "0px" }}>
-          {total_prospects}
-        </th>
-        <th className="text-center" style={{ padding: "0px" }}>
-          {total_test_jobs}
-        </th>
-        <th className="text-center" style={{ padding: "0px" }}>
-          {total_leads}
-        </th>
-      </tr>,
-    );
-
-    setDailyReportStatusRowHtml(parsedTableRows);
+      setDailyReportStatusRowHtml(parsedTableRows);
+    }
   };
 
   const createTodayReportStatusTable = async () => {
@@ -305,10 +335,6 @@ export default function Marketers(props) {
     getAvailableFollowups();
     getMarketers();
   }, []);
-
-  useEffect(() => {
-    createDailyReportStatusTable();
-  }, [reportTimePeriod]);
 
   return (
     <>
@@ -406,20 +432,32 @@ export default function Marketers(props) {
 
           <div className="daily-report-status mt-3">
             <h5 className="bg-light text-center justify-content-center align-center d-flex p-2 mb-3 border">
-              Daily Report Status (Last
-              <select
-                style={{ width: "70px" }}
-                className="form-select ms-2 me-2 form-select-sm"
-                id="floatingSelect"
-                value={reportTimePeriod}
-                onChange={(e) => setReportTimePeriod(e.target.value)}
-              >
-                <option value={5}>5</option>
-                <option value={30}>30</option>
-                <option value={60}>60</option>
-                <option value={365}>365</option>
-              </select>
-              Business Days)
+              <span className="mt-2">Daily Report Status</span>
+              <div className="px-5" style={{ maxWidth: "60%" }}>
+                <div id="datePicker" className="input-group">
+                  <input
+                    type="date"
+                    id="fromDate"
+                    className="form-control custom-input"
+                    value={fromTimePeriod}
+                    onChange={(e) => setFromTimePeriod(e.target.value)}
+                  />
+                  <span className="input-group-text">to</span>
+                  <input
+                    type="date"
+                    id="toDate"
+                    className="form-control custom-input"
+                    value={toTimePeriod}
+                    onChange={(e) => setToTimePeriod(e.target.value)}
+                  />
+                  <button
+                    onClick={createDailyReportStatusTable}
+                    className="btn btn-outline-primary btn-small"
+                  >
+                    Filter
+                  </button>
+                </div>
+              </div>
             </h5>
 
             <table className="table table-bordered table-hover">
