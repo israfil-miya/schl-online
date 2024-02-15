@@ -230,10 +230,19 @@ async function handleGetOrdersByFilter(req, res) {
     if (client_code) query.client_code = { $regex: client_code, $options: "i" };
     if (task) query.task = { $regex: task, $options: "i" };
     if (type) query.type = { $regex: type, $options: "i" };
+
     if (fromtime || totime) {
       query.createdAt = {};
-      if (fromtime) query.createdAt.$gte = new Date(fromtime);
-      if (totime) query.createdAt.$lte = new Date(totime);
+      if (fromtime) {
+        // Set the $gte filter for the start of the day
+        query.createdAt.$gte = new Date(fromtime);
+      }
+      if (totime) {
+        // Set the $lte filter for the end of the day
+        const toTimeDate = new Date(totime);
+        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
+        query.createdAt.$lte = toTimeDate;
+      }
     }
 
     if (Object.keys(query).length === 0 && query.constructor === Object)
@@ -303,6 +312,8 @@ async function handleGetOrdersByFilter(req, res) {
       }
 
       // console.log(pipeline);
+
+      console.log(query);
 
       const count = await Order.countDocuments(query); // Count the total matching documents
 
@@ -461,7 +472,7 @@ async function handleGetAllOrdersOfClient(req, res) {
 function getDatesInRange(fromTime, toTime) {
   const dates = [];
   let currentDate = new Date(fromTime);
-  const endDate = new Date(toTime);
+  const endDate = new Date(toTime).setHours(23, 59, 59, 999);
 
   while (currentDate <= endDate) {
     const year = currentDate.getFullYear();
@@ -501,13 +512,18 @@ async function handleGetOrdersByFilterStat(req, res) {
     const toStatus = getDateRange().to;
 
     let query = { type: { $ne: "Test" } };
+
     if (fromtime || totime) {
       query.createdAt = {};
       if (fromtime) {
+        // Set the $gte filter for the start of the day
         query.createdAt.$gte = new Date(fromtime);
       }
       if (totime) {
-        query.createdAt.$lte = new Date(totime);
+        // Set the $lte filter for the end of the day
+        const toTimeDate = new Date(totime);
+        toTimeDate.setHours(23, 59, 59, 999); // Set to end of the day
+        query.createdAt.$lte = toTimeDate;
       }
     }
 
@@ -569,7 +585,7 @@ async function handleGetOrdersByFilterStat(req, res) {
     const ordersForStatus = await Order.find({
       createdAt: {
         $gte: new Date(fromStatus),
-        $lte: new Date(toStatus),
+        $lte: new Date(toStatus).setHours(23, 59, 59, 999),
       },
     });
 
@@ -836,6 +852,7 @@ async function handleGetOrdersByCountry(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
 export default async function handle(req, res) {
   const { method } = req;
 
