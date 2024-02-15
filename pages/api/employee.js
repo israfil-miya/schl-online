@@ -239,9 +239,14 @@ function getMonthsTillNow(dateString) {
 }
 
 function calculateSalaryComponents(grossSalary) {
-  const base = Math.floor((grossSalary / 25) * 17); // Gross * 68%
-  const houseRent = Math.floor(grossSalary / 3 / 2);
-  const convAllowance = Math.floor(grossSalary / 3 / 2);
+  const basePercentage = 68;
+  const base = Math.floor((grossSalary * basePercentage) / 100);
+  const houseRent = Math.floor(
+    (grossSalary * (100 - basePercentage)) / 100 / 2,
+  );
+  const convAllowance = Math.floor(
+    (grossSalary * (100 - basePercentage)) / 100 / 2,
+  );
 
   // const calculatedTotal = base + houseRent + convAllowance;
   // const difference = grossSalary - calculatedTotal;
