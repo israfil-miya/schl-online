@@ -17,17 +17,16 @@ const isWeekend = (date) => {
   return dayOfWeek === 0 /* Sunday */ || dayOfWeek === 6 /* Saturday */;
 };
 
-const getValidWeekDays = (days) => {
-  const today = moment().utc();
-
-  const fiveDaysAgo = moment().subtract(days, "days").utc();
+const getValidWeekDays = (startDate, endDate) => {
+  const start = moment(startDate, "YYYY-MM-DD");
+  const end = moment(endDate, "YYYY-MM-DD");
 
   const validWeekdays = [];
 
-  for (let d = moment(fiveDaysAgo); d.isSameOrBefore(today); d.add(1, "day")) {
+  for (let d = moment(start); d.isSameOrBefore(end); d.add(1, "day")) {
     if (!isWeekend(d.toDate())) {
       validWeekdays.push({
-        calling_date_history: d.utc().format("YYYY-MM-DD"),
+        calling_date_history: d.format("YYYY-MM-DD"),
       }); // Store valid weekdays
     }
   }
@@ -119,6 +118,9 @@ async function handleGetAllReports(req, res) {
     if (prospect) query.is_prospected = prospect;
     query.is_lead = onlylead || false;
 
+    // Only recalls are being excluded if no new call was made in the time period, only recalls were made.
+    // Need to work here!
+
     if (fromdate || todate) {
       query.calling_date = {};
       if (fromdate) {
@@ -155,8 +157,6 @@ async function handleGetAllReports(req, res) {
         };
       }
 
-      console.log(searchQuery);
-
       const countPromise = Report.countDocuments(searchQuery);
       const reportsPromise = req.headers.notpaginated
         ? Report.find({}).lean()
@@ -170,6 +170,8 @@ async function handleGetAllReports(req, res) {
             { $skip: skip },
             { $limit: ITEMS_PER_PAGE },
           ]);
+
+      console.log("SEARCH Query:", searchQuery);
 
       const [count, reports] = await Promise.all([
         countPromise,
@@ -371,16 +373,24 @@ async function handleGetNearestFollowUps(req, res) {
   }
 }
 
-async function handleGetDailyReportsLast5Days(req, res) {
+async function handleGetDailyReportsLastDays(req, res) {
   try {
-    let validWeekdays = getValidWeekDays(parseInt(req.headers.days));
-
+    let validWeekdays = getValidWeekDays(
+      req.headers.fromtime,
+      req.headers.totime,
+    );
     const validDates = validWeekdays.map((day) => day.calling_date_history);
 
     let resDataPromises = validDates.map((date) =>
       Report.find(
-        { calling_date_history: date },
-        { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
+        { calling_date: date },
+        {
+          marketer_name: 1,
+          is_prospected: 1,
+          is_test: 1,
+          is_lead: 1,
+          calling_date_history: 1,
+        },
       ).lean(),
     );
 
@@ -388,6 +398,11 @@ async function handleGetDailyReportsLast5Days(req, res) {
     resData = resData.flat();
 
     let returnData = resData.reduce((acc, entry) => {
+      // Filter out dates from calling_date_history that are not included in validDates array
+      entry.calling_date_history = entry.calling_date_history.filter((date) =>
+        validDates.includes(date),
+      );
+
       // Find existing entry for the marketer
       const existingEntry = acc.find(
         (item) => item.marketer_name === entry.marketer_name,
@@ -396,7 +411,8 @@ async function handleGetDailyReportsLast5Days(req, res) {
       if (existingEntry) {
         // Update existing entry with new data
         if (!entry.is_lead) {
-          existingEntry.data.total_calls_made += 1;
+          existingEntry.data.total_calls_made +=
+            entry.calling_date_history.length;
           if (entry.is_prospected) existingEntry.data.total_prospects += 1;
           if (entry.is_test) existingEntry.data.total_test_jobs += 1;
         } else {
@@ -407,7 +423,7 @@ async function handleGetDailyReportsLast5Days(req, res) {
           acc.push({
             marketer_name: entry.marketer_name,
             data: {
-              total_calls_made: 1,
+              total_calls_made: entry.calling_date_history.length,
               total_prospects: entry.is_prospected ? 1 : 0,
               total_test_jobs: entry.is_test ? 1 : 0,
               total_leads: 0,
@@ -441,13 +457,16 @@ async function handleGetDailyReportsLast5Days(req, res) {
 
 async function handleGetDailyReportsToday(req, res) {
   try {
-    const today = moment().utc().format("YYYY-MM-DD");
+    const today = moment().tz("Asia/Dhaka").format("YYYY-MM-DD");
+
+    console.log(today);
 
     let resData = await Report.find(
       { calling_date_history: today },
       { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
     ).lean();
 
+    // Calculate aggregated metrics for the reports of the current day
     let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
       const existingEntry = acc.find(
@@ -461,39 +480,29 @@ async function handleGetDailyReportsToday(req, res) {
           if (entry.is_prospected) existingEntry.data.total_prospects += 1;
           if (entry.is_test) existingEntry.data.total_test_jobs += 1;
         } else {
-          if (entry.is_lead) existingEntry.data.total_leads += 1;
+          existingEntry.data.total_leads += 1;
         }
       } else {
-        if (!entry.is_lead) {
-          acc.push({
-            marketer_name: entry.marketer_name,
-            data: {
-              total_calls_made: 1,
-              total_prospects: entry.is_prospected ? 1 : 0,
-              total_test_jobs: entry.is_test ? 1 : 0,
-              total_leads: 0,
-            },
-          });
-        } else {
-          acc.push({
-            marketer_name: entry.marketer_name,
-            data: {
-              total_calls_made: 0,
-              total_prospects: 0,
-              total_test_jobs: 0,
-              total_leads: 1,
-            },
-          });
-        }
         // Create a new entry if the marketer doesn't exist in the result array
+        acc.push({
+          marketer_name: entry.marketer_name,
+          data: {
+            total_calls_made: 1,
+            total_prospects: entry.is_prospected ? 1 : 0,
+            total_test_jobs: entry.is_test ? 1 : 0,
+            total_leads: entry.is_lead ? 1 : 0,
+          },
+        });
       }
 
       return acc;
     }, []);
 
-    if (resData && returnData) {
+    if (returnData) {
       res.status(200).json(returnData);
-    } else sendError(res, 500, "No data found");
+    } else {
+      sendError(res, 500, "No data found");
+    }
   } catch (e) {
     console.error(e);
     sendError(res, 500, "An error occurred");
@@ -509,8 +518,8 @@ export default async function handle(req, res) {
         await handleGetAllMarketers(req, res);
       } else if (req.headers.getallreports) {
         await handleGetAllReports(req, res);
-      } else if (req.headers.getdailyreportslast5days) {
-        await handleGetDailyReportsLast5Days(req, res);
+      } else if (req.headers.getdailyreportslastdays) {
+        await handleGetDailyReportsLastDays(req, res);
       } else if (req.headers.getnearestfollowups) {
         await handleGetNearestFollowUps(req, res);
       } else if (req.headers.finishfollowup) {

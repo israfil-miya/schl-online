@@ -21,10 +21,10 @@ export default function Marketers(props) {
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState([]);
   const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState([]);
   const [fromTimePeriod, setFromTimePeriod] = useState(
-    moment().subtract(5, "days").utc().format("YYYY-MM-DD"),
+    moment().subtract(5, "days").tz("Asia/Dhaka").format("YYYY-MM-DD"),
   );
   const [toTimePeriod, setToTimePeriod] = useState(
-    moment().utc().format("YYYY-MM-DD"),
+    moment().tz("Asia/Dhaka").format("YYYY-MM-DD"),
   );
 
   const [dailyReportStatusLoading, setDailyReportStatusLoading] =
@@ -89,42 +89,6 @@ export default function Marketers(props) {
     }
   };
 
-  const getDailyReportStatus = async (reportTimePeriod) => {
-    try {
-      setDailyReportStatusLoading(true);
-
-      console.log("report-time-period: ", reportTimePeriod);
-
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          getdailyreportslast5days: true,
-          days: reportTimePeriod,
-        },
-      };
-
-      const list = await fetchApi(url, options);
-
-      if (!list.error) {
-        return list;
-      } else {
-        toast.error("Unable to retrieve daily report status list", {
-          toastId: "error1",
-        });
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching daily report status list:", error);
-      toast.error("Error retrieving daily report status list", {
-        toastId: "error3",
-      });
-    } finally {
-      setDailyReportStatusLoading(false); // Set loading state to false after completion
-    }
-  };
-
   const getTodayReportStatus = async () => {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
@@ -160,6 +124,41 @@ export default function Marketers(props) {
     return `${day}-${month}-${year}`;
   };
 
+  const getDailyReportStatus = async (fromtime, totime) => {
+    try {
+      setDailyReportStatusLoading(true);
+
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getdailyreportslastdays: true,
+          fromtime,
+          totime,
+        },
+      };
+
+      const list = await fetchApi(url, options);
+
+      if (!list.error) {
+        return list;
+      } else {
+        toast.error("Unable to retrieve daily report status list", {
+          toastId: "error1",
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching daily report status list:", error);
+      toast.error("Error retrieving daily report status list", {
+        toastId: "error3",
+      });
+    } finally {
+      setDailyReportStatusLoading(false); // Set loading state to false after completion
+    }
+  };
+
   const createDailyReportStatusTable = async () => {
     let parsedTableRows = [];
     let total_calls_made = 0;
@@ -173,7 +172,10 @@ export default function Marketers(props) {
       toast.error("From date can't be more recent than To date");
       return null;
     } else {
-      let dailyReportStatus = await getDailyReportStatus(reportTimePeriod);
+      let dailyReportStatus = await getDailyReportStatus(
+        fromTimePeriod,
+        toTimePeriod,
+      );
 
       dailyReportStatus?.map((FiveDayReportOfMarketer, index) => {
         total_calls_made += parseInt(
