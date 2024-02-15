@@ -27,14 +27,15 @@ export default function Page() {
   };
 
   function calculateSalaryComponents(grossSalary) {
-    const base = Math.floor((grossSalary / 3) * 2);
+    const base = Math.floor((grossSalary / 25) * 17); // Gross * 68%
     const houseRent = Math.floor(grossSalary / 3 / 2);
     const convAllowance = Math.floor(grossSalary / 3 / 2);
-    const calculatedTotal = base + houseRent + convAllowance;
-    const difference = grossSalary - calculatedTotal;
-    const adjustedBase = base + difference;
 
-    return [adjustedBase, houseRent, convAllowance, grossSalary];
+    // const calculatedTotal = base + houseRent + convAllowance;
+    // const difference = grossSalary - calculatedTotal;
+    // const adjustedBase = base + difference;
+
+    return [base, houseRent, convAllowance, grossSalary];
   }
 
   async function GetEmployeeByName() {
