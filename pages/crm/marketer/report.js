@@ -129,6 +129,7 @@ export default function DailyReport() {
                 Country
               </label>
               <input
+                required
                 value={reportData.country}
                 onChange={(e) =>
                   setReportData({ ...reportData, country: e.target.value })
@@ -143,6 +144,7 @@ export default function DailyReport() {
                 Website
               </label>
               <input
+                required
                 value={reportData.website}
                 onChange={(e) =>
                   setReportData({ ...reportData, website: e.target.value })
@@ -157,6 +159,7 @@ export default function DailyReport() {
                 Category
               </label>
               <input
+                required
                 value={reportData.category}
                 onChange={(e) =>
                   setReportData({ ...reportData, category: e.target.value })
@@ -171,6 +174,7 @@ export default function DailyReport() {
                 Company Name
               </label>
               <input
+                required
                 value={reportData.company_name}
                 onChange={(e) =>
                   setReportData({ ...reportData, company_name: e.target.value })
@@ -185,6 +189,7 @@ export default function DailyReport() {
                 Contact Person
               </label>
               <input
+                required
                 value={reportData.contact_person}
                 onChange={(e) =>
                   setReportData({
@@ -202,6 +207,7 @@ export default function DailyReport() {
                 Designation
               </label>
               <input
+                required
                 value={reportData.designation}
                 onChange={(e) =>
                   setReportData({ ...reportData, designation: e.target.value })

@@ -399,24 +399,35 @@ async function handleGetDailyReportsLastDays(req, res) {
     // Extract calling dates from valid weekdays
     const validDates = validWeekdays.map((day) => day.calling_date_history);
 
-    // Fetch reports for each valid date
-    let resDataPromises = validDates.map((date) =>
-      Report.find(
-        { calling_date_history: date },
-        {
-          marketer_name: 1,
-          is_prospected: 1,
-          is_test: 1,
-          is_lead: 1,
-          calling_date_history: 1,
-        },
-      ).lean(),
-    );
+    // // Fetch reports for each valid date
+    // let resDataPromises = validDates.map((date) =>
+    //   Report.find(
+    //     { calling_date_history: date },
+    //     {
+    //       marketer_name: 1,
+    //       is_prospected: 1,
+    //       is_test: 1,
+    //       is_lead: 1,
+    //       calling_date_history: 1,
+    //     },
+    //   ).lean(),
+    // );
 
-    // Execute promises in parallel
-    let resData = await Promise.all(resDataPromises);
-    // Flatten the array of results
-    resData = resData.flat();
+    // // Execute promises in parallel
+    // let resData = await Promise.all(resDataPromises);
+    // // Flatten the array of results
+    // resData = resData.flat();
+
+    let resData = await Report.find(
+      { calling_date_history: { $elemMatch: { $in: validDates } } },
+      {
+        marketer_name: 1,
+        is_prospected: 1,
+        is_test: 1,
+        is_lead: 1,
+        calling_date_history: 1,
+      },
+    ).lean();
 
     // Track which documents have already been counted
     let countedDocuments = new Set();
@@ -445,22 +456,35 @@ async function handleGetDailyReportsLastDays(req, res) {
       );
 
       if (existingEntry) {
-        // Update existing entry with new data
-        existingEntry.data.total_calls_made += totalCallsMade;
-        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
-        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
-        if (entry.is_lead) existingEntry.data.total_leads += 1;
+        if (!entry.is_lead) {
+          existingEntry.data.total_calls_made += totalCallsMade;
+          if (entry.is_prospected) existingEntry.data.total_prospects++;
+          if (entry.is_test) existingEntry.data.total_test_jobs++;
+        } else {
+          existingEntry.data.total_leads++;
+        }
       } else {
-        // Create a new entry if the marketer doesn't exist in the result array
-        acc.push({
-          marketer_name: entry.marketer_name,
-          data: {
-            total_calls_made: totalCallsMade,
-            total_prospects: entry.is_prospected ? 1 : 0,
-            total_test_jobs: entry.is_test ? 1 : 0,
-            total_leads: entry.is_lead ? 1 : 0,
-          },
-        });
+        if (!entry.is_lead) {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: totalCallsMade,
+              total_prospects: entry.is_prospected ? 1 : 0,
+              total_test_jobs: entry.is_test ? 1 : 0,
+              total_leads: 0,
+            },
+          });
+        } else {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 0,
+              total_prospects: 0,
+              total_test_jobs: 0,
+              total_leads: 1,
+            },
+          });
+        }
       }
 
       return acc;
@@ -484,9 +508,11 @@ const handleGetDailyReportsToday = async (req, res) => {
 
     // Fetch reports for the specified date
     const resData = await Report.find(
-      { calling_date_history: date },
+      { calling_date_history: { $elemMatch: { $gte: date, $lte: date } } },
       { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
     ).lean();
+
+    // console.log(resData.length, { calling_date_history: { $elemMatch: { $gte: date, $lte: date } } })
 
     // Calculate aggregated metrics for the reports
     const aggregatedData = resData.reduce((acc, entry) => {
@@ -495,20 +521,35 @@ const handleGetDailyReportsToday = async (req, res) => {
       );
 
       if (existingEntry) {
-        existingEntry.data.total_calls_made++;
-        if (entry.is_prospected) existingEntry.data.total_prospects++;
-        if (entry.is_test) existingEntry.data.total_test_jobs++;
-        if (entry.is_lead) existingEntry.data.total_leads++;
+        if (!entry.is_lead) {
+          existingEntry.data.total_calls_made++;
+          if (entry.is_prospected) existingEntry.data.total_prospects++;
+          if (entry.is_test) existingEntry.data.total_test_jobs++;
+        } else {
+          existingEntry.data.total_leads++;
+        }
       } else {
-        acc.push({
-          marketer_name: entry.marketer_name,
-          data: {
-            total_calls_made: 1,
-            total_prospects: entry.is_prospected ? 1 : 0,
-            total_test_jobs: entry.is_test ? 1 : 0,
-            total_leads: entry.is_lead ? 1 : 0,
-          },
-        });
+        if (!entry.is_lead) {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 1,
+              total_prospects: entry.is_prospected ? 1 : 0,
+              total_test_jobs: entry.is_test ? 1 : 0,
+              total_leads: 0,
+            },
+          });
+        } else {
+          acc.push({
+            marketer_name: entry.marketer_name,
+            data: {
+              total_calls_made: 0,
+              total_prospects: 0,
+              total_test_jobs: 0,
+              total_leads: 1,
+            },
+          });
+        }
       }
       return acc;
     }, []);
