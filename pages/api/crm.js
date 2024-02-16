@@ -122,12 +122,28 @@ async function handleGetAllReports(req, res) {
     // Need to work here!
 
     if (fromdate || todate) {
-      query.calling_date = {};
-      if (fromdate) {
-        query.calling_date.$gte = fromdate;
-      }
-      if (todate) {
-        query.calling_date.$lte = todate;
+      if (fromdate && todate) {
+        // Both fromdate and todate are specified
+        query.calling_date_history = {
+          $elemMatch: {
+            $gte: fromdate,
+            $lte: todate,
+          },
+        };
+      } else if (fromdate) {
+        // Only fromdate is specified
+        query.calling_date_history = {
+          $elemMatch: {
+            $gte: fromdate,
+          },
+        };
+      } else if (todate) {
+        // Only todate is specified
+        query.calling_date_history = {
+          $elemMatch: {
+            $lte: todate,
+          },
+        };
       }
     }
 
@@ -375,15 +391,18 @@ async function handleGetNearestFollowUps(req, res) {
 
 async function handleGetDailyReportsLastDays(req, res) {
   try {
+    // Get valid weekdays from headers
     let validWeekdays = getValidWeekDays(
       req.headers.fromtime,
       req.headers.totime,
     );
+    // Extract calling dates from valid weekdays
     const validDates = validWeekdays.map((day) => day.calling_date_history);
 
+    // Fetch reports for each valid date
     let resDataPromises = validDates.map((date) =>
       Report.find(
-        { calling_date: date },
+        { calling_date_history: date },
         {
           marketer_name: 1,
           is_prospected: 1,
@@ -394,80 +413,32 @@ async function handleGetDailyReportsLastDays(req, res) {
       ).lean(),
     );
 
+    // Execute promises in parallel
     let resData = await Promise.all(resDataPromises);
+    // Flatten the array of results
     resData = resData.flat();
 
+    // Track which documents have already been counted
+    let countedDocuments = new Set();
+
+    // Aggregate data for each marketer
     let returnData = resData.reduce((acc, entry) => {
-      // Filter out dates from calling_date_history that are not included in validDates array
-      entry.calling_date_history = entry.calling_date_history.filter((date) =>
-        validDates.includes(date),
-      );
-
-      // Find existing entry for the marketer
-      const existingEntry = acc.find(
-        (item) => item.marketer_name === entry.marketer_name,
-      );
-
-      if (existingEntry) {
-        // Update existing entry with new data
-        if (!entry.is_lead) {
-          existingEntry.data.total_calls_made +=
-            entry.calling_date_history.length;
-          if (entry.is_prospected) existingEntry.data.total_prospects += 1;
-          if (entry.is_test) existingEntry.data.total_test_jobs += 1;
-        } else {
-          if (entry.is_lead) existingEntry.data.total_leads += 1;
-        }
-      } else {
-        if (!entry.is_lead) {
-          acc.push({
-            marketer_name: entry.marketer_name,
-            data: {
-              total_calls_made: entry.calling_date_history.length,
-              total_prospects: entry.is_prospected ? 1 : 0,
-              total_test_jobs: entry.is_test ? 1 : 0,
-              total_leads: 0,
-            },
-          });
-        } else {
-          acc.push({
-            marketer_name: entry.marketer_name,
-            data: {
-              total_calls_made: 0,
-              total_prospects: 0,
-              total_test_jobs: 0,
-              total_leads: 1,
-            },
-          });
-        }
-        // Create a new entry if the marketer doesn't exist in the result array
+      // Skip counting if this document has already been counted
+      if (countedDocuments.has(entry._id)) {
+        return acc;
       }
 
-      return acc;
-    }, []);
+      // Add this document to the set of counted documents
+      countedDocuments.add(entry._id);
 
-    if (resData && returnData) {
-      res.status(200).json(returnData);
-    } else sendError(res, 500, "No data found");
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
+      // Count total calls made considering all dates in calling_date_history
+      const totalCallsMade = validDates.reduce((total, date) => {
+        if (entry.calling_date_history.includes(date)) {
+          return total + 1;
+        }
+        return total;
+      }, 0);
 
-async function handleGetDailyReportsToday(req, res) {
-  try {
-    const today = moment().tz("Asia/Dhaka").format("YYYY-MM-DD");
-
-    console.log(today);
-
-    let resData = await Report.find(
-      { calling_date_history: today },
-      { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
-    ).lean();
-
-    // Calculate aggregated metrics for the reports of the current day
-    let returnData = resData.reduce((acc, entry) => {
       // Find existing entry for the marketer
       const existingEntry = acc.find(
         (item) => item.marketer_name === entry.marketer_name,
@@ -475,19 +446,16 @@ async function handleGetDailyReportsToday(req, res) {
 
       if (existingEntry) {
         // Update existing entry with new data
-        if (!entry.is_lead) {
-          existingEntry.data.total_calls_made += 1;
-          if (entry.is_prospected) existingEntry.data.total_prospects += 1;
-          if (entry.is_test) existingEntry.data.total_test_jobs += 1;
-        } else {
-          existingEntry.data.total_leads += 1;
-        }
+        existingEntry.data.total_calls_made += totalCallsMade;
+        if (entry.is_prospected) existingEntry.data.total_prospects += 1;
+        if (entry.is_test) existingEntry.data.total_test_jobs += 1;
+        if (entry.is_lead) existingEntry.data.total_leads += 1;
       } else {
         // Create a new entry if the marketer doesn't exist in the result array
         acc.push({
           marketer_name: entry.marketer_name,
           data: {
-            total_calls_made: 1,
+            total_calls_made: totalCallsMade,
             total_prospects: entry.is_prospected ? 1 : 0,
             total_test_jobs: entry.is_test ? 1 : 0,
             total_leads: entry.is_lead ? 1 : 0,
@@ -498,7 +466,8 @@ async function handleGetDailyReportsToday(req, res) {
       return acc;
     }, []);
 
-    if (returnData) {
+    // Send the aggregated data as response
+    if (resData && returnData) {
       res.status(200).json(returnData);
     } else {
       sendError(res, 500, "No data found");
@@ -508,6 +477,48 @@ async function handleGetDailyReportsToday(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
+const handleGetDailyReportsToday = async (req, res) => {
+  try {
+    const date = moment().tz("Asia/Dhaka").format("YYYY-MM-DD");
+
+    // Fetch reports for the specified date
+    const resData = await Report.find(
+      { calling_date_history: date },
+      { marketer_name: 1, is_prospected: 1, is_test: 1, is_lead: 1 },
+    ).lean();
+
+    // Calculate aggregated metrics for the reports
+    const aggregatedData = resData.reduce((acc, entry) => {
+      const existingEntry = acc.find(
+        (item) => item.marketer_name === entry.marketer_name,
+      );
+
+      if (existingEntry) {
+        existingEntry.data.total_calls_made++;
+        if (entry.is_prospected) existingEntry.data.total_prospects++;
+        if (entry.is_test) existingEntry.data.total_test_jobs++;
+        if (entry.is_lead) existingEntry.data.total_leads++;
+      } else {
+        acc.push({
+          marketer_name: entry.marketer_name,
+          data: {
+            total_calls_made: 1,
+            total_prospects: entry.is_prospected ? 1 : 0,
+            total_test_jobs: entry.is_test ? 1 : 0,
+            total_leads: entry.is_lead ? 1 : 0,
+          },
+        });
+      }
+      return acc;
+    }, []);
+
+    res.status(200).json(aggregatedData);
+  } catch (error) {
+    console.error("Error fetching daily reports:", error);
+    sendError(res, 400, "An error occurred while fetching daily reports");
+  }
+};
 
 export default async function handle(req, res) {
   const { method } = req;
