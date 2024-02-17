@@ -27,6 +27,7 @@ function calculateCountdown(timeDifferenceMs) {
 }
 
 const convertToDDMMYYYY = (dateString) => {
+  if (!dateString) return "";
   const [year, month, day] = dateString.split("-");
   if (year.length != 4) return dateString;
   return `${day}-${month}-${year}`;
