@@ -5,6 +5,7 @@ import moment from "moment";
 import NoteTd from "../../../components/extandable-td";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import HiddenText from "../../../components/hidden-text";
 
 export default function EmployeeDatabase() {
   const [employees, setEmployees] = useState([]);
@@ -276,7 +277,9 @@ export default function EmployeeDatabase() {
                       <td>{employee.blood_group}</td>
                       <td>{employee.designation}</td>
                       <td>{employee.department}</td>
-                      <td>{employee.gross_salary} BDT</td>
+                      <td>
+                        <HiddenText>{employee.gross_salary} BDT</HiddenText>
+                      </td>
                       <td>{employee.status}</td>
                       <td>
                         {employee.status == "Active"
@@ -326,19 +329,22 @@ export default function EmployeeDatabase() {
                   <td></td>
                   <td></td>
                   <td className="fw-semibold">
-                    SALARY (GROSS): {totalPayout.gross} BDT
+                    SALARY (GROSS):{" "}
+                    <HiddenText>{totalPayout.gross} BDT</HiddenText>
                   </td>
                   <td></td>
                   <td></td>
                   <td className="fw-semibold">
-                    BONUS (EID-UL-FITR): {totalPayout.bonus_fitr} BDT
+                    BONUS (EID-UL-FITR):{" "}
+                    <HiddenText>{totalPayout.bonus_fitr} BDT</HiddenText>
                   </td>
                   <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
                   <td className="fw-semibold">
-                    BONUS (EID-UL-ADHA): {totalPayout.bonus_adha} BDT
+                    BONUS (EID-UL-ADHA):{" "}
+                    <HiddenText>{totalPayout.bonus_adha} BDT</HiddenText>
                   </td>
                   <td></td>
                 </tr>

@@ -5,6 +5,7 @@ import { useSession, getSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
+import HiddenText from "../../../../components/hidden-text";
 
 export default function Page() {
   const { data: session } = useSession();
@@ -200,13 +201,19 @@ export default function Page() {
                     </div>
                     <div className="col-6 pt-4 pb-1 px-4 text-start">
                       <p className="m-0 p-0">
-                        {salaryComponents[0]?.toLocaleString("en-US")} BDT
+                        <HiddenText>
+                          {salaryComponents[0]?.toLocaleString("en-US")} BDT
+                        </HiddenText>
                       </p>
                       <p className="m-0 p-0">
-                        {salaryComponents[1]?.toLocaleString("en-US")} BDT
+                        <HiddenText>
+                          {salaryComponents[1]?.toLocaleString("en-US")} BDT
+                        </HiddenText>
                       </p>
                       <p className="m-0 p-0">
-                        {salaryComponents[2]?.toLocaleString("en-US")} BDT
+                        <HiddenText>
+                          {salaryComponents[2]?.toLocaleString("en-US")} BDT
+                        </HiddenText>
                       </p>
                     </div>
                   </div>
@@ -217,7 +224,10 @@ export default function Page() {
                     </div>
                     <div className="col-6 py-1 px-4 text-start">
                       <p className="lh-sm">
-                        {salaryComponents[3]?.toLocaleString("en-US")} BDT/month
+                        <HiddenText>
+                          {salaryComponents[3]?.toLocaleString("en-US")}{" "}
+                          BDT/month
+                        </HiddenText>
                       </p>
                     </div>
                     <small>
