@@ -31,12 +31,6 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
   return timeDifferenceMs;
 }
 
-// Example usage:
-const deliveryDate = "2024-02-10";
-const deliveryTime = "12:00 PM";
-const timeDifferenceMs = calculateTimeDifference(deliveryDate, deliveryTime);
-// console.log("Time difference in milliseconds:", timeDifferenceMs);
-
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,
@@ -337,28 +331,6 @@ async function handleGetOrdersByFilter(req, res) {
   }
 }
 
-async function handleGetOnlyTime(req, res) {
-  try {
-    const orders = await Order.find(
-      { status: { $nin: ["Finished", "Correction"] }, type: { $ne: "Test" } },
-      { delivery_date: 1, delivery_bd_time: 1 },
-    ).lean();
-
-    const sortedOrders = orders
-      .map((order) => ({
-        timeDifference: calculateTimeDifference(
-          order.delivery_date,
-          order.delivery_bd_time,
-        ),
-      }))
-      .sort((a, b) => a.timeDifference - b.timeDifference);
-
-    res.status(200).json(sortedOrders);
-  } catch (e) {
-    console.error(e);
-    sendError(res, 500, "An error occurred");
-  }
-}
 
 async function handleEditOrder(req, res) {
   try {
@@ -860,8 +832,6 @@ export default async function handle(req, res) {
     case "GET":
       if (req.headers.getallorders) {
         await handleGetAllOrderPaginated(req, res);
-      } else if (req.headers.getonlytime) {
-        await handleGetOnlyTime(req, res);
       } else if (req.headers.deleteorder) {
         await handleDeleteOrder(req, res);
       } else if (req.headers.getordersbyfilter) {

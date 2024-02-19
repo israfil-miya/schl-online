@@ -5,62 +5,48 @@ import { useSession, SessionProvider, getSession } from "next-auth/react";
 
 import Navbar from "../components/navbar";
 
-const getCurrentTimes = (orders) => {
-  console.log(orders);
-  const timesNow = orders?.map((order) =>
-    order.timeDifference <= 0
-      ? "Over"
-      : calculateCountdown(order.timeDifference),
-  );
-  return timesNow;
-};
 
-function calculateCountdown(timeDifferenceMs) {
-  const totalSeconds = Math.floor(timeDifferenceMs / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-}
-
-const convertToDDMMYYYY = (dateString) => {
-  if (!dateString) return "";
-  const [year, month, day] = dateString.split("-");
-  if (year.length != 4) return dateString;
-  return `${day}-${month}-${year}`;
-};
 
 export default function Home({ orders, ordersRedo }) {
-  const [countdowns, setCountdowns] = useState(getCurrentTimes(orders));
+  const [countdowns, setCountdowns] = useState([]);
 
-  const GetAllOrdersTime = async () => {
-    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/order", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        getonlytime: true,
-      },
-    });
-    const orders = await res.json();
-    return orders;
+  const convertToDDMMYYYY = (dateString) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString?.split("-");
+    if (year.length != 4) return dateString;
+    return `${day}-${month}-${year}`;
+  };
+
+  const calculateCountdown = (timeDifferenceMs) => {
+    const totalSeconds = Math.floor(timeDifferenceMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  const getCurrentTimes = (times) => {
+    const timesNow = times.map((time) => time.timeDifference <= 0
+      ? 'Over'
+      : calculateCountdown(time.timeDifference));
+    return timesNow;
   };
 
   useEffect(() => {
-    if (orders?.length) {
-      const countdownIntervalId = setInterval(async () => {
-        const updatedOrders = await GetAllOrdersTime();
-        const updatedCountdowns = getCurrentTimes(updatedOrders);
-        setCountdowns(updatedCountdowns);
-      }, process.env.NEXT_PUBLIC_UPDATE_DELAY);
+    const eventSource = new EventSource(process.env.NEXT_PUBLIC_BASE_URL + '/api/sse/order/remaining-time');
 
-      return () => {
-        clearInterval(countdownIntervalId); // Clear countdown interval
-      };
-    }
-  }, [orders]);
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setCountdowns(getCurrentTimes(data));
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
 
   return (
     <>
@@ -144,24 +130,27 @@ export default function Home({ orders, ordersRedo }) {
               {orders &&
                 orders?.map((order, index) => {
                   let priorityColor = "";
-                  const countdownTime = countdowns[index];
-                  const [hours, minutes, seconds] = countdownTime.split(":");
-                  const totalSeconds =
-                    parseInt(hours) * 3600 +
-                    parseInt(minutes) * 60 +
-                    parseInt(seconds);
+                  let countdownTime = countdowns[index];
 
-                  if (totalSeconds > 0) {
-                    if (totalSeconds <= 1800 || order.priority == "high") {
-                      priorityColor = "table-danger";
-                    } else if (
-                      totalSeconds <= 3600 ||
-                      order.priority == "medium"
-                    ) {
-                      priorityColor = "table-warning";
+                  if (countdownTime) {
+                    const [hours, minutes, seconds] = countdownTime?.split(":");
+                    const totalSeconds =
+                      parseInt(hours) * 3600 +
+                      parseInt(minutes) * 60 +
+                      parseInt(seconds);
+
+                    if (totalSeconds > 0) {
+                      if (totalSeconds <= 1800 || order.priority == "high") {
+                        priorityColor = "table-danger";
+                      } else if (
+                        totalSeconds <= 3600 ||
+                        order.priority == "medium"
+                      ) {
+                        priorityColor = "table-warning";
+                      }
                     }
+                    if (countdownTime == "Over") priorityColor = "table-dark";
                   }
-                  if (countdownTime == "Over") priorityColor = "table-dark";
 
                   return (
                     <tr
