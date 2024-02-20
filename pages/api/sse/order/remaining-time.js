@@ -94,3 +94,8 @@ export default async function handleGetRemainingTimeSSE(req, res) {
     res.status(500).send('An error occurred');
   }
 }
+
+
+export const config = {
+  supportsResponseStreaming: true,
+};
