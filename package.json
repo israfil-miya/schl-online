@@ -8,9 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "gitpull:dev": "git pull origin dev",
-    "gitpush:dev": "git commit -am \"%npm_config_comment%\" && git push origin dev",
+    "gitpush:dev": "git commit -am \"%npm_config_comment%\" && git push origin HEAD:dev",
     "gitpull:main": "git pull origin main",
-    "gitpush:main": "git commit -am \"%npm_config_comment%\" && git push origin main",
+    "gitpush:main": "git commit -am \"%npm_config_comment%\" && git push origin HEAD:main",
     "format:fix": "prettier --write --ignore-path .gitignore README.md ."
   },
   "dependencies": {
