@@ -1,4 +1,4 @@
-import "../styles/globals.css";
+import "@/styles/globals.css";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Script from "next/script";
