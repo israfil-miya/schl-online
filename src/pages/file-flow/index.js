@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../components/navbar";
-import BarChart from "../../components/charts/Bar.chart";
+import Navbar from "@/components/navbar";
+import BarChart from "@/components/charts/Bar.chart";
 import { getSession } from "next-auth/react";
 import { toast } from "sonner";
 import Link from "next/link";

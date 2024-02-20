@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
-import Navbar from "../../../components/navbar";
+import Navbar from "@/components/navbar";
 
 export default function Clients_Create() {
   const [newClientData, setNewClientData] = useState({

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSession, getSession } from "next-auth/react";
-import Navbar from "../../components/navbar";
+import Navbar from "@/components/navbar";
 import { useRouter } from "next/router";
 import Image from "next/image";
 

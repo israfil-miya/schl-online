@@ -1,7 +1,7 @@
 import React from "react";
 import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Navbar from "../../components/navbar";
+import Navbar from "@/components/navbar";
 import { toast } from "sonner";
 
 export default function Create() {

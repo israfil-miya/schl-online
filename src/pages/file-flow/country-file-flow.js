@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Navbar from "../../components/navbar";
+import Navbar from "@/components/navbar";
 
 export default function View() {
   const router = useRouter();

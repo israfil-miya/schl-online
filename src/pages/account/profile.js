@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../components/navbar";
+import Navbar from "@/components/navbar";
 import Link from "next/link";
 import { useSession, getSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -7,7 +7,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import jwt from "jsonwebtoken";
-import HiddenText from "../../components/hidden-text";
+import HiddenText from "@/components/hidden-text";
 
 export default function Page() {
   const { data: session } = useSession();

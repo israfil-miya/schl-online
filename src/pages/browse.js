@@ -3,7 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import Navbar from "../components/navbar";
+import Navbar from "@/components/navbar";
 
 export default function Browse() {
   const { data: session } = useSession();

@@ -1,10 +1,10 @@
-import Approval from "../../db/Approvals";
-import User from "../../db/Users";
-import Order from "../../db/Orders";
-import Client from "../../db/Clients";
-import Report from "../../db/Reports";
-import Employee from "../../db/Employees";
-import dbConnect from "../../db/dbConnect";
+import Approval from "@/db/Approvals";
+import User from "@/db/Users";
+import Order from "@/db/Orders";
+import Client from "@/db/Clients";
+import Report from "@/db/Reports";
+import Employee from "@/db/Employees";
+import dbConnect from "@/db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({

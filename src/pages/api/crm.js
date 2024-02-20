@@ -1,7 +1,7 @@
-import User from "../../db/Users";
-import dbConnect from "../../db/dbConnect";
-import Report from "../../db/Reports";
-import Employee from "../../db/Employees";
+import User from "@/db/Users";
+import dbConnect from "@/db/dbConnect";
+import Report from "@/db/Reports";
+import Employee from "@/db/Employees";
 const moment = require("moment-timezone");
 
 dbConnect();

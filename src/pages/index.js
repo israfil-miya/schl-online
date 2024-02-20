@@ -3,9 +3,7 @@ import { useRouter } from "next/router";
 import { toast } from "sonner";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 
-import Navbar from "../components/navbar";
-
-
+import Navbar from "@/components/navbar";
 
 export default function Home({ orders, ordersRedo }) {
   const [countdowns, setCountdowns] = useState([]);
@@ -23,20 +21,24 @@ export default function Home({ orders, ordersRedo }) {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    return `${hours.toString().padStart(2, '0')}:${minutes
+    return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
-      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   const getCurrentTimes = (times) => {
-    const timesNow = times.map((time) => time.timeDifference <= 0
-      ? 'Over'
-      : calculateCountdown(time.timeDifference));
+    const timesNow = times.map((time) =>
+      time.timeDifference <= 0
+        ? "Over"
+        : calculateCountdown(time.timeDifference),
+    );
     return timesNow;
   };
 
   useEffect(() => {
-    const eventSource = new EventSource(process.env.NEXT_PUBLIC_BASE_URL + '/api/sse/order/remaining-time');
+    const eventSource = new EventSource(
+      process.env.NEXT_PUBLIC_BASE_URL + "/api/sse/order/get-remaining-time",
+    );
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);

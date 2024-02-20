@@ -1,5 +1,5 @@
-import dbConnect from "../../db/dbConnect";
-import Employee from "../../db/Employees";
+import dbConnect from "@/db/dbConnect";
+import Employee from "@/db/Employees";
 import moment from "moment-timezone";
 dbConnect();
 

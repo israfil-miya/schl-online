@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../../components/navbar";
+import Navbar from "@/components/navbar";
 import { toast } from "sonner";
 import moment from "moment";
-import NoteTd from "../../../components/extandable-td";
+import NoteTd from "@/components/extendable-td";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import HiddenText from "../../../components/hidden-text";
+import HiddenText from "@/components/hidden-text";
 
 export default function EmployeeDatabase() {
   const [employees, setEmployees] = useState([]);

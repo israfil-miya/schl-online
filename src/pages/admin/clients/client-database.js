@@ -3,7 +3,7 @@ import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 import Link from "next/link";
-import Navbar from "../../../components/navbar";
+import Navbar from "@/components/navbar";
 
 export default function Clients() {
   const router = useRouter();

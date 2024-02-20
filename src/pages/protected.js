@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
-import Navbar from "../components/navbar";
+import Navbar from "@/components/navbar";
 
 import { useState } from "react";
 

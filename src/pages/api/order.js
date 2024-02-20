@@ -1,6 +1,6 @@
-import Order from "../../db/Orders";
-import Client from "../../db/Clients";
-import dbConnect from "../../db/dbConnect";
+import Order from "@/db/Orders";
+import Client from "@/db/Clients";
+import dbConnect from "@/db/dbConnect";
 import moment from "moment-timezone";
 dbConnect();
 
@@ -330,7 +330,6 @@ async function handleGetOrdersByFilter(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
-
 
 async function handleEditOrder(req, res) {
   try {

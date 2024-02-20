@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import generateInvoice from "../../../lib/invoice";
-import Navbar from "../../../components/navbar";
+import generateInvoice from "@/lib/invoice";
+import Navbar from "@/components/navbar";
 import { useSession, getSession } from "next-auth/react";
 
 export default function ClientDetails() {

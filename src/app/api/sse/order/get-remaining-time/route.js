@@ -1,38 +1,56 @@
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-
-// app/get-remaining-time/route.js
 import Order from "@/db/Orders";
 import dbConnect from "@/db/dbConnect";
 import moment from "moment-timezone";
-import { setIntervalAsync } from 'set-interval-async/dynamic';
-import { clearIntervalAsync } from 'set-interval-async';
+import { setIntervalAsync } from "set-interval-async/dynamic";
+import { clearIntervalAsync } from "set-interval-async";
 
 dbConnect();
 
 function calculateTimeDifference(deliveryDate, deliveryTime) {
-  // ... (your time difference calculation logic)
+  const is12HourFormat = /\b(?:am|pm)\b/i.test(deliveryTime);
+  const [time, meridiem] = deliveryTime.split(/\s+/);
+  const [hours, minutes] = time.split(":").map(Number);
+
+  let adjustedHours = hours;
+  if (is12HourFormat) {
+    const meridiemLower = meridiem.toLowerCase();
+    adjustedHours = moment(
+      `${hours}:${minutes} ${meridiemLower}`,
+      "hh:mm a",
+    ).hours();
+  }
+  const asiaDhakaTime = moment().tz("Asia/Dhaka");
+
+  const [year, month, day] = deliveryDate.split("-").map(Number);
+  const deliveryDateTime = moment.tz(
+    `${year}-${month}-${day} ${adjustedHours}:${minutes}`,
+    "YYYY-MM-DD HH:mm",
+    "Asia/Dhaka",
+  );
+
+  const timeDifferenceMs = deliveryDateTime.diff(asiaDhakaTime);
+
+  return timeDifferenceMs;
 }
 
 export async function GET(req) {
   try {
-    const res = NextResponse.create();
+    let responseStream = new TransformStream();
+    const writer = responseStream.writable.getWriter();
+    const encoder = new TextEncoder();
 
-    // Set headers for SSE
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'text/event-stream;charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('X-Accel-Buffering', 'no');
-
-    // Function to send SSE event
     function sendSSEEvent(data) {
-      res.write(`data: ${JSON.stringify(data)}\n\n`);
+      const formattedData = `data: ${JSON.stringify(data)}\n\n`;
+      writer.write(encoder.encode(formattedData));
     }
 
     // Send initial time
     const orders = await Order.find(
-      // ... (your query conditions)
+      { status: { $nin: ["Finished", "Correction"] }, type: { $ne: "Test" } },
+      { delivery_date: 1, delivery_bd_time: 1 },
     ).lean();
 
     const sortedOrders = orders
@@ -44,12 +62,14 @@ export async function GET(req) {
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
 
-    sendSSEEvent(sortedOrders);
+    const initialRemainingTimes = sortedOrders;
+    sendSSEEvent(initialRemainingTimes);
 
     // Update time every second
     const intervalId = setIntervalAsync(async () => {
       const orders = await Order.find(
-        // ... (your query conditions)
+        { status: { $nin: ["Finished", "Correction"] }, type: { $ne: "Test" } },
+        { delivery_date: 1, delivery_bd_time: 1 },
       ).lean();
 
       const sortedOrders = orders
@@ -61,27 +81,28 @@ export async function GET(req) {
         }))
         .sort((a, b) => a.timeDifference - b.timeDifference);
 
-      sendSSEEvent(sortedOrders);
+      const remainingTimes = sortedOrders;
+      sendSSEEvent(remainingTimes);
     }, parseInt(process.env.NEXT_PUBLIC_UPDATE_DELAY));
 
-    // Clean up on client disconnect or server-side request completion
-    const cleanup = () => {
-      console.log('Client disconnected or request completed');
+    // Clean up on client disconnect
+    req.signal.onabort = () => {
+      console.log("Client disconnected");
       clearIntervalAsync(intervalId);
-      res.end();
+      writer.close();
     };
 
-    // Handle server-side request completion
-    res.on('finish', cleanup);
-
-    // Handle client disconnect (if applicable)
-    if (req.socket) {
-      req.socket.on('close', cleanup);
-    }
-
-    return res;
+    return new Response(responseStream.readable, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "text/event-stream;charset=utf-8",
+        Connection: "keep-alive",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+      },
+    });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
+    return Response.json({ error: "An error occurred" }, { status: 500 });
   }
 }

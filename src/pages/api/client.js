@@ -1,5 +1,5 @@
-import Client from "../../db/Clients";
-import dbConnect from "../../db/dbConnect";
+import Client from "@/db/Clients";
+import dbConnect from "@/db/dbConnect";
 dbConnect();
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({

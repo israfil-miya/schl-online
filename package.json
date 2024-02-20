@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "gitpull:dev": "git pull origin dev",
+    "gitpull:dev": "git checkout dev && git pull origin HEAD:dev",
     "gitpush:dev": "git commit -am \"%npm_config_comment%\" && git push origin HEAD:dev",
-    "gitpull:main": "git pull origin main",
+    "gitpull:main": "git checkout main && git pull origin HEAD:main",
     "gitpush:main": "git commit -am \"%npm_config_comment%\" && git push origin HEAD:main",
+    "gitmerge:prod": "git checkout main && git merge dev && echo && echo You are now moved to \"main\" branch!",
     "format:fix": "prettier --write --ignore-path .gitignore README.md ."
   },
   "dependencies": {

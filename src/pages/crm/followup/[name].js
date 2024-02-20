@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Navbar from "../../../components/navbar";
+import Navbar from "@/components/navbar";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { toast } from "sonner";
-import CallingStatusTd from "../../../components/extandable-td";
+import CallingStatusTd from "@/components/extendable-td";
 import Link from "next/link";
 import moment from "moment-timezone";
 
