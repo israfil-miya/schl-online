@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "gitpush": "git add . && git commit -m \"Minor Fix\" && git push",
+    "gitpull:dev": "git pull origin dev",
+    "gitpush:dev": "git commit -am \"%npm_config_comment%\" && git push origin dev",
+    "gitpull:main": "git pull origin main",
+    "gitpush:main": "git commit -am \"%npm_config_comment%\" && git push origin main",
     "format:fix": "prettier --write --ignore-path .gitignore README.md ."
   },
   "dependencies": {
