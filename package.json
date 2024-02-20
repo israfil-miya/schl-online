@@ -11,7 +11,7 @@
     "gitpush:dev": "git add . && git commit -am \"%npm_config_comment%\" && git push origin HEAD:dev",
     "gitpull:main": "git checkout main && git pull origin HEAD:main",
     "gitpush:main": "git add . && git commit -am \"%npm_config_comment%\" && git push origin HEAD:main",
-    "gitmerge:prod": "git checkout main && git merge dev && echo && echo You are now moved to \"main\" branch!",
+    "gitmerge:prod": "git checkout main && git merge origin/dev",
     "format:fix": "prettier --write --ignore-path .gitignore README.md ."
   },
   "dependencies": {
