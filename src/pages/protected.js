@@ -41,8 +41,8 @@ export default function Protected() {
     <>
       <Navbar />
       <div className="text-center py-1 border bg-light">
-        The route <code>{redirect}</code> is protected. Enter your
-        credentials to access the page!
+        The route <code>{redirect}</code> is protected. Enter your credentials
+        to access the page!
       </div>
 
       <div className="main-wrapper mt-5">
