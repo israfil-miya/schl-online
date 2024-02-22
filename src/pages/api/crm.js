@@ -238,18 +238,7 @@ async function handleFinishFollowup(req, res) {
   }
 }
 
-const getTodayDate = () => {
-  const today = new Date();
-
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  return formatDate(today);
-};
+const getTodayDate = () => moment().format("YYYY-MM-DD");
 
 async function handleFinishLead(req, res) {
   try {
@@ -307,10 +296,33 @@ async function handleFinishLead(req, res) {
 async function handleEditReport(req, res) {
   try {
     let data = req.body;
+    let recallLimit = 15;
     const updated_by = req.headers.name;
     data = { ...data, updated_by };
 
-    console.log(data);
+    if (Boolean(req.headers.recall)) {
+      const recallCount = await Report.countDocuments({
+        marketer_name: data.marketer_name,
+        is_lead: false,
+        calling_date_history: getTodayDate(),
+        $expr: {
+          $and: [
+            { $gt: [{ $size: "$calling_date_history" }, 1] },
+            {
+              $ne: [
+                { $arrayElemAt: ["$calling_date_history", 0] },
+                getTodayDate(),
+              ],
+            },
+          ],
+        },
+      });
+
+      if (recallCount >= recallLimit) {
+        sendError(res, 400, `Today's recall limit (${recallLimit}) reached!`);
+        return;
+      }
+    }
 
     const resData = await Report.findByIdAndUpdate(data._id, data, {
       new: true,

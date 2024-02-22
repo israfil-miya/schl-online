@@ -213,7 +213,6 @@ export default function Report(props) {
           session.user.role == "super" ||
           session.user.role == "admin"
         ) {
-          // console.log("|| RECALL CALLED ||");
           const today = moment().utc().format("YYYY-MM-DD");
 
           options = {
@@ -230,18 +229,15 @@ export default function Report(props) {
               "Content-Type": "application/json",
               editreport: true,
               name: session.user?.real_name,
+              recall: true,
             },
           };
 
-          if (
-            reports.items.find(
-              (data) =>
-                data.followup_date == today && data._id == submitData._id,
-            )
-          ) {
-            // console.log("RECALL ACCEPTED");
-            // console.log(submitData);
+          let isFollowup = reports.items.find(
+            (data) => data.followup_date == today && data._id == submitData._id,
+          );
 
+          if (isFollowup) {
             const result = await fetchApi(url, options);
 
             setManageData({
@@ -276,10 +272,8 @@ export default function Report(props) {
               if (!isFiltered) await getAllReports();
               else await getAllReportsFiltered();
             } else {
-              toast.error("Something gone wrong!");
+              toast.error(result.message);
             }
-
-            // return
           } else {
             // console.log("RECALL REJECTED");
 
@@ -307,6 +301,7 @@ export default function Report(props) {
                 body: JSON.stringify(submitData),
                 headers: {
                   "Content-Type": "application/json",
+                  recall: true,
                 },
               },
             );
