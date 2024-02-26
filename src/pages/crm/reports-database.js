@@ -213,131 +213,140 @@ export default function Report(props) {
           session.user.role == "super" ||
           session.user.role == "admin"
         ) {
-          const today = moment().utc().format("YYYY-MM-DD");
-
-          options = {
-            method: "POST",
-            body: JSON.stringify({
-              ...manageData,
-              calling_date_history: manageData.calling_date_history.includes(
-                today,
-              )
-                ? manageData.calling_date_history
-                : [...manageData.calling_date_history, today],
-            }),
+          let recallCountCheck = await fetchApi(url, {
+            method: "GET",
             headers: {
               "Content-Type": "application/json",
-              editreport: true,
               name: session.user?.real_name,
-              recall: true,
+              recallcount: true,
             },
-          };
+          });
 
-          let isFollowup = reports.items.find(
-            (data) => data.followup_date == today && data._id == submitData._id,
-          );
+          if (!recallCountCheck.error) {
+            const today = moment().utc().format("YYYY-MM-DD");
 
-          if (isFollowup) {
-            const result = await fetchApi(url, options);
-
-            setManageData({
-              _id: "",
-              marketer_id: "",
-              marketer_name: "",
-              calling_date: "",
-              followup_date: "",
-              country: "",
-              designation: "",
-              website: "",
-              category: "",
-              company_name: "",
-              contact_person: "",
-              contact_number: "",
-              email_address: "",
-              calling_status: "",
-              linkedin: "",
-              calling_date_history: [],
-              updated_by: "",
-              followup_done: false,
-              is_test: false,
-              is_prospected: false,
-              prospect_status: "",
-              is_lead: false,
-            });
-            setIsRecall(0);
-
-            if (!result.error) {
-              toast.success("Edited the report data");
-
-              if (!isFiltered) await getAllReports();
-              else await getAllReportsFiltered();
-            } else {
-              toast.error(result.message);
-            }
-          } else {
-            // console.log("RECALL REJECTED");
-
-            const submitData = {
-              req_type: "Report Edit",
-              req_by: session.user.real_name,
-              id: manageData._id,
-              ...manageData,
-              calling_date_history: manageData.calling_date_history.includes(
-                today,
-              )
-                ? manageData.calling_date_history
-                : [...manageData.calling_date_history, today],
-              updated_by: session.user?.real_name,
+            options = {
+              method: "POST",
+              body: JSON.stringify({
+                ...manageData,
+                calling_date_history: manageData.calling_date_history.includes(
+                  today,
+                )
+                  ? manageData.calling_date_history
+                  : [...manageData.calling_date_history, today],
+              }),
+              headers: {
+                "Content-Type": "application/json",
+                editreport: true,
+                name: session.user?.real_name,
+              },
             };
 
-            delete submitData._id;
-
-            // console.log("THIS IS THE SUBMIT DATA: ", submitData);
-
-            const result = await fetch(
-              process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
-              {
-                method: "POST",
-                body: JSON.stringify(submitData),
-                headers: {
-                  "Content-Type": "application/json",
-                  recall: true,
-                },
-              },
+            let isFollowup = reports.items.find(
+              (data) =>
+                data.followup_date == today && data._id == submitData._id,
             );
 
-            setManageData({
-              _id: "",
-              marketer_id: "",
-              marketer_name: "",
-              calling_date: "",
-              followup_date: "",
-              country: "",
-              designation: "",
-              website: "",
-              category: "",
-              company_name: "",
-              contact_person: "",
-              contact_number: "",
-              email_address: "",
-              calling_status: "",
-              linkedin: "",
-              calling_date_history: [],
-              updated_by: "",
-              followup_done: false,
-              is_test: false,
-              prospect_status: "",
-              is_lead: false,
-            });
-            setIsRecall(0);
+            if (isFollowup) {
+              const result = await fetchApi(url, options);
 
-            if (!result.error) {
-              toast.success(
-                "Today is not the followup date of the report to recall, an approval request has been sent to admin",
-              );
+              setManageData({
+                _id: "",
+                marketer_id: "",
+                marketer_name: "",
+                calling_date: "",
+                followup_date: "",
+                country: "",
+                designation: "",
+                website: "",
+                category: "",
+                company_name: "",
+                contact_person: "",
+                contact_number: "",
+                email_address: "",
+                calling_status: "",
+                linkedin: "",
+                calling_date_history: [],
+                updated_by: "",
+                followup_done: false,
+                is_test: false,
+                is_prospected: false,
+                prospect_status: "",
+                is_lead: false,
+              });
+              setIsRecall(0);
+
+              if (!result.error) {
+                toast.success("Edited the report data");
+
+                if (!isFiltered) await getAllReports();
+                else await getAllReportsFiltered();
+              } else {
+                toast.error(result.message);
+              }
             } else {
-              toast.error("Something gone wrong!");
+              const submitData = {
+                req_type: "Report Edit",
+                req_by: session.user.real_name,
+                id: manageData._id,
+                ...manageData,
+                calling_date_history: manageData.calling_date_history.includes(
+                  today,
+                )
+                  ? manageData.calling_date_history
+                  : [...manageData.calling_date_history, today],
+                updated_by: session.user?.real_name,
+              };
+
+              delete submitData._id;
+
+              const result = await fetch(
+                process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
+                {
+                  method: "POST",
+                  body: JSON.stringify(submitData),
+                  headers: {
+                    "Content-Type": "application/json",
+                    recall: true,
+                  },
+                },
+              );
+
+              setManageData({
+                _id: "",
+                marketer_id: "",
+                marketer_name: "",
+                calling_date: "",
+                followup_date: "",
+                country: "",
+                designation: "",
+                website: "",
+                category: "",
+                company_name: "",
+                contact_person: "",
+                contact_number: "",
+                email_address: "",
+                calling_status: "",
+                linkedin: "",
+                calling_date_history: [],
+                updated_by: "",
+                followup_done: false,
+                is_test: false,
+                prospect_status: "",
+                is_lead: false,
+              });
+              setIsRecall(0);
+
+              if (!result.error) {
+                toast.success(
+                  "Today is not the followup date of the report to recall, an approval request has been sent to admin",
+                );
+              } else {
+                toast.error("Something gone wrong!");
+              }
             }
+          } else {
+            toast.error(recallCountCheck.message);
           }
         } else {
           toast.error(

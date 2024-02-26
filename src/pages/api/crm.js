@@ -293,36 +293,46 @@ async function handleFinishLead(req, res) {
   }
 }
 
+async function handleRecallCount(req, res) {
+  try {
+    let recallLimit = 15;
+
+    const recallCount = await Report.countDocuments({
+      marketer_name: req.headers.name,
+      is_lead: false,
+      calling_date_history: getTodayDate(),
+      $expr: {
+        $and: [
+          { $gt: [{ $size: "$calling_date_history" }, 1] },
+          {
+            $ne: [
+              { $arrayElemAt: ["$calling_date_history", 0] },
+              getTodayDate(),
+            ],
+          },
+        ],
+      },
+    });
+
+    console.log(recallCount);
+
+    if (recallCount >= recallLimit) {
+      sendError(res, 400, `Today's recall limit (${recallLimit}) reached!`);
+      return;
+    } else {
+      res.status(200).json({ count: recallCount, limit: recallLimit });
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 async function handleEditReport(req, res) {
   try {
     let data = req.body;
-    let recallLimit = 15;
     const updated_by = req.headers.name;
     data = { ...data, updated_by };
-
-    if (Boolean(req.headers.recall)) {
-      const recallCount = await Report.countDocuments({
-        marketer_name: data.marketer_name,
-        is_lead: false,
-        calling_date_history: getTodayDate(),
-        $expr: {
-          $and: [
-            { $gt: [{ $size: "$calling_date_history" }, 1] },
-            {
-              $ne: [
-                { $arrayElemAt: ["$calling_date_history", 0] },
-                getTodayDate(),
-              ],
-            },
-          ],
-        },
-      });
-
-      if (recallCount >= recallLimit) {
-        sendError(res, 400, `Today's recall limit (${recallLimit}) reached!`);
-        return;
-      }
-    }
 
     const resData = await Report.findByIdAndUpdate(data._id, data, {
       new: true,
@@ -582,6 +592,8 @@ export default async function handle(req, res) {
         await handleGetAllMarketers(req, res);
       } else if (req.headers.getallreports) {
         await handleGetAllReports(req, res);
+      } else if (req.headers.recallcount) {
+        await handleRecallCount(req, res);
       } else if (req.headers.getdailyreportslastdays) {
         await handleGetDailyReportsLastDays(req, res);
       } else if (req.headers.getnearestfollowups) {
