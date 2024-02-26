@@ -5,8 +5,26 @@ import { useSession, SessionProvider, getSession } from "next-auth/react";
 
 import Navbar from "@/components/navbar";
 
+const calculateCountdown = (timeDifferenceMs) => {
+  const totalSeconds = Math.floor(timeDifferenceMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
+
+const getCurrentTimes = (times) => {
+  const timesNow = times.map((time) =>
+    time.timeDifference <= 0 ? "Over" : calculateCountdown(time.timeDifference),
+  );
+  return timesNow;
+};
+
 export default function Home({ orders, ordersRedo }) {
-  const [countdowns, setCountdowns] = useState([]);
+  const [countdowns, setCountdowns] = useState(getCurrentTimes(orders));
 
   const convertToDDMMYYYY = (dateString) => {
     if (!dateString) return "";
@@ -15,40 +33,23 @@ export default function Home({ orders, ordersRedo }) {
     return `${day}-${month}-${year}`;
   };
 
-  const calculateCountdown = (timeDifferenceMs) => {
-    const totalSeconds = Math.floor(timeDifferenceMs / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+  /* This feature is disabled for some time. Due to overuse of vercel function execution hours bug */
 
-    return `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
+  // const [countdowns, setCountdowns] = useState([]);
+  // useEffect(() => {
+  //   const eventSource = new EventSource(
+  //     process.env.NEXT_PUBLIC_BASE_URL + "/api/sse/order/get-remaining-time",
+  //   );
 
-  const getCurrentTimes = (times) => {
-    const timesNow = times.map((time) =>
-      time.timeDifference <= 0
-        ? "Over"
-        : calculateCountdown(time.timeDifference),
-    );
-    return timesNow;
-  };
+  //   eventSource.onmessage = (event) => {
+  //     const data = JSON.parse(event.data);
+  //     setCountdowns(getCurrentTimes(data));
+  //   };
 
-  useEffect(() => {
-    const eventSource = new EventSource(
-      process.env.NEXT_PUBLIC_BASE_URL + "/api/sse/order/get-remaining-time",
-    );
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setCountdowns(getCurrentTimes(data));
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
+  //   return () => {
+  //     eventSource.close();
+  //   };
+  // }, []);
 
   return (
     <>
