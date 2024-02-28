@@ -21,7 +21,6 @@ export default function Report(props) {
   const [itemPerPage, setItemPerPage] = useState(30);
 
   const [isFiltered, setIsFiltered] = useState(0);
-  const [isRecall, setIsRecall] = useState(0);
 
   const [marketers, setMarketers] = useState([]);
 
@@ -188,147 +187,9 @@ export default function Report(props) {
   async function editReport() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
-      let options;
-
-      let submitData = manageData;
-
-      if (isRecall) {
-        // console.log("|| RECALL CALLED ||");
-        const today = moment().utc().format("YYYY-MM-DD");
-
-        options = {
-          method: "POST",
-          body: JSON.stringify({
-            ...manageData,
-            calling_date_history: manageData.calling_date_history.includes(
-              today,
-            )
-              ? manageData.calling_date_history
-              : [...manageData.calling_date_history, today],
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            editreport: true,
-            name: session.user?.real_name,
-          },
-        };
-
-        if (
-          reports.items.find(
-            (data) => data.followup_date == today && data._id == submitData._id,
-          )
-        ) {
-          // console.log("RECALL ACCEPTED");
-          // console.log(submitData);
-
-          const result = await fetchApi(url, options);
-
-          setManageData({
-            _id: "",
-            marketer_id: "",
-            marketer_name: "",
-            calling_date: "",
-            followup_date: "",
-            country: "",
-            designation: "",
-            website: "",
-            category: "",
-            company_name: "",
-            contact_person: "",
-            contact_number: "",
-            email_address: "",
-            calling_status: "",
-            linkedin: "",
-            calling_date_history: [],
-            updated_by: "",
-            followup_done: false,
-            is_test: false,
-            is_prospected: false,
-            prospect_status: "",
-          });
-          setIsRecall(0);
-
-          if (!result.error) {
-            toast.success("Edited the report data");
-
-            if (!isFiltered) await getAllReports();
-            else await getAllReportsFiltered();
-          } else {
-            toast.error("Something gone wrong!");
-          }
-
-          // return
-        } else {
-          // console.log("RECALL REJECTED");
-
-          const submitData = {
-            req_type: "Report Edit",
-            req_by: session.user.real_name,
-            id: manageData._id,
-            ...manageData,
-            calling_date_history: manageData.calling_date_history.includes(
-              today,
-            )
-              ? manageData.calling_date_history
-              : [...manageData.calling_date_history, today],
-            updated_by: session.user?.real_name,
-          };
-
-          delete submitData._id;
-
-          // console.log("THIS IS THE SUBMIT DATA: ", submitData);
-
-          const result = await fetch(
-            process.env.NEXT_PUBLIC_BASE_URL + "/api/approval",
-            {
-              method: "POST",
-              body: JSON.stringify(submitData),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
-
-          setManageData({
-            _id: "",
-            marketer_id: "",
-            marketer_name: "",
-            calling_date: "",
-            followup_date: "",
-            country: "",
-            designation: "",
-            website: "",
-            category: "",
-            company_name: "",
-            contact_person: "",
-            contact_number: "",
-            email_address: "",
-            calling_status: "",
-            linkedin: "",
-            calling_date_history: [],
-            updated_by: "",
-            followup_done: false,
-            is_test: false,
-            is_prospected: false,
-            prospect_status: "",
-          });
-          setIsRecall(0);
-
-          if (!result.error) {
-            toast.success(
-              "Today is not the followup date of the report to recall, an approval request has been sent to admin",
-            );
-          } else {
-            toast.error("Something gone wrong!");
-          }
-        }
-
-        return;
-      }
-
-      options = {
+      let options = {
         method: "POST",
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(manageData),
         headers: {
           "Content-Type": "application/json",
           editreport: true,
@@ -339,7 +200,7 @@ export default function Report(props) {
       const result = await fetchApi(url, options);
 
       if (!result.error) {
-        toast.success("Edited the report data");
+        toast.success("Edited the lead data");
 
         if (!isFiltered) await getAllReports();
         else await getAllReportsFiltered();
@@ -347,8 +208,8 @@ export default function Report(props) {
         toast.error("Something gone wrong!");
       }
     } catch (error) {
-      console.error("Error editing report:", error);
-      toast.error("Error editing report");
+      console.error("Error editing lead:", error);
+      toast.error("Error editing lead");
     }
     setManageData({
       _id: "",
@@ -373,25 +234,30 @@ export default function Report(props) {
       prospect_status: "",
     });
   }
-
+  
   async function handlefinishlead() {
-    let result;
-    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/crm", {
-      method: "GET",
-      headers: {
-        finishlead: true,
-        updated_by: session.user?.real_name,
-        id: manageData._id,
-        "Content-Type": "application/json",
-      },
-    });
-    result = await res.json();
-    if (!result.error) {
-      toast.success("Changed the status of followup");
-      if (!isFiltered) await getAllReports();
-      else await getAllReportsFiltered();
-    } else {
-      toast.error("Something gone wrong!");
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
+
+      const result = await fetchApi(url, {
+        method: "GET",
+        headers: {
+          finishlead: true,
+          updated_by: session.user?.real_name,
+          id: manageData._id,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!result.error) {
+        toast.success("Changed the status of followup");
+        if (!isFiltered) await getAllReports();
+        else await getAllReportsFiltered();
+      } else {
+        toast.error("Something gone wrong!");
+      }
+    } catch (e) {
+      console.error("Error withdrwaing the lead:", error);
+      toast.error("Error withdrwaing the lead");
     }
     setManageData({
       _id: "",
@@ -585,18 +451,18 @@ export default function Report(props) {
                       <td>
                         {item.website.length
                           ? item.website
-                              .split(" ")
-                              .filter((item) => item.length)
-                              .map((websiteLink, index) => (
-                                <p
-                                  key={index}
-                                  className="text-primary m-0 p-0 link"
-                                >
-                                  <Link target="_blank" href={websiteLink}>
-                                    Click here to visit
-                                  </Link>
-                                </p>
-                              ))
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((websiteLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={websiteLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
                           : "No link provided"}
                       </td>
                       <td>{item.category}</td>
@@ -609,18 +475,18 @@ export default function Report(props) {
                       <td>
                         {item.linkedin.length
                           ? item.linkedin
-                              .split(" ")
-                              .filter((item) => item.length)
-                              .map((linkedinLink, index) => (
-                                <p
-                                  key={index}
-                                  className="text-primary m-0 p-0 link"
-                                >
-                                  <Link target="_blank" href={linkedinLink}>
-                                    Click here to visit
-                                  </Link>
-                                </p>
-                              ))
+                            .split(" ")
+                            .filter((item) => item.length)
+                            .map((linkedinLink, index) => (
+                              <p
+                                key={index}
+                                className="text-primary m-0 p-0 link"
+                              >
+                                <Link target="_blank" href={linkedinLink}>
+                                  Click here to visit
+                                </Link>
+                              </p>
+                            ))
                           : "No link provided"}
                       </td>
                       <td>{item.is_test ? "Yes" : "No"}</td>
@@ -640,7 +506,6 @@ export default function Report(props) {
                           <>
                             <button
                               onClick={() => {
-                                setIsRecall(0);
                                 setManageData(item);
                                 setEditedBy(item.updated_by || "");
                               }}
