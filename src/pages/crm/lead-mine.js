@@ -234,7 +234,7 @@ export default function Report(props) {
       prospect_status: "",
     });
   }
-  
+
   async function handlefinishlead() {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
@@ -451,18 +451,18 @@ export default function Report(props) {
                       <td>
                         {item.website.length
                           ? item.website
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((websiteLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={websiteLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((websiteLink, index) => (
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
+                                  <Link target="_blank" href={websiteLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
                           : "No link provided"}
                       </td>
                       <td>{item.category}</td>
@@ -475,18 +475,18 @@ export default function Report(props) {
                       <td>
                         {item.linkedin.length
                           ? item.linkedin
-                            .split(" ")
-                            .filter((item) => item.length)
-                            .map((linkedinLink, index) => (
-                              <p
-                                key={index}
-                                className="text-primary m-0 p-0 link"
-                              >
-                                <Link target="_blank" href={linkedinLink}>
-                                  Click here to visit
-                                </Link>
-                              </p>
-                            ))
+                              .split(" ")
+                              .filter((item) => item.length)
+                              .map((linkedinLink, index) => (
+                                <p
+                                  key={index}
+                                  className="text-primary m-0 p-0 link"
+                                >
+                                  <Link target="_blank" href={linkedinLink}>
+                                    Click here to visit
+                                  </Link>
+                                </p>
+                              ))
                           : "No link provided"}
                       </td>
                       <td>{item.is_test ? "Yes" : "No"}</td>

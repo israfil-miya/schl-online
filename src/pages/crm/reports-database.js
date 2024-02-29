@@ -409,6 +409,7 @@ export default function Report(props) {
       return p - 1;
     });
   }
+
   function handleNext() {
     setPage((p) => {
       if (p === pageCount) return p;

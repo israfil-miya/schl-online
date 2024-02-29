@@ -2,6 +2,7 @@ import User from "@/db/Users";
 import dbConnect from "@/db/dbConnect";
 import Report from "@/db/Reports";
 import Employee from "@/db/Employees";
+import Approvals from "@/db/Approvals";
 const moment = require("moment-timezone");
 
 dbConnect();
@@ -297,7 +298,7 @@ async function handleRecallCount(req, res) {
   try {
     let recallLimit = 15;
 
-    const recallCount = await Report.countDocuments({
+    const recallCount1 = await Report.countDocuments({
       marketer_name: req.headers.name,
       is_lead: false,
       calling_date_history: getTodayDate(),
@@ -314,7 +315,27 @@ async function handleRecallCount(req, res) {
       },
     });
 
-    console.log(recallCount);
+    const recallCount2 = await Approvals.countDocuments({
+      req_type: "Report Edit",
+      checked_by: "None",
+      is_rejected: false,
+      is_lead: false,
+      marketer_name: req.headers.name,
+      calling_date_history: getTodayDate(),
+      $expr: {
+        $and: [
+          { $gt: [{ $size: "$calling_date_history" }, 1] },
+          {
+            $ne: [
+              { $arrayElemAt: ["$calling_date_history", 0] },
+              getTodayDate(),
+            ],
+          },
+        ],
+      },
+    });
+
+    let recallCount = recallCount1 + recallCount2;
 
     if (recallCount >= recallLimit) {
       sendError(res, 400, `Today's recall limit (${recallLimit}) reached!`);
