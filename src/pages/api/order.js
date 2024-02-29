@@ -206,17 +206,17 @@ async function handleGetOrdersByFilter(req, res) {
     const page = req.headers.page || 1;
     const ITEMS_PER_PAGE = parseInt(req.headers.ordersnumber) || 20; // Number of items per page
 
-    // console.log(
-    //   "Received request with parameters:",
-    //   fromtime,
-    //   totime,
-    //   folder,
-    //   client_code,
-    //   task,
-    //   type,
-    //   forinvoice,
-    //   page,
-    // );
+    console.log(
+      "Received request with parameters:",
+      fromtime,
+      totime,
+      folder,
+      client_code,
+      task,
+      type,
+      forinvoice,
+      page,
+    );
 
     let query = {};
     if (forinvoice) query.status = "Finished";
@@ -307,7 +307,7 @@ async function handleGetOrdersByFilter(req, res) {
 
       // console.log(pipeline);
 
-      console.log(query);
+      console.log("Final Query: ", query);
 
       const count = await Order.countDocuments(query); // Count the total matching documents
 

@@ -326,7 +326,10 @@ export default function Report(props) {
 
   return (
     <>
-      <Navbar navFor={session.user.role == "marketer" ? "lead-mine" : "crm"} />
+      <Navbar
+        navFor={session.user.role == "marketer" ? "lead-mine" : "crm"}
+        shortNote={session.user?.real_name}
+      />
       <div className="containter">
         <div className="d-flex mt-3">
           <div className="container">

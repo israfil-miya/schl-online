@@ -4,8 +4,11 @@ import { toast } from "sonner";
 import Navbar from "@/components/navbar";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function Protected() {
+  const { data: session } = useSession();
+
   const router = useRouter();
   const { redirect } = router.query;
 
@@ -39,7 +42,7 @@ export default function Protected() {
 
   return (
     <>
-      <Navbar />
+      <Navbar shortNote={session.user?.real_name} />
       <div className="text-center py-1 border bg-light">
         The route <code>{redirect}</code> is protected. Enter your credentials
         to access the page!

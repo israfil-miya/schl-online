@@ -123,7 +123,7 @@ export default function ClientDetails() {
         forinvoice: true,
         getordersbyfilter: true,
         folder: foldetFilter,
-        client: client.client_code,
+        client_code: client.client_code,
         task: taskFilter,
 
         fromtime: fromTime,
@@ -154,7 +154,7 @@ export default function ClientDetails() {
         ordersnumber: 5,
         getordersbyfilter: true,
         folder: foldetFilter,
-        client: selectedClientCode,
+        client_code: selectedClientCode,
         task: taskFilter,
         fromtime: fromTime,
         totime: toTime,
@@ -209,6 +209,7 @@ export default function ClientDetails() {
       toast.error("Error retrieving clients");
     }
   }
+
   function getFormattedDate() {
     const today = new Date();
     const day = String(today.getDate()).padStart(2, "0");

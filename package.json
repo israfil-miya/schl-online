@@ -1,22 +1,16 @@
 {
   "name": "schl-online-portal",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "gitpull:dev": "git pull origin dev",
-    "gitpush:dev": "git add . && git commit -am \"%npm_config_comment%\" && git push origin dev",
-    "gitpull:main": "git pull origin main",
-    "gitpush:main": "git add . && (git diff-index --quiet HEAD || git commit -am \"%npm_config_comment%\") && git push origin main",
-    "gitmerge:prod": "git checkout main && git merge origin/dev",
     "format:fix": "prettier --write --ignore-path .gitignore README.md ."
   },
   "dependencies": {
     "@iconscout/react-unicons": "^2.0.2",
-    "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "chart.js": "^4.4.0",
     "chartjs-plugin-datalabels": "^2.2.0",

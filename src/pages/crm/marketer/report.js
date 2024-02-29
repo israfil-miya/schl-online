@@ -90,7 +90,7 @@ export default function DailyReport() {
 
   return (
     <>
-      <Navbar navFor="report-submition" />
+      <Navbar navFor="report-submition" shortNote={session.user?.real_name} />
       <div className="container my-5">
         <div className="add-report">
           <h5 className="py-3">New Report</h5>

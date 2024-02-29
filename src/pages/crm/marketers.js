@@ -341,7 +341,10 @@ export default function Marketers(props) {
 
   return (
     <>
-      <Navbar navFor={session.user.role == "marketer" ? "marketers" : "crm"} />
+      <Navbar
+        navFor={session.user.role == "marketer" ? "marketers" : "crm"}
+        shortNote={session.user?.real_name}
+      />
       {marketersList.length > 0 &&
       dailyReportStatusRowHtml.length > 0 &&
       availableFollowups.length > 0 ? (
