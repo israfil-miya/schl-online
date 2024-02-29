@@ -191,9 +191,7 @@ export default function Followup() {
 
               if (!result.error) {
                 toast.success("Edited the report data");
-
-                if (!isFiltered) await getAllReports();
-                else await getAllReportsFiltered();
+                await getReportsForFollowup();
               } else {
                 toast.error(result.message);
               }
@@ -281,9 +279,7 @@ export default function Followup() {
 
         if (!result.error) {
           toast.success("Edited the report data");
-
-          if (!isFiltered) await getAllReports();
-          else await getAllReportsFiltered();
+          await getReportsForFollowup();
         } else {
           toast.error("Something gone wrong!");
         }
@@ -354,7 +350,7 @@ export default function Followup() {
               {nearestFollowUps?.length !== 0 ? (
                 nearestFollowUps?.map((item, index) => {
                   return (
-                    <tr key={index}>
+                    <tr key={item._id}>
                       <td>{index + 1}</td>
                       <td>
                         {item?.calling_date
