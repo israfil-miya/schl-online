@@ -15,6 +15,11 @@ async function fetchApi(url, options) {
 
 export default function Followup() {
   const router = useRouter();
+
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemPerPage, setItemPerPage] = useState(30);
+
   const { name } = router.query;
   const { data: session } = useSession();
 
@@ -84,6 +89,8 @@ export default function Followup() {
         "Content-Type": "application/json",
         getnearestfollowups: true,
         marketer_name: name,
+        page,
+        item_per_page: itemPerPage,
       },
     };
 
@@ -313,17 +320,89 @@ export default function Followup() {
     });
   }
 
+  function handlePrevious() {
+    setPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
+
+  function handleNext() {
+    setPage((p) => {
+      if (p === pageCount) return p;
+      return p + 1;
+    });
+  }
+
+  useEffect(() => {
+    setPage(1);
+    getReportsForFollowup();
+    if (nearestFollowUps) setPageCount(nearestFollowUps?.pagination?.pageCount);
+  }, [nearestFollowUps?.pagination?.pageCount]);
+
+  useEffect(() => {
+    if (nearestFollowUps?.pagination?.pageCount == 1) return;
+    getReportsForFollowup();
+  }, [page]);
+
   useEffect(() => {
     getReportsForFollowup();
-  }, []);
+  }, [itemPerPage]);
 
   return (
     <>
       <Navbar navFor="crm" shortNote={name + " - FOLLOWUP"} />
       <div className="followup-list my-5 text-nowrap">
-        <h5 className="bg-light text-center p-2 mb-3 border">
-          Available Followups
-        </h5>
+        <div className="d-flex my-3">
+          <div className="container">
+            <div
+              className="float-end"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <span className="me-3">
+                Page{" "}
+                <strong>
+                  {nearestFollowUps?.items?.length !== 0 ? page : 0}/{pageCount}
+                </strong>
+              </span>
+              <div
+                className="btn-group"
+                role="group"
+                aria-label="Basic outlined example"
+              >
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === 1}
+                  onClick={handlePrevious}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === pageCount || pageCount === 0}
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
+              </div>
+
+              <select
+                disabled={!nearestFollowUps?.items?.length}
+                style={{ width: "70px" }}
+                value={itemPerPage}
+                onChange={(e) => setItemPerPage(e.target.value)}
+                className="form-select ms-2 me-2 form-select-sm"
+              >
+                <option value="10">10</option>
+                <option value="30">30</option>
+                <option value="70">70</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div style={{ overflowX: "auto" }} className="text-nowrap">
           <table className="table table-hover">
             <thead>
@@ -347,8 +426,8 @@ export default function Followup() {
               </tr>
             </thead>
             <tbody>
-              {nearestFollowUps?.length !== 0 ? (
-                nearestFollowUps?.map((item, index) => {
+              {nearestFollowUps?.items?.length !== 0 ? (
+                nearestFollowUps?.items?.map((item, index) => {
                   return (
                     <tr key={item._id}>
                       <td>{index + 1}</td>

@@ -73,6 +73,7 @@ export default function Marketers(props) {
         headers: {
           "Content-Type": "application/json",
           getnearestfollowups: true,
+          notpaginated: true,
         },
       };
 

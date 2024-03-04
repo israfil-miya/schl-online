@@ -386,6 +386,10 @@ async function handleGetReportById(req, res) {
 
 async function handleGetNearestFollowUps(req, res) {
   try {
+    const page = req.headers.page || 1;
+    const ITEMS_PER_PAGE = parseInt(req.headers.item_per_page) || 30;
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+
     let marketer_name = req.headers.marketer_name;
     let query = {
       is_lead: false,
@@ -395,14 +399,43 @@ async function handleGetNearestFollowUps(req, res) {
 
     if (marketer_name) {
       query.marketer_name = marketer_name;
-    }
 
-    let resData = await Report.find(query).sort({ followup_date: 1 }).lean();
+      const countPromise = Report.countDocuments(query);
+      const reportsPromise = req.headers.notpaginated
+        ? Report.find({}).lean()
+        : Report.aggregate([
+            { $match: query },
+            {
+              $sort: {
+                followup_date: 1,
+              },
+            },
+            { $skip: skip },
+            { $limit: ITEMS_PER_PAGE },
+          ]);
 
-    if (marketer_name) {
-      res.status(200).json(resData);
+      console.log("Followup List Query:", query);
+
+      const [count, reports] = await Promise.all([
+        countPromise,
+        reportsPromise,
+      ]);
+
+      const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
+
+      res.status(200).json({
+        pagination: {
+          count,
+          pageCount,
+        },
+        items: reports,
+      });
     } else {
-      let returnData = resData.reduce((acc, entry) => {
+      // Followup Count in CRM/marketers
+
+      let reports = await Report.find(query).sort({ followup_date: 1 }).lean();
+
+      let returnData = reports.reduce((acc, entry) => {
         const existingEntry = acc.find(
           (item) => item.marketer_name === entry.marketer_name,
         );

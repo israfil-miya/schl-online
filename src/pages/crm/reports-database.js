@@ -422,17 +422,22 @@ export default function Report(props) {
   }, []);
 
   useEffect(() => {
+    if (reports?.pagination?.pageCount == 1) return;
+
+    if (!isFiltered) getAllReports();
+    else getAllReportsFiltered();
+  }, [page]);
+
+  useEffect(() => {
     setPage(1);
     if (!isFiltered) getAllReports();
     if (reports) setPageCount(reports?.pagination?.pageCount);
   }, [reports?.pagination?.pageCount]);
 
   useEffect(() => {
-    if (reports?.pagination?.pageCount == 1) return;
-
     if (!isFiltered) getAllReports();
     else getAllReportsFiltered();
-  }, [page, itemPerPage]);
+  }, [itemPerPage]);
 
   /*
   Future Note:

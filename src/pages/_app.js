@@ -27,7 +27,12 @@ const SCHL = ({ Component, pageProps }) => {
         <title>SCHL PORTAL</title>
       </Head>
 
-      <Toaster richColors position="top-right" reverseOrder={true} />
+      <Toaster
+        pauseWhenPageIsHidden
+        richColors
+        position="top-right"
+        reverseOrder={true}
+      />
 
       {/* Render NextNProgress only on the client side */}
       {typeof window !== "undefined" && (
