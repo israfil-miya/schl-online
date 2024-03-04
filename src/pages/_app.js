@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession, SessionProvider, getSession } from "next-auth/react";
 import { Toaster } from "sonner";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Dynamically import NextNProgress only on the client side
 const DynamicNextNProgress = dynamic(() => import("nextjs-progressbar"), {
@@ -46,13 +45,9 @@ const SCHL = ({ Component, pageProps }) => {
         {!Component.noAuth ? (
           <Auth>
             <Component {...pageProps} />
-            <SpeedInsights />
           </Auth>
         ) : (
-          <>
-            <Component {...pageProps} />
-            <SpeedInsights />
-          </>
+          <Component {...pageProps} />
         )}
       </SessionProvider>
     </>
