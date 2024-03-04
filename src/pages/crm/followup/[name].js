@@ -404,7 +404,7 @@ export default function Followup() {
           </div>
         </div>
         <div style={{ overflowX: "auto" }} className="text-nowrap">
-          <table className="table table-hover">
+          <table className="table table-bordered table-hover">
             <thead>
               <tr className="table-dark">
                 <th>#</th>
