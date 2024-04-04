@@ -1,6 +1,6 @@
 import PromiseFtp from "promise-ftp";
 
-const MAX_CONNECTIONS = 6; // Set your desired maximum number of connections
+const MAX_CONNECTIONS = 6;
 const connectionPool = [];
 const connectionQueue = [];
 let isConnecting = false;

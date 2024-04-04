@@ -350,6 +350,7 @@ export default function Browse() {
                             client_name: order.client_name || "",
                             folder: order.folder || "",
                             quantity: order.quantity || "",
+                            rate: order.rate || "",
                             download_date: order.download_date || "",
                             delivery_date: order.delivery_date || "",
                             delivery_bd_time: order.delivery_bd_time || "",
@@ -532,6 +533,28 @@ export default function Browse() {
                   placeholder="Quantity"
                 />
               </div>
+
+              {session.user.role == "manager" ? null : (
+                <div className="mb-3">
+                  <label htmlFor="rate" className="form-label">
+                    Rate
+                  </label>
+                  <input
+                    value={manageData.rate}
+                    onChange={(e) =>
+                      setManageData((prevData) => ({
+                        ...prevData,
+                        rate: e.target.value,
+                      }))
+                    }
+                    type="number"
+                    className="form-control"
+                    id="rate"
+                    placeholder="rate"
+                  />
+                </div>
+              )}
+
               <div className="mb-3">
                 <label htmlFor="downloadDate" className="form-label">
                   Download Date
@@ -709,7 +732,6 @@ export default function Browse() {
                   placeholder="Status"
                 />
               </div>
-
               <div className="mb-3">
                 <label htmlFor="status" className="form-label">
                   Priority

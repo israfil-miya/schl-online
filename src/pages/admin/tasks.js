@@ -9,7 +9,8 @@ export default function Tasks() {
   const [client_code, setClientCode] = useState("");
   const [client_name, setClientName] = useState("");
   const [folder, setFolder] = useState("");
-  const [quantity, setQuantity] = useState(false);
+  const [quantity, setQuantity] = useState(null);
+  const [rate, setRate] = useState(null);
   const [download_date, setDownloadDate] = useState("");
   const [delivery_date, setDeliveryDate] = useState("");
   const [delivery_bd_time, setDeliveryBdTime] = useState("");
@@ -161,6 +162,7 @@ export default function Tasks() {
         client_name,
         folder,
         quantity,
+        rate,
         download_date: download_date,
         delivery_date: delivery_date,
         delivery_bd_time,
@@ -190,7 +192,8 @@ export default function Tasks() {
     setClientCode("");
     setClientName("");
     setFolder("");
-    setQuantity(false);
+    setQuantity(null);
+    setRate(null);
     setDownloadDate("");
     setDeliveryDate("");
     setDeliveryBdTime("");
@@ -319,6 +322,19 @@ export default function Tasks() {
                 className="form-control"
                 id="quantity"
                 placeholder="Quantity"
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="rate" className="form-label">
+                Rate
+              </label>
+              <input
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                type="number"
+                className="form-control"
+                id="rate"
+                placeholder="Rate"
               />
             </div>
             <div className="mb-3">

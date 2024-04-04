@@ -11,6 +11,10 @@ const OrderSchema = new mongoose.Schema(
     folder: {
       type: String,
     },
+    rate: {
+      type: Number,
+      default: null,
+    },
     quantity: {
       type: Number,
     },

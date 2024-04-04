@@ -817,6 +817,19 @@ export default function Approvals() {
                 />
               </div>
               <div className="mb-3">
+                <label htmlFor="rate" className="form-label">
+                  Rate
+                </label>
+                <input
+                  value={orderInfo.rate}
+                  disabled
+                  type="number"
+                  className="form-control"
+                  id="rate"
+                  placeholder="Rate"
+                />
+              </div>
+              <div className="mb-3">
                 <label htmlFor="downloadDate" className="form-label">
                   Download Date
                 </label>

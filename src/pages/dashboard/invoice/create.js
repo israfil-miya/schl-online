@@ -250,7 +250,7 @@ export default function ClientDetails() {
             date: isoDateToDdMmYyyy(order.createdAt),
             job_name: order.folder,
             quantity: order.quantity,
-            unit_price: 0,
+            unit_price: order.rate ?? 0,
             total: function () {
               return this.quantity * this.unit_price;
             },
@@ -510,6 +510,7 @@ export default function ClientDetails() {
                   <th>#</th>
                   <th>Folder</th>
                   <th>Quantity</th>
+                  <th>Rate</th>
                   <th>Download Date</th>
                   <th>Delivery Time</th>
                   <th>Task</th>
@@ -527,6 +528,7 @@ export default function ClientDetails() {
                       <td>{index + 1}</td>
                       <td className="text-break">{order.folder}</td>
                       <td className="text-break">{order.quantity}</td>
+                      <td className="text-break">{order.rate}</td>
                       <td className="text-break">
                         {order.download_date &&
                           convertToDDMMYYYY(order.download_date)}

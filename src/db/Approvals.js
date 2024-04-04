@@ -17,6 +17,8 @@ const ApprovalSchema = new mongoose.Schema(
       default: false,
     },
 
+    // Users Database Entry
+
     name: {
       type: String,
     },
@@ -29,6 +31,8 @@ const ApprovalSchema = new mongoose.Schema(
     role: {
       type: String,
     },
+
+    // Reports Database Entry
 
     marketer_id: String,
 
@@ -83,6 +87,8 @@ const ApprovalSchema = new mongoose.Schema(
       default: false,
     },
 
+    // Employees Database Entry
+
     e_id: {
       type: String,
     },
@@ -98,7 +104,6 @@ const ApprovalSchema = new mongoose.Schema(
     email: {
       type: String,
     },
-
     birth_date: {
       type: String,
     },
@@ -114,6 +119,7 @@ const ApprovalSchema = new mongoose.Schema(
     department: {
       type: String,
     },
+    // if employee is a marketer
     company_provided_name: {
       type: String,
     },
@@ -145,6 +151,7 @@ const ApprovalSchema = new mongoose.Schema(
     note: {
       type: String,
     },
+
     id: {
       type: String,
     },

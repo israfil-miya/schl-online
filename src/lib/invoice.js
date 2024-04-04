@@ -402,7 +402,7 @@ export default async function createInvoice(invoiceData, billData) {
         );
     }
 
-    // Extra row, E - H column merge (need to work more on this, it's a bug!)
+    // Extra row, E - H column merge
     addHeader(
       sheet,
       `E${afterContactTableRowNumber}:H${afterContactTableRowNumber}`,
