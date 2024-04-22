@@ -55,13 +55,10 @@ export default function Marketers(props) {
   };
 
   function countDays(fromDate, toDate) {
-    const from_date = new Date(fromDate);
-    const to_date = new Date(toDate);
-
-    console.log(from_date, to_date, fromDate, toDate);
-
-    const timeDifference = to_date.getTime() - from_date.getTime();
-    const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+    const from_date = moment.tz(fromDate, 'YYYY-MM-DD');
+    const to_date = moment.tz(toDate, 'YYYY-MM-DD').add(1, 'days'); // Add one day to include the end date
+  
+    const daysDifference = to_date.diff(from_date, 'days');
     return daysDifference;
   }
 
@@ -170,6 +167,9 @@ export default function Marketers(props) {
 
     let reportTimePeriod = countDays(fromTimePeriod, toTimePeriod);
 
+    let callsTarget = 55 * reportTimePeriod;
+    let leadsTarget = 20 * reportTimePeriod; 
+
     if (reportTimePeriod < 0) {
       toast.error("From date can't be more recent than To date");
       return null;
@@ -200,55 +200,56 @@ export default function Marketers(props) {
           : 0;
         parsedTableRows.push(
           <tr key={index}>
-            <td
-              style={{
-                maxWidth: "5px",
-                padding: "0px 0px 0px 5px",
-                backgroundColor: "#212529",
-                color: "#fff",
-              }}
-            >
-              {index + 1}. {FiveDayReportOfMarketer.marketer_name}
-            </td>
-            <td className="text-center" style={{ padding: "0px" }}>
-              {FiveDayReportOfMarketer.data.total_calls_made}
-            </td>
-            <td className="text-center" style={{ padding: "0px" }}>
-              {FiveDayReportOfMarketer.data.total_prospects}
-            </td>
-            <td className="text-center" style={{ padding: "0px" }}>
-              {FiveDayReportOfMarketer.data.total_test_jobs}
-            </td>
-            <td className="text-center" style={{ padding: "0px" }}>
-              {FiveDayReportOfMarketer.data.total_leads}
-            </td>
-          </tr>,
+          <td
+            className={(((callsTarget - FiveDayReportOfMarketer.data.total_calls_made) <= 0) && ((leadsTarget - FiveDayReportOfMarketer.data.total_leads) <= 0)) ? `bg-success` : "bg-danger"}
+            style={{
+              maxWidth: "5px",
+              padding: "0px 0px 0px 5px",
+              // backgroundColor: "#212529",
+              color: "#fff",
+            }}
+          >
+            {index + 1}. {FiveDayReportOfMarketer.marketer_name}
+          </td>
+          <td className={`text-center align-middle ${(callsTarget - FiveDayReportOfMarketer.data.total_calls_made) <= 0 ? "text-success" : "text-danger"}`} style={{ padding: "0px" }}>
+            {(callsTarget - FiveDayReportOfMarketer.data.total_calls_made) <= 0 ? FiveDayReportOfMarketer.data.total_calls_made : FiveDayReportOfMarketer.data.total_calls_made + " " + `(${callsTarget - FiveDayReportOfMarketer.data.total_calls_made})`}
+          </td>
+          <td className="text-center align-middle" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_prospects}
+          </td>
+          <td className="text-center align-middle" style={{ padding: "0px" }}>
+            {FiveDayReportOfMarketer.data.total_test_jobs}
+          </td>
+          <td className={`text-center align-middle ${(leadsTarget - FiveDayReportOfMarketer.data.total_leads) <= 0 ? "text-success" : "text-danger"}`} style={{ padding: "0px" }}>
+            {(leadsTarget - FiveDayReportOfMarketer.data.total_leads) <= 0 ? FiveDayReportOfMarketer.data.total_leads : FiveDayReportOfMarketer.data.total_leads + " " + `(${leadsTarget - FiveDayReportOfMarketer.data.total_leads})`}
+          </td>
+        </tr>,
         );
       });
 
       parsedTableRows.push(
         <tr className="table-secondary">
-          <th
-            style={{
-              maxWidth: "5px",
-              padding: "0px 0px 0px 5px",
-            }}
-          >
-            Total
-          </th>
-          <th className="text-center" style={{ padding: "0px" }}>
-            {total_calls_made}
-          </th>
-          <th className="text-center" style={{ padding: "0px" }}>
-            {total_prospects}
-          </th>
-          <th className="text-center" style={{ padding: "0px" }}>
-            {total_test_jobs}
-          </th>
-          <th className="text-center" style={{ padding: "0px" }}>
-            {total_leads}
-          </th>
-        </tr>,
+        <th
+          style={{
+            maxWidth: "5px",
+            padding: "0px 0px 0px 5px",
+          }}
+        >
+          Total
+        </th>
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
+          {(callsTarget * parsedTableRows.length - total_calls_made) <= 0 ? total_calls_made : total_calls_made + " " + `(${callsTarget * parsedTableRows.length - total_calls_made})`}
+        </th>
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
+          {total_prospects}
+        </th>
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
+          {total_test_jobs}
+        </th>
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
+          {(leadsTarget * parsedTableRows.length - total_leads) <= 0 ? total_leads : total_leads + " " + `(${leadsTarget * parsedTableRows.length - total_leads})`}
+        </th>
+      </tr>,
       );
 
       setDailyReportStatusRowHtml(parsedTableRows);
@@ -256,6 +257,9 @@ export default function Marketers(props) {
   };
 
   const createTodayReportStatusTable = async () => {
+    let callsTarget = 55; // per day, per marketer
+    let leadsTarget = 20; // per day, per marketer
+
     let parsedTableRows = [];
     let total_calls_made = 0;
     let total_test_jobs = 0;
@@ -280,26 +284,27 @@ export default function Marketers(props) {
       parsedTableRows.push(
         <tr key={index}>
           <td
+            className={(((callsTarget - TodayReportOfMarketer.data.total_calls_made) <= 0) && ((leadsTarget - TodayReportOfMarketer.data.total_leads) <= 0)) ? `bg-success` : "bg-danger"}
             style={{
               maxWidth: "5px",
               padding: "0px 0px 0px 5px",
-              backgroundColor: "#212529",
+              // backgroundColor: "#212529",
               color: "#fff",
             }}
           >
             {index + 1}. {TodayReportOfMarketer.marketer_name}
           </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {TodayReportOfMarketer.data.total_calls_made}
+          <td className={`text-center align-middle ${(callsTarget - TodayReportOfMarketer.data.total_calls_made) <= 0 ? "text-success" : "text-danger"}`} style={{ padding: "0px" }}>
+            {(callsTarget - TodayReportOfMarketer.data.total_calls_made) <= 0 ? TodayReportOfMarketer.data.total_calls_made : TodayReportOfMarketer.data.total_calls_made + " " + `(${callsTarget - TodayReportOfMarketer.data.total_calls_made})`}
           </td>
-          <td className="text-center" style={{ padding: "0px" }}>
+          <td className="text-center align-middle" style={{ padding: "0px" }}>
             {TodayReportOfMarketer.data.total_prospects}
           </td>
-          <td className="text-center" style={{ padding: "0px" }}>
+          <td className="text-center align-middle" style={{ padding: "0px" }}>
             {TodayReportOfMarketer.data.total_test_jobs}
           </td>
-          <td className="text-center" style={{ padding: "0px" }}>
-            {TodayReportOfMarketer.data.total_leads}
+          <td className={`text-center align-middle ${(leadsTarget - TodayReportOfMarketer.data.total_leads) <= 0 ? "text-success" : "text-danger"}`} style={{ padding: "0px" }}>
+            {(leadsTarget - TodayReportOfMarketer.data.total_leads) <= 0 ? TodayReportOfMarketer.data.total_leads : TodayReportOfMarketer.data.total_leads + " " + `(${leadsTarget - TodayReportOfMarketer.data.total_leads})`}
           </td>
         </tr>,
       );
@@ -315,17 +320,17 @@ export default function Marketers(props) {
         >
           Total
         </th>
-        <th className="text-center" style={{ padding: "0px" }}>
-          {total_calls_made}
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
+          {(callsTarget * parsedTableRows.length - total_calls_made) <= 0 ? total_calls_made : total_calls_made + " " + `(${callsTarget * parsedTableRows.length - total_calls_made})`}
         </th>
-        <th className="text-center" style={{ padding: "0px" }}>
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
           {total_prospects}
         </th>
-        <th className="text-center" style={{ padding: "0px" }}>
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
           {total_test_jobs}
         </th>
-        <th className="text-center" style={{ padding: "0px" }}>
-          {total_leads}
+        <th className="text-center align-middle" style={{ padding: "0px" }}>
+          {(leadsTarget * parsedTableRows.length - total_leads) <= 0 ? total_leads : total_leads + " " + `(${leadsTarget * parsedTableRows.length - total_leads})`}
         </th>
       </tr>,
     );
@@ -347,8 +352,8 @@ export default function Marketers(props) {
         shortNote={session.user?.real_name}
       />
       {marketersList.length > 0 &&
-      dailyReportStatusRowHtml.length > 0 &&
-      availableFollowups.length > 0 ? (
+        dailyReportStatusRowHtml.length > 0 &&
+        availableFollowups.length > 0 ? (
         <div className="container">
           <div className="marketers-list my-5">
             <h5 className="bg-light text-center p-2 mb-3 border">
@@ -387,6 +392,12 @@ export default function Marketers(props) {
               </tbody>
             </table>
           </div>
+
+
+
+          <h4 className="text-danger font-monospace fw-semibold text-uppercase text-center" >
+            <span className=" text-decoration-underline">Call Target:</span> 55 Calls (30 Normal, 25 Recall), 20 Leads, 10 Tests/month
+          </h4>
 
           <div className="today-report-status mt-3">
             <h5 className="bg-light text-center p-2 mb-3 border">
