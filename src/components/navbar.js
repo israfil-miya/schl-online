@@ -271,6 +271,32 @@ export default function Navbar({ navFor, shortNote }) {
                   </li>
                 </ul>
               </li>
+
+              <li className="dropdown-submenu">
+                <li
+                  className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+                >
+                  Notice
+                </li>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/dashboard/notice/create"
+                    >
+                      Create
+                    </Link>
+                  </li>
+                  {/* <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/dashboard/notice/browse"
+                    >
+                      View
+                    </Link>
+                  </li> */}
+                </ul>
+              </li>
             </ul>
           </li>
         ) : null}
@@ -340,6 +366,14 @@ export default function Navbar({ navFor, shortNote }) {
                   target="_blank"
                 >
                   Lead Mine
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`dropdown-item ${styles.dropitem}`}
+                  href="/crm/notices"
+                >
+                  Notices
                 </Link>
               </li>
             </ul>
