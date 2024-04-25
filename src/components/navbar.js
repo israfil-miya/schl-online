@@ -115,9 +115,8 @@ export default function Navbar({ navFor, shortNote }) {
       <div className={`px-5 navigation ${styles.nav}`}>
         {session.user.role !== "marketer" ? (
           <Link
-            className={`${styles.navitem} ${
-              navFor === "tasks" ? styles.active : ""
-            }`}
+            className={`${styles.navitem} ${navFor === "tasks" ? styles.active : ""
+              }`}
             href="/"
           >
             Tasks
@@ -125,9 +124,8 @@ export default function Navbar({ navFor, shortNote }) {
         ) : null}
         {session.user.role !== "user" && session.user.role !== "marketer" ? (
           <Link
-            className={`${styles.navitem} ${
-              navFor === "browse" ? styles.active : ""
-            }`}
+            className={`${styles.navitem} ${navFor === "browse" ? styles.active : ""
+              }`}
             href="/browse"
           >
             Browse
@@ -136,9 +134,8 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${
-              navFor === "admin" ? styles.active : ""
-            } `}
+            className={`${styles.navitem} ${navFor === "admin" ? styles.active : ""
+              } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -210,9 +207,8 @@ export default function Navbar({ navFor, shortNote }) {
         ) : null}
         {session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${
-              navFor === "dashboard" ? styles.active : ""
-            } `}
+            className={`${styles.navitem} ${navFor === "dashboard" ? styles.active : ""
+              } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -303,9 +299,8 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <Link
-            className={`${styles.navitem} ${
-              navFor === "fileflow" ? styles.active : ""
-            }`}
+            className={`${styles.navitem} ${navFor === "fileflow" ? styles.active : ""
+              }`}
             href="/file-flow"
           >
             File Flow
@@ -314,9 +309,8 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${
-              navFor === "crm" ? styles.active : ""
-            } `}
+            className={`${styles.navitem} ${navFor === "crm" ? styles.active : ""
+              } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -368,13 +362,36 @@ export default function Navbar({ navFor, shortNote }) {
                   Lead Mine
                 </Link>
               </li>
-              <li>
+
+
+              <li className="dropdown-submenu">
                 <Link
-                  className={`dropdown-item ${styles.dropitem}`}
-                  href="/crm/notices"
+                  href="/crm/notices/notice-board"
                 >
-                  Notices
+                  <li
+                    className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+                  >
+                    Notices
+                  </li>
                 </Link>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/crm/notices/notice-board"
+                    >
+                      Notice Board
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`dropdown-item ${styles.dropitem}`}
+                      href="/crm/notices/rules-and-regulations"
+                    >
+                      Rules & Regulations
+                    </Link>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
@@ -383,38 +400,76 @@ export default function Navbar({ navFor, shortNote }) {
         {session.user.role === "marketer" ? (
           <>
             <Link
-              className={`${styles.navitem} ${
-                navFor === "marketers" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "marketers" ? styles.active : ""
+                }`}
               href="/crm/marketers"
             >
               Marketers
             </Link>
             <Link
-              className={`${styles.navitem} ${
-                navFor === "call-reports" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "call-reports" ? styles.active : ""
+                }`}
               href="/crm/reports-database"
             >
               Call Reports
             </Link>
 
             <Link
-              className={`${styles.navitem} ${
-                navFor === "report-submition" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "report-submition" ? styles.active : ""
+                }`}
               href={`/crm/marketer/report`}
             >
               Report Submition
             </Link>
             <Link
-              className={`${styles.navitem} ${
-                navFor === "lead-mine" ? styles.active : ""
-              }`}
+              className={`${styles.navitem} ${navFor === "lead-mine" ? styles.active : ""
+                }`}
               href={`/crm/lead-mine`}
             >
               Lead Mine
             </Link>
+
+
+            <li className={`${styles.navitem} ${navFor === "notices" ? styles.active : ""
+              }`}>
+              <li
+                className="nav-link dropdown-toggle"
+                id="navbarDropdownMenuLink"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <Link
+                  href={"/crm/notices/notice-board"}
+                >
+                  Notices
+                </Link>
+              </li>
+
+              <ul
+                className="dropdown-menu"
+                aria-labelledby="navbarDropdownMenuLink"
+              >
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href="/crm/notices/notice-board"
+                  >
+                    Notice Board
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`dropdown-item ${styles.dropitem}`}
+                    href="/crm/notices/rules-and-regulations"
+                  >
+                    Reles & Regulations
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
+
           </>
         ) : null}
 

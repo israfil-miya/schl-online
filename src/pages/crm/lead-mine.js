@@ -239,22 +239,27 @@ export default function Report(props) {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
 
-      const result = await fetchApi(url, {
-        method: "GET",
-        headers: {
-          finishlead: true,
-          updated_by: session.user?.real_name,
-          id: manageData._id,
-          "Content-Type": "application/json",
-        },
-      });
-      if (!result.error) {
-        toast.success("Changed the status of followup");
-        if (!isFiltered) await getAllReports();
-        else await getAllReportsFiltered();
+      if(manageData.marketer_name == session.user?.real_name) {
+        const result = await fetchApi(url, {
+          method: "GET",
+          headers: {
+            finishlead: true,
+            updated_by: session.user?.real_name,
+            id: manageData._id,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!result.error) {
+          toast.success("Changed the status of followup");
+          if (!isFiltered) await getAllReports();
+          else await getAllReportsFiltered();
+        } else {
+          toast.error("Something gone wrong!");
+        }
       } else {
-        toast.error("Something gone wrong!");
+        toast.error("You are not allowed to finish this lead");
       }
+
     } catch (e) {
       console.error("Error withdrwaing the lead:", error);
       toast.error("Error withdrwaing the lead");
