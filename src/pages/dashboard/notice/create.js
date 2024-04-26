@@ -4,7 +4,8 @@ import Navbar from '@/components/navbar'
 
 function CreateNotice() {
 
-    let [noticeData, setNoticeData] = useState({ title: "", description: "", channel: "marketers" })
+    let [noticeData, setNoticeData] = useState({ title: "", description: "", file_name: "", channel: "marketers" })
+    let [file, setFile] = useState(null)
 
 
 
@@ -16,9 +17,19 @@ function CreateNotice() {
     })
 
 
+    let handleFileInput = (e) => {
+        let file = e.target.files[0]
+        setNoticeData((prevData) => ({
+            ...prevData,
+            file_name: file.name
+        }))
+        setFile(file)
+    }
+
+
     let handleNoticeFormSubmit = (e) => {
         e.preventDefault()
-        console.log(noticeData)
+        console.log(noticeData, file)
     }
 
     return (
@@ -58,7 +69,6 @@ function CreateNotice() {
                         />
                     </div>
 
-
                     <div className="mb-3">
                         <label className="form-label">
                             Description
@@ -72,6 +82,14 @@ function CreateNotice() {
                             required
                         ></textarea>
                     </div>
+
+                    <div className="mb-3 d-flex flex-column">
+                        <label className="form-label">
+                            Notice File
+                        </label>
+                        <input onChange={handleFileInput} type="file" className="form-control" id="customFile" accept=".xls, .xlsx, .doc, .docx, .ppt, .pptx, .txt, .pdf" />
+                    </div>
+
 
                     <button type="submit" className="btn btn-sm btn-outline-primary">
                         Send Notice

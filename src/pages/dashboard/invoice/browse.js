@@ -130,6 +130,7 @@ export default function Database() {
             "Content-Type": "application/json",
             deletefile: true,
             filename: file_name,
+            folder_name: "invoice",
           },
         };
 
@@ -159,6 +160,7 @@ export default function Database() {
         headers: {
           downloadfile: true,
           filename: file_name,
+          folder_name: "invoice",
         },
       };
 

@@ -12,6 +12,10 @@ function sendError(res, statusCode, message) {
 async function handleInsertFile(req, res) {
   let ftp;
   try {
+
+    const { folder_name } = req.headers;
+
+
     // console.log(req)
     ftp = await getConnection();
     const form = new formidable.IncomingForm({ keepExtensions: true });
@@ -37,8 +41,10 @@ async function handleInsertFile(req, res) {
       const fileName = fileData.originalFilename;
       const filePath = fileData.filepath;
       // console.log("Received file:", fileName);
+      console.log("Received file path:", filePath);
+      console.log("Received folder name:", folder_name);
 
-      await ftp.put(filePath, `./${fileName}`);
+      await ftp.put(filePath, `./${folder_name}/${fileName}`);
 
       // console.log("File uploaded to FTP.");
       res.status(200).json({ message: "File uploaded successfully" });
@@ -62,7 +68,9 @@ async function handleDeleteFile(req, res) {
     let data = req.headers;
     console.log(req.headers);
 
-    let response = await ftp.delete(`./${data.filename}`);
+    const { folder_name } = req.headers;
+
+    let response = await ftp.delete(`./${folder_name}/${data.filename}`);
 
     console.log(response);
 
@@ -85,7 +93,8 @@ async function handleDownloadFile(req, res) {
     ftp = await getConnection();
 
     let data = req.headers;
-    const stream = await ftp.get(`./${data.filename}`);
+    const { folder_name } = req.headers;
+    const stream = await ftp.get(`./${folder_name}/${data.filename}`);
 
     // Set response headers for the file download
     res.setHeader(

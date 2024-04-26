@@ -297,6 +297,7 @@ export default function ClientDetails() {
                 method: "POST",
                 body: formData,
                 headers: {
+                  folder_name: "invoice",
                   insertfile: true,
                 },
               };
