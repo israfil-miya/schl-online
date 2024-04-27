@@ -388,7 +388,7 @@ export default function Navbar({ navFor, shortNote }) {
                       className={`dropdown-item ${styles.dropitem}`}
                       href="/crm/notices/rules-and-regulations"
                     >
-                      Rules & Regulations
+                      R&R
                     </Link>
                   </li>
                 </ul>
@@ -463,7 +463,7 @@ export default function Navbar({ navFor, shortNote }) {
                     className={`dropdown-item ${styles.dropitem}`}
                     href="/crm/notices/rules-and-regulations"
                   >
-                    Reles & Regulations
+                    R&R
                   </Link>
                 </li>
               </ul>

@@ -40,9 +40,10 @@ async function handleInsertFile(req, res) {
       // Handle the file data
       const fileName = fileData.originalFilename;
       const filePath = fileData.filepath;
-      // console.log("Received file:", fileName);
+      
+      console.log("Received file:", fileName);
       console.log("Received file path:", filePath);
-      console.log("Received folder name:", folder_name);
+      // console.log("Received folder name:", folder_name);
 
       await ftp.put(filePath, `./${folder_name}/${fileName}`);
 

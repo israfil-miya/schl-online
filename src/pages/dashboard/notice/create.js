@@ -1,12 +1,21 @@
 import React, { useState } from 'react'
 import Navbar from '@/components/navbar'
+import { toast } from 'sonner'
+
 
 
 function CreateNotice() {
 
+
+    async function fetchApi(url, options) {
+        const res = await fetch(url, options);
+        const data = await res.json();
+        return data;
+    }
+
+
     let [noticeData, setNoticeData] = useState({ title: "", description: "", file_name: "", channel: "marketers" })
     let [file, setFile] = useState(null)
-
 
 
     let handleOnChange = (e => {
@@ -15,7 +24,6 @@ function CreateNotice() {
             [e.target.name]: e.target.value
         }))
     })
-
 
     let handleFileInput = (e) => {
         let file = e.target.files[0]
@@ -27,9 +35,74 @@ function CreateNotice() {
     }
 
 
-    let handleNoticeFormSubmit = (e) => {
+    let constructFileName = (file, db_entry_id) => {
+        let file_name = file.name
+        let file_ext = file_name.split('.').pop()
+        let file_name_without_ext = file_name.split('.').slice(0, -1).join('.')
+        let new_file_name = `${file_name_without_ext}_${db_entry_id}.${file_ext}`
+        return new_file_name
+    }
+
+    let handleNoticeFormSubmit = async (e) => {
         e.preventDefault()
         console.log(noticeData, file)
+
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/notice`;
+        const options = {
+            method: "POST",
+            body: JSON.stringify({
+                channel: noticeData.channel,
+                title: noticeData.title,
+                description: noticeData.description,
+                file_name: noticeData.file_name || undefined
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                storenotice: true,
+            },
+        };
+
+        try {
+            const result = await fetchApi(url, options);
+
+            if (!result.error) {
+                if (file) {
+
+                    let formData = new FormData()
+                    formData.append("file", file, constructFileName(file, result._id))
+
+                    let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
+                    let options = {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            folder_name: "notice",
+                            insertfile: true,
+                        },
+                    };
+
+                    let ftp_res = await fetchApi(url, options)
+
+
+                    if(ftp_res.error) {
+                        toast.error("Unable to send the notice")
+                    } else {
+                        toast.success("Successfully sent the notice")
+                    }
+                } else {
+                    toast.success("Successfully sent the notice");
+                }
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.error("Error adding new client:", error);
+            toast.error("Error adding new client");
+        } finally {
+            e.target.reset()
+            setNoticeData({ title: "", description: "", file_name: "", channel: "marketers" })
+            setFile(null)
+        }
     }
 
     return (

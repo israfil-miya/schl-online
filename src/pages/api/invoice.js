@@ -2,6 +2,8 @@ import Invoice from "@/db/Invoices";
 import dbConnect from "@/db/dbConnect";
 import Client from "@/db/Clients";
 dbConnect();
+
+
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,
@@ -40,6 +42,7 @@ function ddMmYyyyToIsoDate(ddMmYyyy) {
     throw error;
   }
 }
+
 async function handleGetInvoicesByFilter(req, res) {
   try {
     const { fromtime, totime, client, invoicenumber, filename } = req.headers;
@@ -117,6 +120,7 @@ async function handleGetInvoicesByFilter(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
 async function handleGetInvoiceDetails(req, res) {
   try {
     const page = parseInt(req.headers.page);
@@ -159,6 +163,7 @@ async function handleGetInvoiceDetails(req, res) {
     sendError(res, 500, "An error occurred");
   }
 }
+
 async function handleStoreInvoiceDetails(req, res) {
   const data = req.body;
 
