@@ -6,6 +6,12 @@ let NoticeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    notice_no: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true
+    },
     title: {
         type: String,
         required: true
@@ -18,7 +24,6 @@ let NoticeSchema = new mongoose.Schema({
         type: String,
         required: true
     }
-}, { timestamps: true, __v: false })
-
+}, { timestamps: true, __v: false });
 
 module.exports = mongoose.models.Notice || mongoose.model("Notice", NoticeSchema);

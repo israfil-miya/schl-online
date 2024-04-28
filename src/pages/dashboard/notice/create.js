@@ -14,7 +14,7 @@ function CreateNotice() {
     }
 
 
-    let [noticeData, setNoticeData] = useState({ title: "", description: "", file_name: "", channel: "marketers" })
+    let [noticeData, setNoticeData] = useState({notice_no: "", title: "", description: "", file_name: "", channel: "marketers" })
     let [file, setFile] = useState(null)
 
 
@@ -52,6 +52,7 @@ function CreateNotice() {
             method: "POST",
             body: JSON.stringify({
                 channel: noticeData.channel,
+                notice_no: noticeData.notice_no,
                 title: noticeData.title,
                 description: noticeData.description,
                 file_name: noticeData.file_name || undefined
@@ -126,6 +127,22 @@ function CreateNotice() {
                             <option value="marketers">Marketers</option>
                             <option value="production">Production</option>
                         </select>
+                    </div>
+
+
+                    
+                    <div className="mb-3">
+                        <label className="form-label">
+                            Notice No.
+                        </label>
+                        <input
+                            type="text"
+                            value={noticeData.notice_no}
+                            onChange={handleOnChange}
+                            name="notice_no"
+                            className="form-control"
+                            required
+                        />
                     </div>
 
                     <div className="mb-3">

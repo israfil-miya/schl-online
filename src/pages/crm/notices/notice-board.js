@@ -1,174 +1,357 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import Navbar from '@/components/navbar'
-import Image from 'next/image'
+import React, { useState, useEffect, useCallback } from "react";
+import Navbar from "@/components/navbar";
+import { toast } from "sonner";
+import { useRouter } from "next/router";
 
 function Notices() {
+  const router = useRouter();
+  let [notices, setNotices] = useState([]);
 
-    let [notices, setNotices] = useState([])
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemPerPage, setItemPerPage] = useState(30);
 
+  const [filters, setFilters] = useState({
+    fromTime: "",
+    toTime: "",
+    notice_no: "",
+    title: "",
+  });
 
+  const [isFiltered, setIsFiltered] = useState(0);
 
-//     function createMarkup() {
-//         return {
-//             __html:
-//                 `
-//   <ul>
-//     <li><span style="font-weight: bold;">Important:</span> <span style="font-style: italic;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span></li>
-//     <li><span style="font-style: italic;">Italic:</span> Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li>
-//     <li><span style="font-weight: bold;">Bold and Italic:</span> Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li>
-//   </ul>
-  
-//   <table border="1">
-//     <tr>
-//       <th style="padding: 8px; border: 1px solid black;">Header 1</th>
-//       <th style="padding: 8px; border: 1px solid black;">Header 2</th>
-//       <th style="padding: 8px; border: 1px solid black;">Header 3</th>
-//     </tr>
-//     <tr>
-//       <td style="padding: 8px; border: 1px solid black;">Data 1</td>
-//       <td style="padding: 8px; border: 1px solid black;">Data 2</td>
-//       <td style="padding: 8px; border: 1px solid black;">Data 3</td>
-//     </tr>
-//     <tr>
-//       <td style="padding: 8px; border: 1px solid black;">Data 4</td>
-//       <td style="padding: 8px; border: 1px solid black;">Data 5</td>
-//       <td style="padding: 8px; border: 1px solid black;">Data 6</td>
-//     </tr>
-//   </table>
-//             `
-//         };
-//     };
+  async function fetchApi(url, options) {
+    const res = await fetch(url, options);
+    const data = await res.json();
+    return data;
+  }
 
+  async function getNotices() {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/notice`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          getnotices: true,
+          item_per_page: itemPerPage,
+          page,
+        },
+      };
 
+      const list = await fetchApi(url, options);
 
-    return (
-        <>
-            <Navbar navFor="notices" />
+      if (!list.error) {
+        setNotices(list);
+      } else {
+        toast.error("Unable to retrieve file list", { toastId: "error1" });
+      }
+    } catch (error) {
+      console.error("Error fetching file list:", error);
+      toast.error("Error retrieving file list", { toastId: "error3" });
+    }
+  }
 
-            <h3 className="text-center mt-4 mb-3 fw-semibold text-decoration-underline">NOTICE &nbsp; BOARD</h3>
-            <div className="container d-flex flex-column bg-light gap-3 border border-3 rounded-2 notices">
+  async function getNoticesFiltered() {
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/notice`;
 
-                <div className='notice border rounded-2 bg-white px-3 py-2'>
-                    <div className='notice-header pt-2 pb-2 d-flex justify-content-start flex-row align-items-center gap-3'>
-                        <Image
-                            priority
-                            src="/images/NEW-SCH-logo-text-grey.png"
-                            alt="Logo"
-                            width={60}
-                            height={60}
-                            className="me-2 rounded-circle"
-                        />
-                        <div className='d-flex flex-column'>
-                            <h5 className='fw-semibold mb-0'>Studio Click House LTD.</h5>
-                            <smal className="text-body-secondary"><b>28 April, 2024</b></smal>
-                        </div>
-                    </div>
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        getnoticesbyfilter: true,
+        fromtime: filters.fromTime,
+        totime: filters.toTime,
+        notice_no: filters.notice_no,
+        title: filters.title,
+        page,
+        item_per_page: itemPerPage,
+      },
+    };
 
-                    <div className='border'></div>
+    try {
+      const list = await fetchApi(url, options);
 
-                    <div className='notice-body d-flex flex-column justify-content-start py-2 pb-3'>
-                        <div className='notice-title'>
-                            <h4 className='fw-semibold my-3'>Notice: {'New Rules & Regulations'}</h4>
-                        </div>
-                        <div className='notice-description' dangerouslySetInnerHTML={createMarkup()} />
-                    </div>
-                </div>
+      if (!list.error) {
+        setIsFiltered(1);
+        setNotices(list);
+      } else {
+        setIsFiltered(0);
+        await getNotices();
+      }
+    } catch (error) {
+      console.error("Error fetching filtered notices:", error);
+    }
+  }
 
-                <div className='notice border rounded-2 bg-white px-3 py-2'>
-                    <div className='notice-header pt-2 pb-2 d-flex justify-content-start flex-row align-items-center gap-3'>
-                        <Image
-                            priority
-                            src="/images/NEW-SCH-logo-text-grey.png"
-                            alt="Logo"
-                            width={60}
-                            height={60}
-                            className="me-2 rounded-circle"
-                        />
-                        <div className='d-flex flex-column'>
-                            <h5 className='fw-semibold mb-0'>Studio Click House LTD.</h5>
-                            <smal className="text-body-secondary"><b>28 April, 2024</b></smal>
-                        </div>
-                    </div>
+  function isoDateToDdMmYyyy(isoDate) {
+    const date = new Date(isoDate);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
+    const year = date.getFullYear().toString();
 
-                    <div className='border'></div>
+    return `${day}-${month}-${year}`;
+  }
+  function handlePrevious() {
+    setPage((p) => {
+      if (p === 1) return p;
+      return p - 1;
+    });
+  }
 
-                    <div className='notice-body d-flex flex-column justify-content-start py-2 pb-3'>
-                        <div className='notice-title'>
-                            <h4 className='fw-semibold my-3'>Notice: {'New Rules & Regulations'}</h4>
-                        </div>
-                        <div className='notice-description' dangerouslySetInnerHTML={createMarkup()} />
-                    </div>
-                </div>
+  function handleNext() {
+    setPage((p) => {
+      if (p === pageCount) return p;
+      return p + 1;
+    });
+  }
 
-                <div className='notice border rounded-2 bg-white px-3 py-2'>
-                    <div className='notice-header pt-2 pb-2 d-flex justify-content-start flex-row align-items-center gap-3'>
-                        <Image
-                            priority
-                            src="/images/NEW-SCH-logo-text-grey.png"
-                            alt="Logo"
-                            width={60}
-                            height={60}
-                            className="me-2 rounded-circle"
-                        />
-                        <div className='d-flex flex-column'>
-                            <h5 className='fw-semibold mb-0'>Studio Click House LTD.</h5>
-                            <smal className="text-body-secondary"><b>28 April, 2024</b></smal>
-                        </div>
-                    </div>
+  useEffect(() => {
+    getNotices();
+  }, []);
 
-                    <div className='border'></div>
+  useEffect(() => {
+    if (notices?.pagination?.pageCount == 1) return;
 
-                    <div className='notice-body d-flex flex-column justify-content-start py-2 pb-3'>
-                        <div className='notice-title'>
-                            <h4 className='fw-semibold my-3'>Notice: {'New Rules & Regulations'}</h4>
-                        </div>
-                        <div className='notice-description' dangerouslySetInnerHTML={createMarkup()} />
-                    </div>
-                </div>
+    if (!isFiltered) getNotices();
+    else getNoticesFiltered();
+  }, [page]);
 
-                <div className='notice border rounded-2 bg-white px-3 py-2'>
-                    <div className='notice-header pt-2 pb-2 d-flex justify-content-start flex-row align-items-center gap-3'>
-                        <Image
-                            priority
-                            src="/images/NEW-SCH-logo-text-grey.png"
-                            alt="Logo"
-                            width={60}
-                            height={60}
-                            className="me-2 rounded-circle"
-                        />
-                        <div className='d-flex flex-column'>
-                            <h5 className='fw-semibold mb-0'>Studio Click House LTD.</h5>
-                            <smal className="text-body-secondary"><b>28 April, 2024</b></smal>
-                        </div>
-                    </div>
+  useEffect(() => {
+    setPage(1);
+    if (!isFiltered) getNotices();
+    if (notices) setPageCount(notices?.pagination?.pageCount);
+  }, [notices?.pagination?.pageCount]);
 
-                    <div className='border'></div>
+  useEffect(() => {
+    if (!isFiltered) getNotices();
+    else getNoticesFiltered();
+  }, [itemPerPage]);
 
-                    <div className='notice-body d-flex flex-column justify-content-start py-2 pb-3'>
-                        <div className='notice-title'>
-                            <h4 className='fw-semibold my-3'>Notice: {'New Rules & Regulations'}</h4>
-                        </div>
-                        <div className='notice-description' dangerouslySetInnerHTML={createMarkup()} />
-                    </div>
-                </div>
+  return (
+    <>
+      <Navbar navFor="notices" />
 
+      <div className="container">
+        <div className="d-flex mt-3">
+          <div className="container">
+            <div
+              className="float-end"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <span className="me-3">
+                Page{" "}
+                <strong>
+                  {notices?.items?.length !== 0 ? page : 0}/{pageCount}
+                </strong>
+              </span>
+              <div
+                className="btn-group"
+                role="group"
+                aria-label="Basic outlined example"
+              >
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === 1}
+                  onClick={handlePrevious}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={page === pageCount || pageCount === 0}
+                  onClick={handleNext}
+                >
+                  Next
+                </button>
+              </div>
 
+              <select
+                disabled={!notices?.items?.length}
+                style={{ width: "70px" }}
+                value={itemPerPage}
+                onChange={(e) => setItemPerPage(e.target.value)}
+                className="form-select ms-2 me-2 form-select-sm"
+              >
+                <option value="10">10</option>
+                <option value="30">30</option>
+                <option value="70">70</option>
+                <option value="100">100</option>
+              </select>
 
+              <button
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar"
+                aria-label="Toggle navigation"
+                className="btn m-2 btn-sm btn-outline-primary"
+              >
+                Filter
+              </button>
             </div>
+          </div>
+        </div>
 
+        <div style={{ overflowX: "auto" }} className="text-nowrap">
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr className="table-dark">
+                <th>#</th>
+                <th>Date</th>
+                <th>Notice No</th>
+                <th>Title</th>
+                <th>Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notices?.items?.length ? (
+                notices?.items?.map((item, index) => {
+                  return (
+                    <tr key={item.notice_no}>
+                      <td>{index + 1}</td>
+                      <td>
+                        {item.updatedAt
+                          ? isoDateToDdMmYyyy(item.updatedAt)
+                          : ""}
+                      </td>
+                      <td>{item.notice_no}</td>
+                      <td>{item.title}</td>
+                      <td
+                        className="align-middle"
+                        style={{ textAlign: "center" }}
+                      >
+                        <button
+                          onClick={() => {
+                            router.push(`/crm/notices/${item.notice_no}`);
+                          }}
+                          className="btn btn-sm btn-outline-primary me-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editModal"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr key={"no_notices"}>
+                  <td colSpan="5" className=" align-center text-center">
+                    No Notices To Show.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-            <style jsx>{`
-        .notices {
-          height: 70vh;
-          padding: 30px;
-          overflow-x: hidden;
-          overflow-y: scroll;
-          scroll-snap-type: y mandatory;
-          scroll-padding: 20px;
-        }
-        `}</style>
-        </>
-    )
+      <div
+        className="offcanvas offcanvas-end"
+        tabIndex="-1"
+        id="offcanvasNavbar"
+        aria-labelledby="offcanvasNavbarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
+            Search notices
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div className="d-grid gap-2">
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Notice No
+                </label>
+                <input
+                  value={filters.notice_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, notice_no: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="datePicker">
+                  Date picker
+                </label>
+                <div id="datePicker" className="input-group">
+                  <input
+                    type="date"
+                    id="fromDate"
+                    className="form-control custom-input"
+                    value={filters.fromTime}
+                    onChange={(e) =>
+                      setFilters({ ...filters, fromTime: e.target.value })
+                    }
+                  />
+                  <span className="input-group-text">to</span>
+                  <input
+                    type="date"
+                    id="toDate"
+                    className="form-control custom-input"
+                    value={filters.toTime}
+                    onChange={(e) =>
+                      setFilters({ ...filters, toTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Title
+                </label>
+                <input
+                  value={filters.title}
+                  onChange={(e) =>
+                    setFilters({ ...filters, title: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+            <button
+              onClick={getNoticesFiltered}
+              className="btn btn-outline-primary"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>
+        {`
+          .table {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            padding: 2.5px 10px;
+          }
+        `}
+      </style>
+    </>
+  );
 }
 
-export default Notices
+export default Notices;
