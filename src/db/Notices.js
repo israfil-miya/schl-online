@@ -22,7 +22,6 @@ let NoticeSchema = new mongoose.Schema({
     },
     file_name: {
         type: String,
-        required: true
     }
 }, { timestamps: true, __v: false });
 

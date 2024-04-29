@@ -35,11 +35,11 @@ function CreateNotice() {
     }
 
 
-    let constructFileName = (file, db_entry_id) => {
+    let constructFileName = (file, notice_no) => {
         let file_name = file.name
         let file_ext = file_name.split('.').pop()
         let file_name_without_ext = file_name.split('.').slice(0, -1).join('.')
-        let new_file_name = `${file_name_without_ext}_${db_entry_id}.${file_ext}`
+        let new_file_name = `${file_name_without_ext}_${notice_no}.${file_ext}`
         return new_file_name
     }
 
@@ -70,7 +70,7 @@ function CreateNotice() {
                 if (file) {
 
                     let formData = new FormData()
-                    formData.append("file", file, constructFileName(file, result._id))
+                    formData.append("file", file, constructFileName(file, result.notice_no))
 
                     let url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/ftp`;
                     let options = {

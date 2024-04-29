@@ -26,7 +26,7 @@ function Notices() {
     return data;
   }
 
-  async function getNotices() {
+  const getNotices = async () => {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/notice`;
       const options = {
@@ -34,6 +34,7 @@ function Notices() {
         headers: {
           "Content-Type": "application/json",
           getnotices: true,
+          channel: "marketers", // "marketers" is hardcoded here
           item_per_page: itemPerPage,
           page,
         },
@@ -52,7 +53,7 @@ function Notices() {
     }
   }
 
-  async function getNoticesFiltered() {
+  const getNoticesFiltered = async () => {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/notice`;
 
     const options = {
@@ -60,6 +61,7 @@ function Notices() {
       headers: {
         "Content-Type": "application/json",
         getnoticesbyfilter: true,
+        channel: "marketers", // "marketers" is hardcoded here
         fromtime: filters.fromTime,
         totime: filters.toTime,
         notice_no: filters.notice_no,
@@ -107,10 +109,12 @@ function Notices() {
   }
 
   useEffect(() => {
+    // console.log("initial effect")
     getNotices();
   }, []);
 
   useEffect(() => {
+    // console.log("page effect")
     if (notices?.pagination?.pageCount == 1) return;
 
     if (!isFiltered) getNotices();
@@ -118,12 +122,14 @@ function Notices() {
   }, [page]);
 
   useEffect(() => {
+    // console.log("page count effect")
     setPage(1);
     if (!isFiltered) getNotices();
     if (notices) setPageCount(notices?.pagination?.pageCount);
   }, [notices?.pagination?.pageCount]);
 
   useEffect(() => {
+    // console.log("items per page effect")
     if (!isFiltered) getNotices();
     else getNoticesFiltered();
   }, [itemPerPage]);
