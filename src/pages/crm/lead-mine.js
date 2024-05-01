@@ -239,7 +239,7 @@ export default function Report(props) {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/crm`;
 
-      if(manageData.marketer_name == session.user?.real_name) {
+      if (manageData.marketer_name == session.user?.real_name) {
         const result = await fetchApi(url, {
           method: "GET",
           headers: {
@@ -259,7 +259,6 @@ export default function Report(props) {
       } else {
         toast.error("You are not allowed to finish this lead");
       }
-
     } catch (e) {
       console.error("Error withdrwaing the lead:", error);
       toast.error("Error withdrwaing the lead");

@@ -17,8 +17,10 @@ const calculateCountdown = (timeDifferenceMs) => {
 };
 
 const getCurrentTimes = (times) => {
-  const timesNow = times.map((time) =>
-    time.timeDifference <= 0 ? "Over" : calculateCountdown(time.timeDifference),
+  const timesNow = times?.map((time) =>
+    time?.timeDifference <= 0
+      ? "Over"
+      : calculateCountdown(time?.timeDifference),
   );
   return timesNow;
 };

@@ -14,7 +14,9 @@ async function handleGetNotices(req, res) {
     const page = req.headers.page || 1;
     const ITEMS_PER_PAGE = parseInt(req.headers.item_per_page) || 30;
 
-    let query = {channel: req.headers.channel};
+    let query = {};
+
+    if (req.headers.channel) query.channel = req.headers.channel;
 
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
@@ -23,15 +25,15 @@ async function handleGetNotices(req, res) {
       { $sort: { createdAt: -1 } },
       { $skip: skip }, // Skip items for pagination
       { $limit: ITEMS_PER_PAGE },
-      {
-        $project: {
-          notice_no: 1,
-          title: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          _id: 1,
-        },
-      },
+      // {
+      //   $project: {
+      //     notice_no: 1,
+      //     title: 1,
+      //     createdAt: 1,
+      //     updatedAt: 1,
+      //     _id: 1,
+      //   },
+      // },
     ];
 
     //   console.log(pipeline);
@@ -66,23 +68,14 @@ async function handleGetNoticesByFilter(req, res) {
     const page = req.headers.page || 1;
     const ITEMS_PER_PAGE = parseInt(req.headers.item_per_page) || 30;
 
+    let { fromtime, totime, notice_no, title } = req.headers;
 
-    let {
-      fromtime,
-      totime,
-      notice_no,
-      title
-    } = req.headers;
+    let query = {};
 
-
-
-    let query = {channel: req.headers.channel};
-
-    if (notice_no) query.notice_no = { $regex: `^${notice_no}$`, $options: "i" };
-    if (title)
-      query.title = { $regex: title, $options: "i" };
-
-
+    if (req.headers.channel) query.channel = req.headers.channel;
+    if (notice_no)
+      query.notice_no = { $regex: `^${notice_no}$`, $options: "i" };
+    if (title) query.title = { $regex: title, $options: "i" };
 
     if (fromtime || totime) {
       if (fromtime && totime) {
@@ -101,12 +94,10 @@ async function handleGetNoticesByFilter(req, res) {
       }
     }
 
-
     if (!query) {
       sendError(res, 400, "No filter applied");
     } else {
       const skip = (page - 1) * ITEMS_PER_PAGE;
-
 
       const count = await Notice.countDocuments(query);
       const notices = await Notice.aggregate([
@@ -119,7 +110,6 @@ async function handleGetNoticesByFilter(req, res) {
         { $skip: skip },
         { $limit: ITEMS_PER_PAGE },
       ]);
-
 
       const pageCount = Math.ceil(count / ITEMS_PER_PAGE);
 
@@ -162,7 +152,7 @@ async function handleStoreNotice(req, res) {
       sendError(
         res,
         400,
-        "A notice with the same notice number already exists."
+        "A notice with the same notice number already exists.",
       );
       return;
     }
@@ -181,6 +171,48 @@ async function handleStoreNotice(req, res) {
   }
 }
 
+async function handleDeleteNotice(req, res) {
+  try {
+    let data = req.headers;
+
+    let resData = await Notice.findByIdAndDelete(data._id);
+    console.log(resData);
+
+    if (resData) {
+      res.status(200).json({ message: "Successfully deleted the notice" });
+    } else {
+      sendError(res, 400, "Unable to delete the notice");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
+async function handleEditNotice(req, res) {
+  try {
+    console.log("HERE");
+    let data = req.body;
+    const updated_by = req.headers.name;
+    data = { ...data, updated_by };
+
+    console.log(data);
+
+    const resData = await Notice.findByIdAndUpdate(data._id, data, {
+      new: true,
+    });
+
+    if (resData) {
+      res.status(200).json(resData);
+    } else {
+      sendError(res, 400, "No Notice found");
+    }
+  } catch (e) {
+    console.error(e);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -192,6 +224,8 @@ export default async function handle(req, res) {
         await handleGetNoticesByFilter(req, res);
       } else if (req.headers.getnotice) {
         await handleGetNotice(req, res);
+      } else if (req.headers.deletenotice) {
+        await handleDeleteNotice(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }
@@ -199,8 +233,13 @@ export default async function handle(req, res) {
     case "POST":
       if (req.headers.storenotice) {
         await handleStoreNotice(req, res);
+        break;
+      } else if (req.headers.editnotice) {
+        await handleEditNotice(req, res);
+        break;
+      } else {
+        sendError(res, 400, "Not a valid GET request");
       }
-      break;
     default:
       sendError(res, 400, "Unknown request");
   }

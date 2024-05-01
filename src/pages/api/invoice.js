@@ -3,7 +3,6 @@ import dbConnect from "@/db/dbConnect";
 import Client from "@/db/Clients";
 dbConnect();
 
-
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
     error: true,

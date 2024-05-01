@@ -51,7 +51,7 @@ function Notices() {
       console.error("Error fetching file list:", error);
       toast.error("Error retrieving file list", { toastId: "error3" });
     }
-  }
+  };
 
   const getNoticesFiltered = async () => {
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/notice`;
@@ -84,7 +84,7 @@ function Notices() {
     } catch (error) {
       console.error("Error fetching filtered notices:", error);
     }
-  }
+  };
 
   function isoDateToDdMmYyyy(isoDate) {
     const date = new Date(isoDate);

@@ -21,10 +21,10 @@ export default function Marketers(props) {
   const [dailyReportStatusRowHtml, setDailyReportStatusRowHtml] = useState([]);
   const [todayReportStatusRowHtml, setTodayReportStatusRowHtml] = useState([]);
   const [fromTimePeriod, setFromTimePeriod] = useState(
-    moment().tz("Asia/Dhaka").subtract(5, "days").format("YYYY-MM-DD")
+    moment().tz("Asia/Dhaka").subtract(5, "days").format("YYYY-MM-DD"),
   );
   const [toTimePeriod, setToTimePeriod] = useState(
-    moment().tz("Asia/Dhaka").format("YYYY-MM-DD")
+    moment().tz("Asia/Dhaka").format("YYYY-MM-DD"),
   );
 
   const [dailyReportStatusLoading, setDailyReportStatusLoading] =
@@ -56,8 +56,10 @@ export default function Marketers(props) {
 
   function countDays(fromDate, toDate) {
     const from_date = moment(fromDate, "YYYY-MM-DD").tz("Asia/Dhaka");
-    const to_date = moment(toDate, "YYYY-MM-DD").tz("Asia/Dhaka").add(1, "days"); // Add one day to include the end date
-  
+    const to_date = moment(toDate, "YYYY-MM-DD")
+      .tz("Asia/Dhaka")
+      .add(1, "days"); // Add one day to include the end date
+
     const daysDifference = to_date.diff(from_date, "days");
     return daysDifference;
   }
@@ -181,22 +183,22 @@ export default function Marketers(props) {
     } else {
       let dailyReportStatus = await getDailyReportStatus(
         fromTimePeriod,
-        toTimePeriod
+        toTimePeriod,
       );
 
       dailyReportStatus?.map((FiveDayReportOfMarketer, index) => {
         total_calls_made += parseInt(
-          FiveDayReportOfMarketer.data.total_calls_made
+          FiveDayReportOfMarketer.data.total_calls_made,
         )
           ? parseInt(FiveDayReportOfMarketer.data.total_calls_made)
           : 0;
         total_test_jobs += parseInt(
-          FiveDayReportOfMarketer.data.total_test_jobs
+          FiveDayReportOfMarketer.data.total_test_jobs,
         )
           ? parseInt(FiveDayReportOfMarketer.data.total_test_jobs)
           : 0;
         total_prospects += parseInt(
-          FiveDayReportOfMarketer.data.total_prospects
+          FiveDayReportOfMarketer.data.total_prospects,
         )
           ? parseInt(FiveDayReportOfMarketer.data.total_prospects)
           : 0;
@@ -268,7 +270,7 @@ export default function Marketers(props) {
                   " " +
                   `(${leadsTarget - FiveDayReportOfMarketer.data.total_leads})`}
             </td>
-          </tr>
+          </tr>,
         );
       });
 
@@ -303,7 +305,7 @@ export default function Marketers(props) {
               ? total_leads
               : total_leads + " " + `(${total_leads_remaining})`}
           </th>
-        </tr>
+        </tr>,
       );
 
       setDailyReportStatusRowHtml(parsedTableRows);
@@ -404,7 +406,7 @@ export default function Marketers(props) {
                 " " +
                 `(${leadsTarget - TodayReportOfMarketer.data.total_leads})`}
           </td>
-        </tr>
+        </tr>,
       );
     });
 
@@ -439,7 +441,7 @@ export default function Marketers(props) {
             ? total_leads
             : total_leads + " " + `(${total_leads_remaining})`}
         </th>
-      </tr>
+      </tr>,
     );
 
     setTodayReportStatusRowHtml(parsedTableRows);

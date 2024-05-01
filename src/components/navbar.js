@@ -115,8 +115,9 @@ export default function Navbar({ navFor, shortNote }) {
       <div className={`px-5 navigation ${styles.nav}`}>
         {session.user.role !== "marketer" ? (
           <Link
-            className={`${styles.navitem} ${navFor === "tasks" ? styles.active : ""
-              }`}
+            className={`${styles.navitem} ${
+              navFor === "tasks" ? styles.active : ""
+            }`}
             href="/"
           >
             Tasks
@@ -124,8 +125,9 @@ export default function Navbar({ navFor, shortNote }) {
         ) : null}
         {session.user.role !== "user" && session.user.role !== "marketer" ? (
           <Link
-            className={`${styles.navitem} ${navFor === "browse" ? styles.active : ""
-              }`}
+            className={`${styles.navitem} ${
+              navFor === "browse" ? styles.active : ""
+            }`}
             href="/browse"
           >
             Browse
@@ -134,8 +136,9 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${navFor === "admin" ? styles.active : ""
-              } `}
+            className={`${styles.navitem} ${
+              navFor === "admin" ? styles.active : ""
+            } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -207,8 +210,9 @@ export default function Navbar({ navFor, shortNote }) {
         ) : null}
         {session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${navFor === "dashboard" ? styles.active : ""
-              } `}
+            className={`${styles.navitem} ${
+              navFor === "dashboard" ? styles.active : ""
+            } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -283,14 +287,14 @@ export default function Navbar({ navFor, shortNote }) {
                       Create
                     </Link>
                   </li>
-                  {/* <li>
+                  <li>
                     <Link
                       className={`dropdown-item ${styles.dropitem}`}
                       href="/dashboard/notice/browse"
                     >
                       View
                     </Link>
-                  </li> */}
+                  </li>
                 </ul>
               </li>
             </ul>
@@ -299,8 +303,9 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <Link
-            className={`${styles.navitem} ${navFor === "fileflow" ? styles.active : ""
-              }`}
+            className={`${styles.navitem} ${
+              navFor === "fileflow" ? styles.active : ""
+            }`}
             href="/file-flow"
           >
             File Flow
@@ -309,8 +314,9 @@ export default function Navbar({ navFor, shortNote }) {
 
         {session.user.role === "admin" || session.user.role === "super" ? (
           <li
-            className={`${styles.navitem} ${navFor === "crm" ? styles.active : ""
-              } `}
+            className={`${styles.navitem} ${
+              navFor === "crm" ? styles.active : ""
+            } `}
           >
             <li
               className="nav-link dropdown-toggle"
@@ -363,11 +369,8 @@ export default function Navbar({ navFor, shortNote }) {
                 </Link>
               </li>
 
-
               <li className="dropdown-submenu">
-                <Link
-                  href="/crm/notices/notice-board"
-                >
+                <Link href="/crm/notices/notice-board">
                   <li
                     className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
                   >
@@ -400,38 +403,44 @@ export default function Navbar({ navFor, shortNote }) {
         {session.user.role === "marketer" ? (
           <>
             <Link
-              className={`${styles.navitem} ${navFor === "marketers" ? styles.active : ""
-                }`}
+              className={`${styles.navitem} ${
+                navFor === "marketers" ? styles.active : ""
+              }`}
               href="/crm/marketers"
             >
               Marketers
             </Link>
             <Link
-              className={`${styles.navitem} ${navFor === "call-reports" ? styles.active : ""
-                }`}
+              className={`${styles.navitem} ${
+                navFor === "call-reports" ? styles.active : ""
+              }`}
               href="/crm/reports-database"
             >
               Call Reports
             </Link>
 
             <Link
-              className={`${styles.navitem} ${navFor === "report-submition" ? styles.active : ""
-                }`}
+              className={`${styles.navitem} ${
+                navFor === "report-submition" ? styles.active : ""
+              }`}
               href={`/crm/marketer/report`}
             >
               Report Submition
             </Link>
             <Link
-              className={`${styles.navitem} ${navFor === "lead-mine" ? styles.active : ""
-                }`}
+              className={`${styles.navitem} ${
+                navFor === "lead-mine" ? styles.active : ""
+              }`}
               href={`/crm/lead-mine`}
             >
               Lead Mine
             </Link>
 
-
-            <li className={`${styles.navitem} ${navFor === "notices" ? styles.active : ""
-              }`}>
+            <li
+              className={`${styles.navitem} ${
+                navFor === "notices" ? styles.active : ""
+              }`}
+            >
               <li
                 className="nav-link dropdown-toggle"
                 id="navbarDropdownMenuLink"
@@ -439,11 +448,7 @@ export default function Navbar({ navFor, shortNote }) {
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                <Link
-                  href={"/crm/notices/notice-board"}
-                >
-                  Notices
-                </Link>
+                <Link href={"/crm/notices/notice-board"}>Notices</Link>
               </li>
 
               <ul
@@ -468,8 +473,6 @@ export default function Navbar({ navFor, shortNote }) {
                 </li>
               </ul>
             </li>
-
-
           </>
         ) : null}
 
