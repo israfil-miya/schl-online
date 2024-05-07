@@ -14,7 +14,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
     const meridiemLower = meridiem.toLowerCase();
     adjustedHours = moment(
       `${hours}:${minutes} ${meridiemLower}`,
-      "hh:mm a",
+      "hh:mm a"
     ).hours();
   }
   const asiaDhakaTime = moment().tz("Asia/Dhaka");
@@ -23,7 +23,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
   const deliveryDateTime = moment.tz(
     `${year}-${month}-${day} ${adjustedHours}:${minutes}`,
     "YYYY-MM-DD HH:mm",
-    "Asia/Dhaka",
+    "Asia/Dhaka"
   );
 
   const timeDifferenceMs = deliveryDateTime.diff(asiaDhakaTime);
@@ -68,7 +68,7 @@ async function handleGetOrdersUnFinished(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time,
+          order.delivery_bd_time
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -92,7 +92,7 @@ async function handleGetOrdersRedo(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time,
+          order.delivery_bd_time
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -215,14 +215,17 @@ async function handleGetOrdersByFilter(req, res) {
       task,
       type,
       forinvoice,
-      page,
+      page
     );
 
     let query = {};
     if (forinvoice) query.status = "Finished";
-    if (folder) query.folder = { $regex: folder, $options: "i" };
-    if (client_code) query.client_code = { $regex: client_code, $options: "i" };
-    if (task) query.task = { $regex: task, $options: "i" };
+
+    if (folder) query.folder = { $regex: `^${folder.trim()}$`, $options: "i" };
+    if (client_code)
+      query.client_code = { $regex: `^${client_code.trim()}$`, $options: "i" };
+    if (task) query.task = { $regex: `^${task.trim()}$`, $options: "i" };
+
     if (type) query.type = { $regex: type, $options: "i" };
 
     if (fromtime || totime) {
@@ -382,7 +385,7 @@ async function handleFinishOrder(req, res) {
       { status: "Finished" },
       {
         new: true,
-      },
+      }
     );
 
     if (resData) {
@@ -406,7 +409,7 @@ async function handleRedoOrder(req, res) {
       { status: "Correction" },
       {
         new: true,
-      },
+      }
     );
 
     if (resData) {
@@ -613,8 +616,8 @@ async function handleGetOrdersByFilterStat(req, res) {
     const orderPromises = clientsAll.map(async (clientData) =>
       Order.find(
         { ...query, client_code: clientData.client_code },
-        { createdAt: 1, quantity: 1 },
-      ),
+        { createdAt: 1, quantity: 1 }
+      )
     );
 
     // Use Promise.all to wait for all asynchronous calls to complete
@@ -692,7 +695,7 @@ async function handleGetOrdersByFilterStat(req, res) {
       (date) => {
         const [year, month, day] = date.split("-");
         return `${monthNames[month - 1]} ${day}`;
-      },
+      }
     );
 
     const zeroDataQP = {
@@ -788,7 +791,7 @@ async function handleGetOrdersByCountry(req, res) {
 
     const clientsAll = await Client.find(
       { country: countryFilter },
-      { client_code: 1, country: 1 },
+      { client_code: 1, country: 1 }
     );
 
     let returnData = {
