@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import moment from "moment-timezone";
 import { toast } from "sonner";
 import generateInvoice from "@/lib/invoice";
 import Navbar from "@/components/navbar";
 import { useSession, getSession } from "next-auth/react";
 
 export default function ClientDetails() {
+  const router = useRouter();
   const [client, setClient] = useState(null);
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [clients, setClients] = useState([]);
-  const [selectedClientCode, setSelectedClientCode] = useState();
   const { data: session } = useSession();
-
+  
+  let { code, month } = router.query;
+  const [query, setQuery] = useState({ code: "", month: {start: "", end: ""} });
+  
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
     _id: "",
     client_name: "",
@@ -34,6 +39,7 @@ export default function ClientDetails() {
     email: "info@studioclickhouse.com",
   });
 
+  const [selectedClientCode, setSelectedClientCode] = useState();
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [foldetFilter, setFolderFilter] = useState("");
@@ -219,6 +225,19 @@ export default function ClientDetails() {
     return `${year}-${month}-${day}`;
   }
 
+  function getMonthRange(monthYear) {
+    const [month, year] = monthYear.split("-");
+    const startDate = moment
+      .tz(`${year}-${month}-01`, "Asia/Dhaka")
+      .startOf("month")
+      .format("DD-MM-YYYY");
+    const endDate = moment
+      .tz(`${year}-${month}-01`, "Asia/Dhaka")
+      .endOf("month")
+      .format("DD-MM-YYYY");
+    return { start: startDate, end: endDate };
+  }
+
   function isoDateToDdMmYyyy(isoDate) {
     const date = new Date(isoDate);
     const day = date.getDate().toString().padStart(2, "0");
@@ -356,10 +375,18 @@ export default function ClientDetails() {
   }
 
   useEffect(() => {
+    if (code && month) {
+      const { start, end } = getMonthRange(month);
+      setQuery({ code, month: { start, end }});
+    }
+  }, [code, month]);
+
+  useEffect(() => {
     if (clients?.length) getClientDetails();
   }, [selectedClientCode]);
 
   useEffect(() => {
+    console.log(code)
     if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
   }, [clients]);
 
@@ -390,7 +417,10 @@ export default function ClientDetails() {
               <div className=" mx-2 form-floating">
                 <select
                   required
-                  onChange={(e) => setSelectedClientCode(e.target.value)}
+                  onChange={(e) => {
+                    console.log("Changing value")
+                    setSelectedClientCode(e.target.value)
+                  }}
                   className="form-select"
                   id="floatingSelectGrid"
                 >
