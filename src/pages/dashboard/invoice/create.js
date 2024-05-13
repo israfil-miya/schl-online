@@ -14,10 +14,13 @@ export default function ClientDetails() {
   const [pageCount, setPageCount] = useState(0);
   const [clients, setClients] = useState([]);
   const { data: session } = useSession();
-  
+
   let { code, month } = router.query;
-  const [query, setQuery] = useState({ code: "", month: {start: "", end: ""} });
-  
+  const [query, setQuery] = useState({
+    code: "",
+    month: { start: "", end: "" },
+  });
+
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
     _id: "",
     client_name: "",
@@ -66,17 +69,16 @@ export default function ClientDetails() {
     return `${day}-${month}-${year}`;
   };
 
-  async function getClientDetails() {
+  async function getClientDetails(client_code) {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
 
-      console.log(selectedClientCode);
       const options = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           getclientsbycode: true,
-          client_code: selectedClientCode,
+          client_code,
         },
       };
 
@@ -226,15 +228,16 @@ export default function ClientDetails() {
   }
 
   function getMonthRange(monthYear) {
-    const [month, year] = monthYear.split("-");
+    const [monthName, year] = monthYear.split("-");
+    const monthNumber = moment().month(monthName).format("MM");
     const startDate = moment
-      .tz(`${year}-${month}-01`, "Asia/Dhaka")
+      .tz(`${year}-${monthNumber}-01`, "Asia/Dhaka")
       .startOf("month")
-      .format("DD-MM-YYYY");
+      .format("YYYY-MM-DD");
     const endDate = moment
-      .tz(`${year}-${month}-01`, "Asia/Dhaka")
+      .tz(`${year}-${monthNumber}-01`, "Asia/Dhaka")
       .endOf("month")
-      .format("DD-MM-YYYY");
+      .format("YYYY-MM-DD");
     return { start: startDate, end: endDate };
   }
 
@@ -349,7 +352,7 @@ export default function ClientDetails() {
             ? prevData?.client_code?.split("_")?.[1] + "0001"
             : prevData?.client_code?.split("_")?.[1] +
               `${(parseInt(prevData?.invoice_number.match(/\d+/g)[0]) + 1).pad(
-                4,
+                4
               )}`,
         }));
       } else {
@@ -377,18 +380,40 @@ export default function ClientDetails() {
   useEffect(() => {
     if (code && month) {
       const { start, end } = getMonthRange(month);
-      setQuery({ code, month: { start, end }});
+      setQuery({ code, month: { start, end } });
     }
   }, [code, month]);
 
   useEffect(() => {
-    if (clients?.length) getClientDetails();
+    if (!query.code) {
+      if (clients?.length) getClientDetails(clients?.[0].client_code);
+    } else {
+      getClientDetails(query.code);
+    }
   }, [selectedClientCode]);
+
 
   useEffect(() => {
     console.log(code)
-    if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
+    if(!query.code) {
+      if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
+    }
   }, [clients]);
+
+
+  useEffect(() => {
+    if (query.code) {
+      setSelectedClientCode(query.code);
+    }
+    if (query.month.start) {
+      console.log("Setting from time", query.month.start);
+      setFromTime(query.month.start);
+    }
+    if (query.month.end) {
+      console.log("Setting to time", query.month.end);
+      setToTime(query.month.end);
+    }
+  }, [query]);
 
   useEffect(() => {
     getAllClients();
@@ -418,8 +443,8 @@ export default function ClientDetails() {
                 <select
                   required
                   onChange={(e) => {
-                    console.log("Changing value")
-                    setSelectedClientCode(e.target.value)
+                    console.log("Changing value");
+                    setSelectedClientCode(e.target.value);
                   }}
                   className="form-select"
                   id="floatingSelectGrid"
@@ -427,7 +452,7 @@ export default function ClientDetails() {
                   {clients?.map((client, index) => {
                     return (
                       <>
-                        <option key={index} defaultValue={index == 0}>
+                        <option key={index} selected={index == 0}>
                           {client?.client_code}
                         </option>
                       </>

@@ -223,6 +223,7 @@ export default function Navbar({ navFor, shortNote }) {
             >
               Dashboard
             </li>
+
             <ul
               className="dropdown-menu"
               aria-labelledby="navbarDropdownMenuLink"
@@ -246,11 +247,16 @@ export default function Navbar({ navFor, shortNote }) {
               </li>
 
               <li className="dropdown-submenu">
-                <li
-                  className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+                <Link
+                  href={"/dashboard/invoice"}
                 >
-                  Invoice
-                </li>
+                  <li
+                    className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
+                  >
+                    Invoice
+                  </li>
+                </Link>
+
                 <ul className="dropdown-menu">
                   <li>
                     <Link

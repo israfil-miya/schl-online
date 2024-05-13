@@ -37,6 +37,7 @@ export default function Invoice() {
 
     if (!res.error) {
       setData(res);
+      if(isLoading) setIsLoading(false)
     } else {
       toast.error(res.message);
     }
@@ -58,6 +59,7 @@ export default function Invoice() {
     if (!res.error) {
       setData(res);
       setIsFiltered(1);
+      if(isLoading) setIsLoading(false)
     } else {
       setIsFiltered(0);
       await getClientsOrdersByMonth();
@@ -203,6 +205,51 @@ export default function Invoice() {
           </tbody>
         </table>
       )}
+
+      <div
+        className="offcanvas offcanvas-end"
+        tabIndex="-1"
+        id="offcanvasNavbar"
+        aria-labelledby="offcanvasNavbarLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
+            Filter
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <div className="d-grid gap-2">
+            <div className="row">
+              <div className="col">
+                <label className="fw-semibold" htmlFor="floatingInput">
+                  Client Code
+                </label>
+                <input
+                  value={filters.client_code}
+                  onChange={(e) =>
+                    setFilters({ ...filters, client_code: e.target.value })
+                  }
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                />
+              </div>
+            </div>
+            <button
+              onClick={getClientsOrdersByMonthFiltered}
+              className="btn btn-outline-primary"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
 
       <style jsx>{`
         .table td.fit,
