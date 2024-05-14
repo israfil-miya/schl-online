@@ -247,9 +247,7 @@ export default function Navbar({ navFor, shortNote }) {
               </li>
 
               <li className="dropdown-submenu">
-                <Link
-                  href={"/dashboard/invoice"}
-                >
+                <Link href={"/dashboard/invoice"}>
                   <li
                     className={`dropdown-item dropdown-toggle ${styles.dropitem}`}
                   >

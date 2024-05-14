@@ -5,7 +5,6 @@ import Navbar from "@/components/navbar";
 import { getSession, useSession } from "next-auth/react";
 
 export default function InvoiceDatabase() {
-
   // const [list, setList] = useState([]);
   const [files, setFiles] = useState([]);
   const [selectedInvoiceData, setSelectedInvoiceData] = useState({});

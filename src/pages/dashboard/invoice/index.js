@@ -1,5 +1,5 @@
 import Navbar from "@/components/navbar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -10,7 +10,10 @@ export default function Invoice() {
   const [isFiltered, setIsFiltered] = useState(0);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const prevPageCount = useRef(0);
+  const prevPage = useRef(1);
 
   let [filters, setFilters] = useState({
     client_code: "",
@@ -23,6 +26,7 @@ export default function Invoice() {
   }
 
   async function getClientsOrdersByMonth() {
+    setIsLoading(true);
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "GET",
@@ -37,12 +41,13 @@ export default function Invoice() {
 
     if (!res.error) {
       setData(res);
-      if(isLoading) setIsLoading(false)
+      setIsLoading(false);
     } else {
       toast.error(res.message);
     }
   }
   async function getClientsOrdersByMonthFiltered() {
+    setIsLoading(true);
     const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/order`;
     const options = {
       method: "GET",
@@ -50,7 +55,6 @@ export default function Invoice() {
         "Content-Type": "application/json",
         getordersbymonth: true,
         client_code: filters.client_code,
-        page,
       },
     };
 
@@ -59,7 +63,7 @@ export default function Invoice() {
     if (!res.error) {
       setData(res);
       setIsFiltered(1);
-      if(isLoading) setIsLoading(false)
+      setIsLoading(false);
     } else {
       setIsFiltered(0);
       await getClientsOrdersByMonth();
@@ -85,22 +89,24 @@ export default function Invoice() {
   }
 
   useEffect(() => {
-    console.log("Render : 1");
-    getClientsOrdersByMonth();
-  }, []);
-
-  useEffect(() => {
-    console.log("Render : 2");
-    if (data?.pagination?.pageCount == 1) return;
-    if (!isFiltered) getClientsOrdersByMonth();
-    else getClientsOrdersByMonthFiltered();
+    if (prevPage.current !== 1 || page > 1) {
+      if (data?.pagination?.pageCount == 1) return;
+      if (!isFiltered) getClientsOrdersByMonth();
+      else getClientsOrdersByMonthFiltered();
+    }
+    prevPage.current = page;
   }, [page]);
 
   useEffect(() => {
-    console.log("Render : 3");
-    setPage(1);
-    if (!isFiltered) getClientsOrdersByMonth();
-    if (data) setPageCount(data?.pagination?.pageCount);
+    if (data?.pagination?.pageCount !== undefined) {
+      setPage(1);
+      if (prevPageCount.current !== 0) {
+        if (!isFiltered) getClientsOrdersByMonth();
+      }
+      if (data) setPageCount(data?.pagination?.pageCount);
+      prevPageCount.current = data?.pagination?.pageCount;
+      prevPage.current = 1;
+    }
   }, [data?.pagination?.pageCount]);
 
   return (
@@ -127,28 +133,23 @@ export default function Invoice() {
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
-                disabled={page === 1}
-                onClick={() => {
-                  setIsLoading(true);
-                  handlePrevious();
-                }}
+                disabled={page === 1 || isLoading}
+                onClick={handlePrevious}
               >
                 Previous
               </button>
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary"
-                disabled={page === pageCount || pageCount === 0}
-                onClick={() => {
-                  setIsLoading(true);
-                  handleNext();
-                }}
+                disabled={page === pageCount || pageCount === 0 || isLoading}
+                onClick={handleNext}
               >
                 Next
               </button>
             </div>
 
             <button
+              disabled={(pageCount === 0 && !isFiltered) || isLoading}
               type="button"
               data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasNavbar"
@@ -164,12 +165,16 @@ export default function Invoice() {
 
       {isLoading && <p className="text-center my-3">Loading...</p>}
 
-      {!isLoading && (
+      {data?.items?.length === 0 && !isLoading && (
+        <p className="text-center my-3">No data found</p>
+      )}
+
+      {!isLoading && data?.items?.length !== 0 && (
         <table className="table table-responsive table-bordered text-center table-striped">
           <thead>
             <tr>
               <th></th>
-              {data?.items?.[0].orders.map((order, i) => {
+              {data?.items?.[0]?.orders.map((order, i) => {
                 const month = Object.keys(order)[0];
                 return <td key={i}>{month.split(" ")[0]}</td>;
               })}

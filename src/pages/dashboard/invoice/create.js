@@ -352,7 +352,7 @@ export default function ClientDetails() {
             ? prevData?.client_code?.split("_")?.[1] + "0001"
             : prevData?.client_code?.split("_")?.[1] +
               `${(parseInt(prevData?.invoice_number.match(/\d+/g)[0]) + 1).pad(
-                4
+                4,
               )}`,
         }));
       } else {
@@ -392,14 +392,12 @@ export default function ClientDetails() {
     }
   }, [selectedClientCode]);
 
-
   useEffect(() => {
-    console.log(code)
-    if(!query.code) {
+    console.log(code);
+    if (!query.code) {
       if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
     }
   }, [clients]);
-
 
   useEffect(() => {
     if (query.code) {
