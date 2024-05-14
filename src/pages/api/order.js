@@ -14,7 +14,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
     const meridiemLower = meridiem.toLowerCase();
     adjustedHours = moment(
       `${hours}:${minutes} ${meridiemLower}`,
-      "hh:mm a"
+      "hh:mm a",
     ).hours();
   }
   const asiaDhakaTime = moment().tz("Asia/Dhaka");
@@ -23,7 +23,7 @@ function calculateTimeDifference(deliveryDate, deliveryTime) {
   const deliveryDateTime = moment.tz(
     `${year}-${month}-${day} ${adjustedHours}:${minutes}`,
     "YYYY-MM-DD HH:mm",
-    "Asia/Dhaka"
+    "Asia/Dhaka",
   );
 
   const timeDifferenceMs = deliveryDateTime.diff(asiaDhakaTime);
@@ -68,7 +68,7 @@ async function handleGetOrdersUnFinished(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -92,7 +92,7 @@ async function handleGetOrdersRedo(req, res) {
         ...order,
         timeDifference: calculateTimeDifference(
           order.delivery_date,
-          order.delivery_bd_time
+          order.delivery_bd_time,
         ),
       }))
       .sort((a, b) => a.timeDifference - b.timeDifference);
@@ -215,7 +215,7 @@ async function handleGetOrdersByFilter(req, res) {
       task,
       type,
       forinvoice,
-      page
+      page,
     );
 
     let query = {};
@@ -385,7 +385,7 @@ async function handleFinishOrder(req, res) {
       { status: "Finished" },
       {
         new: true,
-      }
+      },
     );
 
     if (resData) {
@@ -409,7 +409,7 @@ async function handleRedoOrder(req, res) {
       { status: "Correction" },
       {
         new: true,
-      }
+      },
     );
 
     if (resData) {
@@ -616,8 +616,8 @@ async function handleGetOrdersByFilterStat(req, res) {
     const orderPromises = clientsAll.map(async (clientData) =>
       Order.find(
         { ...query, client_code: clientData.client_code },
-        { createdAt: 1, quantity: 1 }
-      )
+        { createdAt: 1, quantity: 1 },
+      ),
     );
 
     // Use Promise.all to wait for all asynchronous calls to complete
@@ -695,7 +695,7 @@ async function handleGetOrdersByFilterStat(req, res) {
       (date) => {
         const [year, month, day] = date.split("-");
         return `${monthNames[month - 1]} ${day}`;
-      }
+      },
     );
 
     const zeroDataQP = {
@@ -791,7 +791,7 @@ async function handleGetOrdersByCountry(req, res) {
 
     const clientsAll = await Client.find(
       { country: countryFilter },
-      { client_code: 1, country: 1 }
+      { client_code: 1, country: 1 },
     );
 
     let returnData = {
@@ -827,6 +827,97 @@ async function handleGetOrdersByCountry(req, res) {
   }
 }
 
+const getLast12Months = () => {
+  const result = [];
+  const today = moment();
+  for (let i = 0; i < 12; i++) {
+    result.push({
+      monthYear: today.format("YYYY-MM"), // Format as "YYYY-MM"
+    });
+    today.subtract(1, "months");
+  }
+  return result.reverse(); // Reverse to start from oldest to newest
+};
+
+async function handleGetOrdersByMonth(req, res) {
+  const ITEMS_PER_PAGE = 20;
+  let page = parseInt(req.headers.page) || 1;
+  console.log("Page = ", req.headers.page);
+  let { client_code } = req.headers;
+  let query = {};
+
+  if (client_code)
+    query.client_code = { $regex: `^${client_code.trim()}$`, $options: "i" };
+
+  try {
+    // Step 1: Get client codes from the Client collection with pagination
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+    const clients = await Client.find(query, { client_code: 1 })
+      .skip(skip)
+      .limit(ITEMS_PER_PAGE)
+      .lean();
+
+    // Step 2: Loop through each client code
+    const result = [];
+    for (const client of clients) {
+      const clientCode = client.client_code;
+      const clientOrders = {
+        client_code: clientCode,
+        orders: [],
+      };
+
+      // Step 3: Loop through the Order collection to count orders for each month
+      const ordersByMonth = {};
+      const startDate = moment()
+        .subtract(11, "months")
+        .startOf("month")
+        .toDate();
+      const endDate = moment().endOf("month").toDate();
+      const orders = await Order.find({
+        client_code: clientCode,
+        createdAt: { $gte: startDate, $lte: endDate },
+      }).lean();
+
+      orders.forEach((order) => {
+        const monthYear = moment(order.createdAt).format("YYYY-MM");
+        if (!ordersByMonth[monthYear]) {
+          ordersByMonth[monthYear] = 0;
+        }
+        ordersByMonth[monthYear]++;
+      });
+
+      // Step 4: Aggregate monthly order counts for the client
+      const last12Months = getLast12Months();
+      last12Months.forEach((month) => {
+        const monthYear = month.monthYear;
+        const count = ordersByMonth[monthYear] || 0;
+        const formattedMonthYear = moment(monthYear, "YYYY-MM").format(
+          "MMMM YYYY",
+        );
+        clientOrders.orders.push({ [formattedMonthYear]: count });
+      });
+
+      result.push(clientOrders);
+    }
+
+    // Step 5: Pagination
+    const count = await Client.countDocuments(query); // Count the total matching documents
+    const pageCount = Math.ceil(count / ITEMS_PER_PAGE); // Calculate the total number of pages
+
+    res.status(200).json({
+      pagination: {
+        count,
+        pageCount,
+        currentPage: page,
+      },
+      items: result,
+    });
+  } catch (error) {
+    console.error("Error fetching orders by month:", error);
+    sendError(res, 500, "An error occurred");
+  }
+}
+
 export default async function handle(req, res) {
   const { method } = req;
 
@@ -856,6 +947,8 @@ export default async function handle(req, res) {
         await handleGetOrdersByFilterStat(req, res);
       } else if (req.headers.getordersbycountry) {
         await handleGetOrdersByCountry(req, res);
+      } else if (req.headers.getordersbymonth) {
+        await handleGetOrdersByMonth(req, res);
       } else {
         sendError(res, 400, "Not a valid GET request");
       }

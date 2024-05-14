@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import moment from "moment-timezone";
 import { toast } from "sonner";
 import generateInvoice from "@/lib/invoice";
 import Navbar from "@/components/navbar";
 import { useSession, getSession } from "next-auth/react";
 
 export default function ClientDetails() {
+  const router = useRouter();
   const [client, setClient] = useState(null);
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [clients, setClients] = useState([]);
-  const [selectedClientCode, setSelectedClientCode] = useState();
   const { data: session } = useSession();
+
+  let { code, month } = router.query;
+  const [query, setQuery] = useState({
+    code: "",
+    month: { start: "", end: "" },
+  });
 
   const [invoiceCustomerData, setInvoiceCustomerData] = useState({
     _id: "",
@@ -34,6 +42,7 @@ export default function ClientDetails() {
     email: "info@studioclickhouse.com",
   });
 
+  const [selectedClientCode, setSelectedClientCode] = useState();
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [foldetFilter, setFolderFilter] = useState("");
@@ -60,17 +69,16 @@ export default function ClientDetails() {
     return `${day}-${month}-${year}`;
   };
 
-  async function getClientDetails() {
+  async function getClientDetails(client_code) {
     try {
       const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/client`;
 
-      console.log(selectedClientCode);
       const options = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           getclientsbycode: true,
-          client_code: selectedClientCode,
+          client_code,
         },
       };
 
@@ -219,6 +227,20 @@ export default function ClientDetails() {
     return `${year}-${month}-${day}`;
   }
 
+  function getMonthRange(monthYear) {
+    const [monthName, year] = monthYear.split("-");
+    const monthNumber = moment().month(monthName).format("MM");
+    const startDate = moment
+      .tz(`${year}-${monthNumber}-01`, "Asia/Dhaka")
+      .startOf("month")
+      .format("YYYY-MM-DD");
+    const endDate = moment
+      .tz(`${year}-${monthNumber}-01`, "Asia/Dhaka")
+      .endOf("month")
+      .format("YYYY-MM-DD");
+    return { start: startDate, end: endDate };
+  }
+
   function isoDateToDdMmYyyy(isoDate) {
     const date = new Date(isoDate);
     const day = date.getDate().toString().padStart(2, "0");
@@ -356,12 +378,40 @@ export default function ClientDetails() {
   }
 
   useEffect(() => {
-    if (clients?.length) getClientDetails();
+    if (code && month) {
+      const { start, end } = getMonthRange(month);
+      setQuery({ code, month: { start, end } });
+    }
+  }, [code, month]);
+
+  useEffect(() => {
+    if (!query.code) {
+      if (clients?.length) getClientDetails(clients?.[0].client_code);
+    } else {
+      getClientDetails(query.code);
+    }
   }, [selectedClientCode]);
 
   useEffect(() => {
-    if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
+    console.log(code);
+    if (!query.code) {
+      if (clients?.length) setSelectedClientCode(clients?.[0].client_code);
+    }
   }, [clients]);
+
+  useEffect(() => {
+    if (query.code) {
+      setSelectedClientCode(query.code);
+    }
+    if (query.month.start) {
+      console.log("Setting from time", query.month.start);
+      setFromTime(query.month.start);
+    }
+    if (query.month.end) {
+      console.log("Setting to time", query.month.end);
+      setToTime(query.month.end);
+    }
+  }, [query]);
 
   useEffect(() => {
     getAllClients();
@@ -390,14 +440,17 @@ export default function ClientDetails() {
               <div className=" mx-2 form-floating">
                 <select
                   required
-                  onChange={(e) => setSelectedClientCode(e.target.value)}
+                  onChange={(e) => {
+                    console.log("Changing value");
+                    setSelectedClientCode(e.target.value);
+                  }}
                   className="form-select"
                   id="floatingSelectGrid"
                 >
                   {clients?.map((client, index) => {
                     return (
                       <>
-                        <option key={index} defaultValue={index == 0}>
+                        <option key={index} selected={index == 0}>
                           {client?.client_code}
                         </option>
                       </>
