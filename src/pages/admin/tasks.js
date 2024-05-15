@@ -312,16 +312,16 @@ export default function Tasks() {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="quantity" className="form-label">
-                Quantity
+              <label htmlFor="nof" className="form-label">
+                NOF
               </label>
               <input
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 type="number"
                 className="form-control"
-                id="quantity"
-                placeholder="Quantity"
+                id="nof"
+                placeholder="Number of Files"
               />
             </div>
             <div className="mb-3">

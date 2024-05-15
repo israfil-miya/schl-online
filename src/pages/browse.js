@@ -294,7 +294,7 @@ export default function Browse() {
                 <></>
               )}
               <th>Folder</th>
-              <th>Quantity</th>
+              <th>NOF</th>
               <th>Download Date</th>
               <th>Delivery Time</th>
               <th>Task</th>
@@ -516,8 +516,8 @@ export default function Browse() {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="quantity" className="form-label">
-                  Quantity
+                <label htmlFor="nof" className="form-label">
+                  NOF
                 </label>
                 <input
                   value={manageData.quantity}
@@ -529,8 +529,8 @@ export default function Browse() {
                   }
                   type="number"
                   className="form-control"
-                  id="quantity"
-                  placeholder="Quantity"
+                  id="nof"
+                  placeholder="Number of Files"
                 />
               </div>
 

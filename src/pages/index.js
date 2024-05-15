@@ -65,7 +65,7 @@ export default function Home({ orders, ordersRedo }) {
                 <th>#</th>
                 <th>Client Code</th>
                 <th>Folder</th>
-                <th>Quantity</th>
+                <th>NOF</th>
                 <th>Download Date</th>
                 <th>Delivery Time</th>
                 <th>Task</th>
@@ -118,7 +118,7 @@ export default function Home({ orders, ordersRedo }) {
                 <th>#</th>
                 <th>Client Code</th>
                 <th>Folder</th>
-                <th>Quantity</th>
+                <th>NOF</th>
                 <th>Download Date</th>
                 <th>Delivery Time</th>
                 <th>Time Remaining</th>

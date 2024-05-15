@@ -176,7 +176,8 @@ export default function Invoice() {
               <th></th>
               {data?.items?.[0]?.orders.map((order, i) => {
                 const month = Object.keys(order)[0];
-                return <td key={i}>{month.split(" ")[0]}</td>;
+                // return <td key={i}>{month.split(" ")[0]}</td>; <-- to display only month
+                return <td key={month}>{month}</td>; // <-- to display month and year
               })}
             </tr>
           </thead>
@@ -187,9 +188,20 @@ export default function Invoice() {
                   <td className="text-start fit ps-4">{item.client_code}</td>
                   {item.orders.map((order, i) => {
                     const month = Object.keys(order)[0];
-                    const orderCount = order[month];
+                    const orderCount = order[month].count;
+                    const fileCount = order[month].totalFiles;
+                    const isInvoiced = order[month].invoiced;
                     return (
-                      <td key={i}>
+                      <td
+                        className={
+                          isInvoiced
+                            ? "bg-success text-light"
+                            : orderCount > 0
+                              ? "bg-danger text-light"
+                              : "bg-secondary text-light"
+                        }
+                        key={`${month} - ${orderCount}`}
+                      >
                         <Link
                           href={
                             process.env.NEXT_PUBLIC_BASE_URL +
@@ -199,7 +211,7 @@ export default function Invoice() {
                           }
                           target="_blank"
                         >
-                          {orderCount}
+                          {orderCount} {fileCount > 0 && `(${fileCount})`}
                         </Link>
                       </td>
                     );

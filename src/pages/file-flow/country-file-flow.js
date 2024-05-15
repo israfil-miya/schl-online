@@ -142,7 +142,7 @@ export default function View() {
                 <th>Client Name</th>
                 <th>Folder</th>
                 <th>Country</th>
-                <th>Quantity</th>
+                <th>NOF</th>
               </tr>
             </thead>
             <tbody>

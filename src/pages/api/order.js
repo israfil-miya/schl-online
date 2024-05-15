@@ -1,5 +1,6 @@
 import Order from "@/db/Orders";
 import Client from "@/db/Clients";
+import Invoice from "@/db/Invoices";
 import dbConnect from "@/db/dbConnect";
 import moment from "moment-timezone";
 dbConnect();
@@ -839,6 +840,20 @@ const getLast12Months = () => {
   return result.reverse(); // Reverse to start from oldest to newest
 };
 
+function getMonthRange(monthYear) {
+  const [monthName, year] = monthYear.split(" ");
+  const monthNumber = moment().month(monthName).format("MM");
+  const startDate = moment
+    .tz(`${year}-${monthNumber}-01`, "Asia/Dhaka")
+    .startOf("month")
+    .format("YYYY-MM-DD");
+  const endDate = moment
+    .tz(`${year}-${monthNumber}-01`, "Asia/Dhaka")
+    .endOf("month")
+    .format("YYYY-MM-DD");
+  return { start: startDate, end: endDate };
+}
+
 async function handleGetOrdersByMonth(req, res) {
   const ITEMS_PER_PAGE = 20;
   let page = parseInt(req.headers.page) || 1;
@@ -881,20 +896,64 @@ async function handleGetOrdersByMonth(req, res) {
       orders.forEach((order) => {
         const monthYear = moment(order.createdAt).format("YYYY-MM");
         if (!ordersByMonth[monthYear]) {
-          ordersByMonth[monthYear] = 0;
+          ordersByMonth[monthYear] = {
+            count: 0,
+            totalFiles: 0,
+            invoiced: false,
+          };
         }
-        ordersByMonth[monthYear]++;
+        ordersByMonth[monthYear].count++;
+        ordersByMonth[monthYear].totalFiles += order.quantity;
       });
 
       // Step 4: Aggregate monthly order counts for the client
       const last12Months = getLast12Months();
-      last12Months.forEach((month) => {
-        const monthYear = month.monthYear;
-        const count = ordersByMonth[monthYear] || 0;
-        const formattedMonthYear = moment(monthYear, "YYYY-MM").format(
-          "MMMM YYYY",
+      await Promise.all(
+        last12Months.map(async (month) => {
+          const monthYear = month.monthYear;
+
+          // console.log(ordersByMonth, month);
+          const count = ordersByMonth[monthYear]?.count || 0;
+          const totalFiles = ordersByMonth[monthYear]?.totalFiles || 0;
+          let invoiced = ordersByMonth[monthYear]?.invoiced || false;
+
+          const formattedMonthYear = moment(monthYear, "YYYY-MM").format(
+            "MMMM YYYY",
+          );
+
+          if (count) {
+            let monthYearRange = getMonthRange(formattedMonthYear);
+            try {
+              const invoiceData = await Invoice.findOne({
+                client_code: clientCode,
+                "time_period.fromDate": { $gte: monthYearRange.start },
+                "time_period.toDate": { $lte: monthYearRange.end },
+              }).lean();
+              if (invoiceData) {
+                invoiced = true;
+              }
+            } catch (error) {
+              console.error("Error fetching invoice data:", error);
+              invoiced = false;
+            }
+          }
+
+          return {
+            monthYear: formattedMonthYear,
+            data: { count, totalFiles, invoiced },
+          };
+        }),
+      ).then((monthlyData) => {
+        // Sort the monthlyData array based on monthYear
+        monthlyData.sort(
+          (a, b) =>
+            moment(a.monthYear, "MMMM YYYY") - moment(b.monthYear, "MMMM YYYY"),
         );
-        clientOrders.orders.push({ [formattedMonthYear]: count });
+
+        // Push the sorted data into clientOrders.orders
+        monthlyData.forEach((data) => {
+          clientOrders.orders.push({ [data.monthYear]: data.data });
+        });
       });
 
       result.push(clientOrders);

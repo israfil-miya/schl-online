@@ -563,7 +563,7 @@ export default function ClientDetails() {
                 <tr className="table-dark">
                   <th>#</th>
                   <th>Folder</th>
-                  <th>Quantity</th>
+                  <th>NOF</th>
                   <th>Rate</th>
                   <th>Download Date</th>
                   <th>Delivery Time</th>
