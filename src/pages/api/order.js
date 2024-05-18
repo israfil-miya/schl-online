@@ -220,7 +220,7 @@ async function handleGetOrdersByFilter(req, res) {
     );
 
     let query = {};
-    if (forinvoice) query.status = "Finished";
+    // if (forinvoice) query.status = "Finished";
 
     if (folder) query.folder = { $regex: `^${folder.trim()}$`, $options: "i" };
     if (client_code)
@@ -889,6 +889,7 @@ async function handleGetOrdersByMonth(req, res) {
         .toDate();
       const endDate = moment().endOf("month").toDate();
       const orders = await Order.find({
+        // status: "Finished",
         client_code: clientCode,
         createdAt: { $gte: startDate, $lte: endDate },
       }).lean();
