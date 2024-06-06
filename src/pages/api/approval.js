@@ -5,6 +5,7 @@ import Client from "@/db/Clients";
 import Report from "@/db/Reports";
 import Employee from "@/db/Employees";
 import dbConnect from "@/db/dbConnect";
+import NextCors from "nextjs-cors";
 dbConnect();
 function sendError(res, statusCode, message) {
   res.status(statusCode).json({
@@ -519,6 +520,15 @@ async function handleResponseMultiple(req, res) {
 
 export default async function handle(req, res) {
   const { method } = req;
+
+
+  await NextCors(req, res, {
+    // Options
+    methods: ['GET', 'HEAD', 'POST'],
+    origin: '*', // You can specify the allowed origin(s) here
+    optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  });
+
 
   switch (method) {
     case "GET":
