@@ -439,15 +439,6 @@ export default function Report(props) {
     else getAllReportsFiltered();
   }, [itemPerPage]);
 
-  /*
-  Future Note:
-  This page has pagination bugs corrected.
-  Others page's pagination need to be like this, other pages still contains the pagination bugs.
-  
-  Changes made in files to correct the bug:
-    1. api/crm
-    2. crm/reports-database
-  */
 
   return (
     <>
