@@ -296,7 +296,7 @@ async function handleFinishLead(req, res) {
 
 async function handleRecallCount(req, res) {
   try {
-    let recallLimit = 25;
+    let recallLimit = 30;
 
     const recallCount1 = await Report.countDocuments({
       marketer_name: req.headers.name,
