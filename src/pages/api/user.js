@@ -19,7 +19,12 @@ async function handleSignIn(req, res) {
       password: password,
     });
 
+
     if (userData) {
+
+      if(userData.role === "marketer"){
+        sendError(res, 400, "You are not allowed to login");
+      }
       res.status(200).json(userData);
     } else {
       sendError(res, 400, "No account found");
