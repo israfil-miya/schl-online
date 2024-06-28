@@ -404,7 +404,10 @@ export default function Navbar({ navFor, shortNote }) {
           </li>
         ) : null}
 
-        {session.user.role === "marketer" ? (
+
+        {/* marketer portal shifted from task.studioclickhouse.com to marketers.studioclickhouse.com */}
+
+        {/* {session.user.role === "marketer" ? (
           <>
             <Link
               className={`${styles.navitem} ${
@@ -478,7 +481,7 @@ export default function Navbar({ navFor, shortNote }) {
               </ul>
             </li>
           </>
-        ) : null}
+        ) : null} */}
 
         {shortNote ? (
           <div style={{ color: "white" }} className="pt-2 ms-auto">

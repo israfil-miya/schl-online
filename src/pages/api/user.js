@@ -19,10 +19,8 @@ async function handleSignIn(req, res) {
       password: password,
     });
 
-
     if (userData) {
-
-      if(userData.role === "marketer"){
+      if (userData.role === "marketer") {
         sendError(res, 400, "You are not allowed to login");
       }
       res.status(200).json(userData);
@@ -130,11 +128,11 @@ async function handleVerifyUserAndSetCookie(req, res) {
     if (userData) {
       const token = jwt.sign(
         { userId: userData._id, exp: Date.now() + 10 * 1000 },
-        process.env.SECRET,
+        process.env.SECRET
       );
       res.setHeader(
         "Set-Cookie",
-        `verify-token.tmp=${token}; Path=${redirect_path}`,
+        `verify-token.tmp=${token}; Path=${redirect_path}`
       );
       res.status(200).json({});
     } else {
